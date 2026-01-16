@@ -1,36 +1,203 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Frontend
 
-## Getting Started
+Next.js 16 frontend application with React 19 and Tailwind CSS 4.
 
-First, run the development server:
+## Tech Stack
+
+| Technology   | Version | Purpose                         |
+| ------------ | ------- | ------------------------------- |
+| Next.js      | 16.1.2  | React framework with App Router |
+| React        | 19.2.3  | UI library                      |
+| TypeScript   | 5.x     | Type safety                     |
+| Tailwind CSS | 4.x     | Styling                         |
+
+## Quick Start
 
 ```bash
+# Install dependencies
+npm install
+
+# Development server (http://localhost:3000)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Production build
+npm run build
+npm start
+
+# Linting
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Project Structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+src/
+├── app/                    # App Router pages
+│   ├── (auth)/             # Auth routes group (planned)
+│   │   ├── login/
+│   │   ├── register/
+│   │   └── reset-password/
+│   ├── (protected)/        # Protected routes group (planned)
+│   │   ├── dashboard/
+│   │   └── profile/
+│   ├── layout.tsx          # Root layout
+│   └── page.tsx            # Home page
+├── components/             # Reusable components (planned)
+│   ├── auth/               # Auth forms
+│   ├── ui/                 # UI primitives
+│   └── layout/             # Layout components
+├── hooks/                  # Custom hooks (planned)
+│   ├── useAuth.ts
+│   └── useForm.ts
+├── lib/                    # Utilities (planned)
+│   ├── api/                # API client
+│   └── validation/         # Zod schemas
+├── context/                # React Context (planned)
+│   └── AuthContext.tsx
+├── types/                  # TypeScript types (planned)
+└── constants/              # Constants (planned)
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment Variables
 
-## Learn More
+Create `.env.local` in the frontend directory:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# API Configuration
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# OAuth (Public Keys)
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id
+NEXT_PUBLIC_FACEBOOK_APP_ID=your-facebook-app-id
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# App Configuration
+NEXT_PUBLIC_APP_NAME=Auth Boilerplate
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
 
-## Deploy on Vercel
+## Development
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Path Aliases
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The project uses `@/*` as a path alias for `src/*`:
+
+```typescript
+// Instead of relative imports
+import { Button } from '../../../components/ui/Button';
+
+// Use path alias
+import { Button } from '@/components/ui/Button';
+```
+
+### Server vs Client Components
+
+Next.js 16 uses Server Components by default:
+
+```typescript
+// Server Component (default) - no directive needed
+export default function Page() {
+  return <div>Server rendered</div>;
+}
+
+// Client Component - add directive at top
+'use client';
+export default function Form() {
+  const [state, setState] = useState();
+  return <form>...</form>;
+}
+```
+
+Use Client Components only when needed:
+
+- Using React hooks (useState, useEffect, etc.)
+- Event handlers (onClick, onChange, etc.)
+- Browser APIs (window, localStorage, etc.)
+
+### Code Style
+
+- TypeScript strict mode (no `any` types)
+- ESLint with Next.js config
+- Tailwind CSS for styling
+- Use `data-testid` for testable elements
+
+## Features (Planned)
+
+### Authentication Pages
+
+- [ ] Login page with email/password
+- [ ] Registration page with validation
+- [ ] Email verification page (6-digit code)
+- [ ] Forgot password page
+- [ ] Reset password page
+- [ ] Google OAuth button
+- [ ] Facebook OAuth button
+
+### Protected Pages
+
+- [ ] Dashboard
+- [ ] User profile
+- [ ] Settings
+
+### Components
+
+- [ ] Auth forms with Zod validation
+- [ ] Toast notifications
+- [ ] Loading states
+- [ ] Error boundaries
+
+### State Management
+
+- [ ] AuthContext for auth state
+- [ ] API client with token injection
+- [ ] Protected route middleware
+
+## API Integration
+
+The frontend communicates with the NestJS backend:
+
+```typescript
+// Example API call
+const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  credentials: 'include', // For HTTP-only cookies
+  body: JSON.stringify({ email, password }),
+});
+
+const data = await response.json();
+// { success: true, data: { user: {...} }, message: "..." }
+```
+
+## Deployment
+
+### Vercel (Recommended)
+
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Login
+vercel login
+
+# Deploy preview
+vercel
+
+# Deploy production
+vercel --prod
+```
+
+Configure in Vercel dashboard:
+
+- `NEXT_PUBLIC_API_URL` - Backend API URL
+- `NEXT_PUBLIC_APP_URL` - Frontend URL
+
+### Docker
+
+The frontend can be built with Docker. See root `docker-compose.yml`.
+
+## Resources
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [React Documentation](https://react.dev)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [Backend API Documentation](../backend/docs/)

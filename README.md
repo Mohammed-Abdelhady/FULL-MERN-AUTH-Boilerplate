@@ -284,25 +284,35 @@ npm test
 
 ### Authentication
 
-```
-POST   /api/auth/register          # Register with email
-POST   /api/auth/activate          # Verify email
-POST   /api/auth/signin            # Login
-POST   /api/auth/forgot-password   # Request password reset
-POST   /api/auth/reset-password    # Reset password
-POST   /api/auth/google            # Google OAuth
-POST   /api/auth/facebook          # Facebook OAuth
-```
+| Method | Endpoint                    | Status | Description                              |
+| ------ | --------------------------- | ------ | ---------------------------------------- |
+| POST   | `/api/auth/register`        | ✅     | Register with email (sends 6-digit code) |
+| POST   | `/api/auth/activate`        | ✅     | Activate account with code               |
+| POST   | `/api/auth/login`           | 🚧     | Login with email/password                |
+| POST   | `/api/auth/logout`          | 🚧     | Logout (invalidate session)              |
+| POST   | `/api/auth/forgot-password` | ⏳     | Request password reset                   |
+| POST   | `/api/auth/reset-password`  | ⏳     | Reset password                           |
+| POST   | `/api/auth/google`          | ⏳     | Google OAuth                             |
+| POST   | `/api/auth/facebook`        | ⏳     | Facebook OAuth                           |
 
 ### User (Protected)
 
-```
-GET    /api/user/profile           # Get user profile
-PUT    /api/user/profile           # Update profile
-GET    /api/user/list              # List users (admin only)
-```
+| Method | Endpoint            | Status | Description             |
+| ------ | ------------------- | ------ | ----------------------- |
+| GET    | `/api/user/profile` | ⏳     | Get user profile        |
+| PUT    | `/api/user/profile` | ⏳     | Update profile          |
+| GET    | `/api/user/list`    | ⏳     | List users (admin only) |
+
+**Legend**: ✅ Implemented | 🚧 In Progress | ⏳ Planned
 
 ## Documentation
+
+### Backend API
+
+- [Authentication Flow](./backend/docs/authentication-flow.md) - Registration, login, logout, sessions
+- [User, Roles & Permissions](./backend/docs/user-roles-permissions.md) - User model, role hierarchy, RBAC
+
+### Project Guides
 
 - [Code Quality Standards](./docs/code-quality.md) - Pre-commit hooks, linting, formatting
 - [Deployment Guide](./docs/deployment.md) - Docker and Vercel deployment instructions
@@ -323,10 +333,17 @@ GET    /api/user/list              # List users (admin only)
 This project is being refactored from Express/React to NestJS/Next.js:
 
 - ✅ Project structure set up
-- ✅ Code quality automation
-- 🚧 Authentication module (in progress)
-- ⏳ User management (planned)
-- ⏳ OAuth integration (planned)
+- ✅ Code quality automation (Husky, ESLint, Prettier)
+- ✅ Docker & Vercel deployment configuration
+- ✅ Database models (User, Session, Permission)
+- ✅ Email registration with 6-digit activation code
+- ✅ Session-based authentication with HTTP-only cookies
+- ✅ Role system (USER, SUPPORT, MANAGER, ADMIN)
+- 🚧 Login endpoint (in progress)
+- 🚧 Verification guards (in progress)
+- ⏳ OAuth integration (Google, Facebook)
+- ⏳ Password reset flow
+- ⏳ Frontend implementation
 
 Legacy code is preserved in `old-code/` for reference.
 
