@@ -63,6 +63,36 @@ export enum ErrorCode {
   /** User is already deleted */
   USER_ALREADY_DELETED = 'USER_ALREADY_DELETED',
 
+  // OAuth errors
+  /** Invalid OAuth provider specified */
+  INVALID_OAUTH_PROVIDER = 'INVALID_OAUTH_PROVIDER',
+  /** OAuth authentication failed */
+  OAUTH_AUTHENTICATION_FAILED = 'OAUTH_AUTHENTICATION_FAILED',
+  /** OAuth code is invalid or expired */
+  OAUTH_INVALID_CODE = 'OAUTH_INVALID_CODE',
+
+  // Google OAuth errors
+  /** Google ID token is invalid */
+  GOOGLE_TOKEN_INVALID = 'GOOGLE_TOKEN_INVALID',
+  /** Google ID token has expired */
+  GOOGLE_TOKEN_EXPIRED = 'GOOGLE_TOKEN_EXPIRED',
+  /** Google OAuth not configured */
+  GOOGLE_NOT_CONFIGURED = 'GOOGLE_NOT_CONFIGURED',
+  /** Google email is not verified */
+  GOOGLE_EMAIL_NOT_VERIFIED = 'GOOGLE_EMAIL_NOT_VERIFIED',
+
+  // GitHub OAuth errors
+  /** GitHub authorization code is invalid */
+  GITHUB_CODE_INVALID = 'GITHUB_CODE_INVALID',
+  /** GitHub authorization code has expired */
+  GITHUB_CODE_EXPIRED = 'GITHUB_CODE_EXPIRED',
+  /** GitHub OAuth not configured */
+  GITHUB_NOT_CONFIGURED = 'GITHUB_NOT_CONFIGURED',
+  /** GitHub email is not verified */
+  GITHUB_EMAIL_NOT_VERIFIED = 'GITHUB_EMAIL_NOT_VERIFIED',
+  /** GitHub API error */
+  GITHUB_API_ERROR = 'GITHUB_API_ERROR',
+
   // User self-service errors
   /** Current password is incorrect */
   INVALID_CURRENT_PASSWORD = 'INVALID_CURRENT_PASSWORD',
