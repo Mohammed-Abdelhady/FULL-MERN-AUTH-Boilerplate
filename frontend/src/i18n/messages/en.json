@@ -18,6 +18,28 @@
     "password": "Password",
     "confirmPassword": "Confirm Password",
     "forgotPassword": "Forgot Password?",
-    "rememberMe": "Remember Me"
+    "rememberMe": "Remember Me",
+    "login": {
+      "title": "Login to your account",
+      "subtitle": "Welcome back! Please enter your credentials",
+      "email": "Email address",
+      "password": "Password",
+      "rememberMe": "Remember me",
+      "submit": "Sign in",
+      "forgotPassword": "Forgot password?",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up",
+      "success": "Login successful! Redirecting...",
+      "errors": {
+        "invalidCredentials": "Invalid email or password",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Please enter a valid email address",
+        "passwordRequired": "Password is required",
+        "passwordMinLength": "Password must be at least 6 characters",
+        "serverError": "An error occurred. Please try again later",
+        "networkError": "Network error. Please check your connection",
+        "tooManyAttempts": "Too many login attempts. Please try again later"
+      }
+    }
   }
 }
