@@ -8,6 +8,8 @@ import {
   OAuthUserProfile,
 } from '../strategies/oauth.strategy.interface';
 import { GoogleOAuthStrategy } from '../strategies/google-oauth.strategy';
+import { GitHubOAuthStrategy } from '../strategies/github-oauth.strategy';
+import { FacebookOAuthStrategy } from '../strategies/facebook-oauth.strategy';
 import { User, UserDocument } from '../../user/schemas/user.schema';
 import { AuthProvider } from '../../user/enums/auth-provider.enum';
 import { ApiResponse } from '../../common/dto/api-response.dto';
@@ -18,7 +20,7 @@ import { SessionService } from './session.service';
 /**
  * OAuth Provider Type
  */
-export type OAuthProvider = 'google' | 'facebook';
+export type OAuthProvider = 'google' | 'facebook' | 'github';
 
 /**
  * OAuth Service
@@ -34,6 +36,8 @@ export class OAuthService {
     private readonly sessionService: SessionService,
     private readonly configService: ConfigService,
     private readonly googleStrategy: GoogleOAuthStrategy,
+    private readonly githubStrategy: GitHubOAuthStrategy,
+    private readonly facebookStrategy: FacebookOAuthStrategy,
   ) {
     this.registerStrategies();
   }
@@ -43,8 +47,8 @@ export class OAuthService {
    */
   private registerStrategies(): void {
     this.strategies.set('google', this.googleStrategy);
-    // Add other providers here as they are implemented
-    // this.strategies.set('facebook', this.facebookStrategy);
+    this.strategies.set('github', this.githubStrategy);
+    this.strategies.set('facebook', this.facebookStrategy);
   }
 
   /**
@@ -202,6 +206,7 @@ export class OAuthService {
     const authProviderMap: Record<OAuthProvider, AuthProvider> = {
       google: AuthProvider.GOOGLE,
       facebook: AuthProvider.FACEBOOK,
+      github: AuthProvider.GITHUB,
     };
 
     // Create new user

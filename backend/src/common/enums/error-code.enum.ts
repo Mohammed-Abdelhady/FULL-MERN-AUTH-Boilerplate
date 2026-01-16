@@ -93,6 +93,18 @@ export enum ErrorCode {
   /** GitHub API error */
   GITHUB_API_ERROR = 'GITHUB_API_ERROR',
 
+  // Facebook OAuth errors
+  /** Facebook authorization code is invalid */
+  FACEBOOK_CODE_INVALID = 'FACEBOOK_CODE_INVALID',
+  /** Facebook authorization code has expired */
+  FACEBOOK_CODE_EXPIRED = 'FACEBOOK_CODE_EXPIRED',
+  /** Facebook OAuth not configured */
+  FACEBOOK_NOT_CONFIGURED = 'FACEBOOK_NOT_CONFIGURED',
+  /** Facebook email is not verified */
+  FACEBOOK_EMAIL_NOT_VERIFIED = 'FACEBOOK_EMAIL_NOT_VERIFIED',
+  /** Facebook API error */
+  FACEBOOK_API_ERROR = 'FACEBOOK_API_ERROR',
+
   // User self-service errors
   /** Current password is incorrect */
   INVALID_CURRENT_PASSWORD = 'INVALID_CURRENT_PASSWORD',

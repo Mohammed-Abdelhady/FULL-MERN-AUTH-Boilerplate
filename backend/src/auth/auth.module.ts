@@ -13,6 +13,8 @@ import { Session, SessionSchema } from '../session/schemas/session.schema';
 import { SessionService } from './services/session.service';
 import { OAuthService } from './services/oauth.service';
 import { GoogleOAuthStrategy } from './strategies/google-oauth.strategy';
+import { GitHubOAuthStrategy } from './strategies/github-oauth.strategy';
+import { FacebookOAuthStrategy } from './strategies/facebook-oauth.strategy';
 import { CommonModule } from '../common/common.module';
 import { MailModule } from '../mail/mail.module';
 import { UserModule } from '../user/user.module';
@@ -40,6 +42,8 @@ import { VerifiedGuard } from './guards/verified.guard';
     SessionService,
     OAuthService,
     GoogleOAuthStrategy,
+    GitHubOAuthStrategy,
+    FacebookOAuthStrategy,
     AuthGuard,
     VerifiedGuard,
   ],
