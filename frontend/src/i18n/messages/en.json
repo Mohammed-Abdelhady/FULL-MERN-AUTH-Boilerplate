@@ -1,0 +1,23 @@
+{
+  "common": {
+    "appName": "Auth Boilerplate",
+    "welcome": "Welcome",
+    "language": "Language",
+    "loading": "To get started, edit the page.tsx file."
+  },
+  "nav": {
+    "home": "Home",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember Me"
+  }
+}

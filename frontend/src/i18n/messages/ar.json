@@ -1,0 +1,23 @@
+{
+  "common": {
+    "appName": "نظام المصادقة",
+    "welcome": "مرحباً",
+    "language": "اللغة",
+    "loading": "للبدء، قم بتحرير ملف page.tsx."
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب",
+    "logout": "تسجيل الخروج"
+  },
+  "auth": {
+    "signIn": "تسجيل الدخول",
+    "signUp": "إنشاء حساب",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "rememberMe": "تذكرني"
+  }
+}
