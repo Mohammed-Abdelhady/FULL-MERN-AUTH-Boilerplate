@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 
 /**
@@ -12,6 +13,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
+  // Set global prefix for all routes
+  app.setGlobalPrefix('api');
+
   // 1. Security Headers - Apply first for all requests
   app.use(
     helmet({
@@ -21,7 +25,10 @@ async function bootstrap() {
     }),
   );
 
-  // 2. CORS Configuration - Apply before routing
+  // 2. Cookie Parser Middleware - Parse cookies from requests
+  app.use(cookieParser());
+
+  // 3. CORS Configuration - Apply before routing
   const clientUrl = configService.get<string>(
     'CLIENT_URL',
     'http://localhost:3000',
@@ -45,9 +52,9 @@ async function bootstrap() {
     }),
   );
 
-  // 4. Rate Limiting - Applied via ThrottlerGuard in AppModule
+  // 5. Rate Limiting - Applied via ThrottlerGuard in AppModule
 
-  // 5. Startup Logging
+  // 6. Startup Logging
   const port = configService.get<number>('PORT', 3000);
   const environment = configService.get<string>('NODE_ENV', 'development');
 
@@ -60,10 +67,10 @@ async function bootstrap() {
   console.log(`🔒 CORS Origin: ${clientUrl}`);
   console.log('='.repeat(50));
 
-  // 6. Graceful Shutdown
+  // 7. Graceful Shutdown
   app.enableShutdownHooks();
 
-  // 7. Start Server
+  // 8. Start Server
   await app.listen(port);
 
   console.log('✅ Server started successfully');

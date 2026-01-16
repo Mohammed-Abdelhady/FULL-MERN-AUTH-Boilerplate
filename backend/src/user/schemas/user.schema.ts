@@ -50,8 +50,5 @@ export const UserSchema: MongooseSchema<User> =
   SchemaFactory.createForClass(User);
 
 // Indexes
-UserSchema.index({ email: 1 }, { unique: true });
-UserSchema.index({ googleId: 1 }, { sparse: true });
-UserSchema.index({ facebookId: 1 }, { sparse: true });
 UserSchema.index({ createdAt: -1 });
 UserSchema.index({ isDeleted: 1 });
