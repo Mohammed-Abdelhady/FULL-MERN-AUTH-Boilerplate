@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import { Test, TestingModule } from '@nestjs/testing';
 import { HealthController } from './health.controller';
 import { HealthService } from './health.service';
@@ -52,12 +53,10 @@ describe('HealthController', () => {
         environment: 'development',
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      (mockHealthService.getHealth as jest.Mock).mockReturnValue(healthData);
+      mockHealthService.getHealth.mockReturnValue(healthData);
 
       const result = controller.getHealth();
 
-      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(service.getHealth).toHaveBeenCalled();
       expect(result).toEqual({
         httpStatus: 200,
@@ -82,12 +81,10 @@ describe('HealthController', () => {
         environment: 'development',
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      (mockHealthService.getHealth as jest.Mock).mockReturnValue(healthData);
+      mockHealthService.getHealth.mockReturnValue(healthData);
 
       const result = controller.getHealth();
 
-      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(service.getHealth).toHaveBeenCalled();
       expect(result).toEqual({
         httpStatus: 503,
@@ -112,12 +109,10 @@ describe('HealthController', () => {
         environment: 'development',
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      (mockHealthService.getHealth as jest.Mock).mockReturnValue(healthData);
+      mockHealthService.getHealth.mockReturnValue(healthData);
 
       const result = controller.getHealth();
 
-      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(service.getHealth).toHaveBeenCalled();
       expect(result).toEqual({
         httpStatus: 503,

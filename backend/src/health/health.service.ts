@@ -21,8 +21,7 @@ export class HealthService {
     const startTime = Date.now();
 
     try {
-      const readyState = this.connection.readyState;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+      const readyState = this.connection.readyState as number;
       if (readyState === 1) {
         // Connected
         const responseTime = Date.now() - startTime;
@@ -30,7 +29,6 @@ export class HealthService {
           status: 'connected',
           responseTime,
         };
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
       } else if (readyState === 2) {
         // Connecting
         return {

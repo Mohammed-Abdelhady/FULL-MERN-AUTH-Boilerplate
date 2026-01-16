@@ -23,8 +23,7 @@ interface HealthResponse {
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let httpServer: any;
+  let httpServer: ReturnType<INestApplication['getHttpServer']>;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
