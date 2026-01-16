@@ -14,7 +14,7 @@ import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { CommonModule } from './common/common.module';
 import { MailModule } from './mail/mail.module';
-import { EnvironmentVariables } from './config/configuration';
+import configuration, { EnvironmentVariables } from './config/configuration';
 import { Connection } from 'mongoose';
 
 @Module({
@@ -22,6 +22,7 @@ import { Connection } from 'mongoose';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      load: [configuration],
       validationOptions: {
         allowUnknown: true,
         abortOnError: true,

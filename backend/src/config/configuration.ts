@@ -42,6 +42,9 @@ export interface EnvironmentConfig {
   OAUTH_FACEBOOK_CLIENT_ID?: string;
   OAUTH_FACEBOOK_CLIENT_SECRET?: string;
   OAUTH_FACEBOOK_CALLBACK_URL?: string;
+  OAUTH_GITHUB_CLIENT_ID?: string;
+  OAUTH_GITHUB_CLIENT_SECRET?: string;
+  OAUTH_GITHUB_CALLBACK_URL?: string;
 
   // SMTP
   SMTP_HOST?: string;
@@ -135,6 +138,18 @@ export class EnvironmentVariables {
   @IsString()
   @IsOptional()
   OAUTH_FACEBOOK_CALLBACK_URL?: string;
+
+  @IsString()
+  @IsOptional()
+  OAUTH_GITHUB_CLIENT_ID?: string;
+
+  @IsString()
+  @IsOptional()
+  OAUTH_GITHUB_CLIENT_SECRET?: string;
+
+  @IsString()
+  @IsOptional()
+  OAUTH_GITHUB_CALLBACK_URL?: string;
 
   // SMTP
   @IsString()
@@ -231,6 +246,23 @@ export interface Configuration {
     codeExpiresIn: number;
     maxAttempts: number;
   };
+  oauth: {
+    google: {
+      clientId?: string;
+      clientSecret?: string;
+      callbackUrl?: string;
+    };
+    facebook: {
+      clientId?: string;
+      clientSecret?: string;
+      callbackUrl?: string;
+    };
+    github: {
+      clientId?: string;
+      clientSecret?: string;
+      callbackUrl?: string;
+    };
+  };
 }
 
 const configuration = (): Configuration => ({
@@ -277,6 +309,23 @@ const configuration = (): Configuration => ({
       process.env.ACTIVATION_MAX_ATTEMPTS || '5',
       10,
     ),
+  },
+  oauth: {
+    google: {
+      clientId: process.env.OAUTH_GOOGLE_CLIENT_ID,
+      clientSecret: process.env.OAUTH_GOOGLE_CLIENT_SECRET,
+      callbackUrl: process.env.OAUTH_GOOGLE_CALLBACK_URL,
+    },
+    facebook: {
+      clientId: process.env.OAUTH_FACEBOOK_CLIENT_ID,
+      clientSecret: process.env.OAUTH_FACEBOOK_CLIENT_SECRET,
+      callbackUrl: process.env.OAUTH_FACEBOOK_CALLBACK_URL,
+    },
+    github: {
+      clientId: process.env.OAUTH_GITHUB_CLIENT_ID,
+      clientSecret: process.env.OAUTH_GITHUB_CLIENT_SECRET,
+      callbackUrl: process.env.OAUTH_GITHUB_CALLBACK_URL,
+    },
   },
 });
 

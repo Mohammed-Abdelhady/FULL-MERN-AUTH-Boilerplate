@@ -6,8 +6,8 @@ import { OAuthProvider } from '../services/oauth.service';
  * Used to handle OAuth callback requests
  */
 export class OAuthCallbackDto {
-  @IsEnum(['google', 'facebook'], {
-    message: 'Provider must be either google or facebook',
+  @IsEnum(['google', 'facebook', 'github'], {
+    message: 'Provider must be google, facebook, or github',
   })
   @IsNotEmpty()
   provider!: OAuthProvider;
@@ -32,8 +32,8 @@ export class OAuthAuthUrlResponseDto {
  * OAuth Authorization URL Request DTO
  */
 export class OAuthAuthUrlDto {
-  @IsEnum(['google', 'facebook'], {
-    message: 'Provider must be either google or facebook',
+  @IsEnum(['google', 'facebook', 'github'], {
+    message: 'Provider must be google, facebook, or github',
   })
   @IsNotEmpty()
   provider!: OAuthProvider;

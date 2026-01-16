@@ -26,6 +26,9 @@ export class User {
   @Prop({ sparse: true, unique: true })
   facebookId?: string;
 
+  @Prop({ sparse: true, unique: true })
+  githubId?: string;
+
   @Prop({ default: false })
   isVerified!: boolean;
 
