@@ -8,6 +8,29 @@ export const DEFAULT_USER_PERMISSIONS: string[] = [
 ];
 
 /**
+ * Default permissions for support users
+ * Support users can view profiles and user sessions
+ */
+export const DEFAULT_SUPPORT_PERMISSIONS: string[] = [
+  'profile:read',
+  'profile:update',
+  'users:read',
+  'sessions:read',
+];
+
+/**
+ * Default permissions for manager users
+ * Managers can manage users and view sessions
+ */
+export const DEFAULT_MANAGER_PERMISSIONS: string[] = [
+  'profile:read',
+  'profile:update',
+  'users:read',
+  'users:update',
+  'sessions:read',
+];
+
+/**
  * Default permissions for admin users
  * Admins typically have access to everything, represented by wildcard
  */

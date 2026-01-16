@@ -17,8 +17,10 @@ import {
 } from './schemas/pending-registration.schema';
 import { RegisterDto } from './dto/register.dto';
 import { ActivateDto } from './dto/activate.dto';
+import { LoginDto } from './dto/login.dto';
 import { RegisterResponseDto } from './dto/register-response.dto';
 import { ActivateResponseDto } from './dto/activate-response.dto';
+import { LoginResponseDto } from './dto/login-response.dto';
 import { HashService } from '../common/services/hash.service';
 import { MailService } from '../mail/mail.service';
 import { SessionService } from './services/session.service';
@@ -204,5 +206,87 @@ export class AuthService {
     });
 
     return ActivateResponseDto.success(user);
+  }
+
+  /**
+   * Login user with email and password
+   * @param dto - Login data
+   * @param response - Express response object for setting cookie
+   * @throws UnauthorizedException for invalid credentials
+   */
+  async login(dto: LoginDto, response: Response): Promise<LoginResponseDto> {
+    // Find user with password field selected
+    const user = await this.userModel
+      .findOne({ email: dto.email })
+      .select('+password');
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    // Compare password
+    const isPasswordValid = await this.hashService.compare(
+      dto.password,
+      user.password!,
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    // Create session
+    const userAgent = response.req.headers['user-agent'] || 'Unknown';
+    const ip = response.req.ip || '127.0.0.1';
+    const sessionToken = await this.sessionService.createSession(
+      user._id,
+      userAgent,
+      ip,
+    );
+
+    this.logger.log(`User logged in: ${user.email}`);
+
+    // Set HTTP-only cookie
+    const cookieName = this.configService.get<string>(
+      'session.cookieName',
+      'sid',
+    );
+    const cookieMaxAge = this.configService.get<number>(
+      'session.cookieMaxAge',
+      604800000,
+    );
+
+    response.cookie(cookieName, sessionToken, {
+      httpOnly: true,
+      secure: this.configService.get('NODE_ENV') === 'production',
+      sameSite: 'strict',
+      maxAge: cookieMaxAge,
+      path: '/',
+    });
+
+    return LoginResponseDto.success({
+      id: user._id.toString(),
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      isVerified: user.isVerified,
+    });
+  }
+
+  /**
+   * Logout user by invalidating session
+   * @param sessionToken - Session token to invalidate
+   * @returns Success message
+   */
+  async logout(sessionToken: string): Promise<{ message: string }> {
+    const invalidated =
+      await this.sessionService.invalidateSession(sessionToken);
+
+    if (!invalidated) {
+      throw new UnauthorizedException('Invalid session');
+    }
+
+    this.logger.log(`User logged out with token: ${sessionToken}`);
+
+    return { message: 'Logout successful' };
   }
 }

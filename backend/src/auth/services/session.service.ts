@@ -54,11 +54,13 @@ export class SessionService {
    * @returns The session document if valid, null otherwise
    */
   async validateSession(token: string): Promise<SessionDocument | null> {
-    const session = await this.sessionModel.findOne({
-      refreshToken: token,
-      isValid: true,
-      expiresAt: { $gt: new Date() },
-    });
+    const session = await this.sessionModel
+      .findOne({
+        refreshToken: token,
+        isValid: true,
+        expiresAt: { $gt: new Date() },
+      })
+      .populate('user');
 
     if (!session) {
       return null;

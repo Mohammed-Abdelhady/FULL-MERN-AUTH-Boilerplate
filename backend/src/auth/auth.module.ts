@@ -14,6 +14,8 @@ import { CommonModule } from '../common/common.module';
 import { MailModule } from '../mail/mail.module';
 import { UserModule } from '../user/user.module';
 import { SessionModule } from '../session/session.module';
+import { AuthGuard } from './guards/auth.guard';
+import { VerifiedGuard } from './guards/verified.guard';
 
 @Module({
   imports: [
@@ -30,7 +32,14 @@ import { SessionModule } from '../session/session.module';
     SessionModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, SessionService],
-  exports: [AuthService, SessionService],
+  providers: [AuthService, SessionService, AuthGuard, VerifiedGuard],
+  exports: [AuthService, SessionService, AuthGuard, VerifiedGuard],
 })
 export class AuthModule {}
+
+/**
+ * Decorators are exported directly from their source files:
+ * - @Public() from './decorators/public.decorator'
+ * - @CurrentUser() from './decorators/current-user.decorator'
+ * - @Verified() from './decorators/verified.decorator'
+ */
