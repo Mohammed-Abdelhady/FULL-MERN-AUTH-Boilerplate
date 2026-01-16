@@ -1,4 +1,5 @@
 import { UserRole } from '../enums/user-role.enum';
+import { AuthProvider } from '../enums/auth-provider.enum';
 
 /**
  * DTO for user profile response.
@@ -8,6 +9,7 @@ export class UserProfileDto {
   email!: string;
   name!: string;
   role!: UserRole;
+  authProvider!: AuthProvider;
   isVerified!: boolean;
   googleId?: string | null;
   facebookId?: string | null;

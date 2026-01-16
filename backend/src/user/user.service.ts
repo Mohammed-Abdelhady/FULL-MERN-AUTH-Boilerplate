@@ -285,6 +285,7 @@ export class UserService {
       email: user.email,
       name: user.name,
       role: user.role,
+      authProvider: user.authProvider,
       isVerified: user.isVerified,
       googleId: user.googleId,
       facebookId: user.facebookId,

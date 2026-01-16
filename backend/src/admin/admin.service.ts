@@ -352,6 +352,7 @@ export class AdminService {
       email: user.email,
       name: user.name,
       role: user.role,
+      authProvider: user.authProvider,
       isVerified: user.isVerified,
       isDeleted: user.isDeleted,
       googleId: user.googleId,

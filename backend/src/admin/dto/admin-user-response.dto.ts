@@ -1,4 +1,5 @@
 import { UserRole } from '../../user/enums/user-role.enum';
+import { AuthProvider } from '../../user/enums/auth-provider.enum';
 import { ApiResponse } from '../../common/dto/api-response.dto';
 
 /**
@@ -9,6 +10,7 @@ export class AdminUserDto {
   email!: string;
   name!: string;
   role!: UserRole;
+  authProvider!: AuthProvider;
   isVerified!: boolean;
   isDeleted!: boolean;
   googleId?: string | null;
