@@ -26,7 +26,7 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
   let result = await baseQuery(args, api, extraOptions);
 
   // If request fails with 401, attempt token refresh
-  if (result.error && result.error.status === 401) {
+  if (result.error?.status === 401) {
     // Try to refresh the token
     const refreshResult = await baseQuery('/api/auth/refresh', api, extraOptions);
 

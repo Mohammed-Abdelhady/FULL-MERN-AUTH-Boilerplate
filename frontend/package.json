@@ -27,6 +27,7 @@
     "react-dom": "19.2.3",
     "react-hook-form": "^7.71.1",
     "react-redux": "^9.2.0",
+    "redux-persist": "^6.0.0",
     "tailwind-merge": "^3.4.0",
     "zod": "^3.25.76"
   },
