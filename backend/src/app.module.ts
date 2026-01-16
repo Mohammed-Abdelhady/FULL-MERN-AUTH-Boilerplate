@@ -6,6 +6,9 @@ import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HealthModule } from './health/health.module';
+import { UserModule } from './user/user.module';
+import { SessionModule } from './session/session.module';
+import { PermissionModule } from './permission/permission.module';
 import { EnvironmentVariables } from './config/configuration';
 import { Connection } from 'mongoose';
 
@@ -54,6 +57,9 @@ import { Connection } from 'mongoose';
       inject: [ConfigService],
     }),
     HealthModule,
+    UserModule,
+    SessionModule,
+    PermissionModule,
   ],
   controllers: [AppController],
   providers: [
