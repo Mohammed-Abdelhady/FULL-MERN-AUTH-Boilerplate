@@ -50,4 +50,28 @@ export enum ErrorCode {
   NOT_FOUND = 'NOT_FOUND',
   /** Access forbidden */
   FORBIDDEN = 'FORBIDDEN',
+
+  // Admin errors
+  /** User does not exist */
+  USER_NOT_FOUND = 'USER_NOT_FOUND',
+  /** Cannot change own role/status */
+  CANNOT_MODIFY_SELF = 'CANNOT_MODIFY_SELF',
+  /** Cannot modify user with higher role */
+  CANNOT_MODIFY_HIGHER_ROLE = 'CANNOT_MODIFY_HIGHER_ROLE',
+  /** Cannot assign ADMIN role via API */
+  INVALID_ROLE_ASSIGNMENT = 'INVALID_ROLE_ASSIGNMENT',
+  /** User is already deleted */
+  USER_ALREADY_DELETED = 'USER_ALREADY_DELETED',
+
+  // User self-service errors
+  /** Current password is incorrect */
+  INVALID_CURRENT_PASSWORD = 'INVALID_CURRENT_PASSWORD',
+  /** New password is same as current */
+  SAME_PASSWORD = 'SAME_PASSWORD',
+  /** Session not found */
+  SESSION_NOT_FOUND = 'SESSION_NOT_FOUND',
+  /** Cannot revoke current session */
+  CANNOT_REVOKE_CURRENT_SESSION = 'CANNOT_REVOKE_CURRENT_SESSION',
+  /** Admin cannot deactivate their own account */
+  ADMIN_CANNOT_DEACTIVATE_SELF = 'ADMIN_CANNOT_DEACTIVATE_SELF',
 }
