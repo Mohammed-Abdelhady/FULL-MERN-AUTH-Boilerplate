@@ -43,6 +43,62 @@ npm run format        # Prettier
 | ----------------------------------------------------------- | ------------------------------------------------------------- |
 | [Authentication Flow](docs/authentication-flow.md)          | Registration, activation, login, logout, session management   |
 | [User, Roles & Permissions](docs/user-roles-permissions.md) | User model, role hierarchy (USER/SUPPORT/MANAGER/ADMIN), RBAC |
+| [API Responses](docs/api-responses.md)                      | Standardized API response format and error codes              |
+
+## API Documentation (Swagger)
+
+### Interactive API Documentation
+
+The backend includes Swagger/OpenAPI documentation for interactive API exploration:
+
+**Enable Swagger in Development:**
+
+Set `SWAGGER_ENABLED=true` in your `.env` file:
+
+```bash
+# backend/.env
+SWAGGER_ENABLED=true
+```
+
+**Access Documentation:**
+
+- **Swagger UI**: http://localhost:3000/api/docs - Interactive API documentation with "Try it out" feature
+- **OpenAPI Spec**: http://localhost:3000/api/docs-json - Machine-readable API specification
+
+**Features:**
+
+- Auto-generated from TypeScript decorators and DTOs
+- Interactive "Try it out" for testing endpoints directly
+- JWT Bearer authentication support
+- Request/response schema documentation
+- Download OpenAPI specification for other tools
+
+**Security Note:**
+
+Swagger is disabled by default in production. Only enable in development environments.
+
+## Postman Collection
+
+A ready-to-use Postman collection is available for API testing:
+
+**Location:** [`backend/docs/postman/`](./docs/postman/)
+
+**Quick Start:**
+
+1. Import `FULL-MERN-AUTH-Boilerplate-API.postman_collection.json` into Postman
+2. Import environment file (`dev.json`, `staging.json`, or `production.json`)
+3. Set active environment
+4. Run requests to test the API
+
+**Features:**
+
+- All 19 API endpoints pre-configured
+- Automatic JWT token handling
+- Environment variables for different environments
+- Test scripts for response validation
+- Pre-request scripts for authentication
+
+**See:** [`backend/docs/postman/README.md`](./docs/postman/README.md) for detailed usage instructions.
 
 ## Project Structure
 
@@ -72,6 +128,17 @@ src/
 ├── config/                 # Configuration
 │   └── configuration.ts    # Environment config
 └── app.module.ts           # Root module
+
+docs/
+├── postman/               # Postman collection and environments
+│   ├── FULL-MERN-AUTH-Boilerplate-API.postman_collection.json
+│   ├── dev.json
+│   ├── staging.json
+│   ├── production.json
+│   └── README.md
+├── authentication-flow.md
+├── user-roles-permissions.md
+└── api-responses.md
 ```
 
 ## Environment Variables
@@ -108,6 +175,9 @@ EMAIL_FROM=noreply@yourapp.com
 
 # Security
 BCRYPT_ROUNDS=10
+
+# Swagger/OpenAPI Documentation (development only)
+SWAGGER_ENABLED=false    # Set to true to enable Swagger UI at /api/docs
 ```
 
 ## API Endpoints
