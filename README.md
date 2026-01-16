@@ -282,26 +282,51 @@ npm test
 
 ## API Endpoints
 
+### Interactive Documentation
+
+- **Swagger UI**: [http://localhost:3000/api/docs](http://localhost:3000/api/docs) - Interactive API documentation (enable with `SWAGGER_ENABLED=true`)
+- **OpenAPI Spec**: [http://localhost:3000/api/docs-json](http://localhost:3000/api/docs-json) - Machine-readable API specification
+- **Postman Collection**: See [`backend/docs/postman/`](./backend/docs/postman/) - Ready-to-use collection for API testing
+
 ### Authentication
 
 | Method | Endpoint                    | Status | Description                              |
 | ------ | --------------------------- | ------ | ---------------------------------------- |
 | POST   | `/api/auth/register`        | ✅     | Register with email (sends 6-digit code) |
 | POST   | `/api/auth/activate`        | ✅     | Activate account with code               |
-| POST   | `/api/auth/login`           | 🚧     | Login with email/password                |
-| POST   | `/api/auth/logout`          | 🚧     | Logout (invalidate session)              |
-| POST   | `/api/auth/forgot-password` | ⏳     | Request password reset                   |
-| POST   | `/api/auth/reset-password`  | ⏳     | Reset password                           |
-| POST   | `/api/auth/google`          | ⏳     | Google OAuth                             |
-| POST   | `/api/auth/facebook`        | ⏳     | Facebook OAuth                           |
+| POST   | `/api/auth/login`           | ✅     | Login with email/password                |
+| POST   | `/api/auth/logout`          | ✅     | Logout (invalidate session)              |
+| POST   | `/api/auth/oauth/authorize` | ✅     | Get OAuth authorization URL              |
+| POST   | `/api/auth/oauth/callback`  | ✅     | Handle OAuth callback                    |
+| GET    | `/api/auth/oauth/providers` | ✅     | Get supported OAuth providers            |
 
 ### User (Protected)
 
-| Method | Endpoint            | Status | Description             |
-| ------ | ------------------- | ------ | ----------------------- |
-| GET    | `/api/user/profile` | ⏳     | Get user profile        |
-| PUT    | `/api/user/profile` | ⏳     | Update profile          |
-| GET    | `/api/user/list`    | ⏳     | List users (admin only) |
+| Method | Endpoint                           | Status | Description               |
+| ------ | ---------------------------------- | ------ | ------------------------- |
+| GET    | `/api/user/profile`                | ✅     | Get user profile          |
+| PATCH  | `/api/user/profile`                | ✅     | Update profile            |
+| POST   | `/api/user/password`               | ✅     | Change password           |
+| GET    | `/api/user/sessions`               | ✅     | Get all sessions          |
+| DELETE | `/api/user/sessions/:sessionId`    | ✅     | Revoke specific session   |
+| POST   | `/api/user/sessions/revoke-others` | ✅     | Revoke all other sessions |
+| DELETE | `/api/user/account`                | ✅     | Deactivate account        |
+
+### Admin (Protected)
+
+| Method | Endpoint                      | Status | Description                |
+| ------ | ----------------------------- | ------ | -------------------------- |
+| GET    | `/api/admin/users`            | ✅     | List all users (paginated) |
+| GET    | `/api/admin/users/:id`        | ✅     | Get user by ID             |
+| PATCH  | `/api/admin/users/:id/status` | ✅     | Update user status         |
+| PATCH  | `/api/admin/users/:id/role`   | ✅     | Update user role           |
+| DELETE | `/api/admin/users/:id`        | ✅     | Delete user                |
+
+### Health
+
+| Method | Endpoint      | Status | Description           |
+| ------ | ------------- | ------ | --------------------- |
+| GET    | `/api/health` | ✅     | Health check endpoint |
 
 **Legend**: ✅ Implemented | 🚧 In Progress | ⏳ Planned
 

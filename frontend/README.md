@@ -168,6 +168,17 @@ const data = await response.json();
 // { success: true, data: { user: {...} }, message: "..." }
 ```
 
+### API Documentation
+
+For comprehensive API documentation and testing:
+
+- **Swagger UI**: [http://localhost:3000/api/docs](http://localhost:3000/api/docs) - Interactive API documentation
+- **OpenAPI Spec**: [http://localhost:3000/api/docs-json](http://localhost:3000/api/docs-json) - Machine-readable API specification
+- **Postman Collection**: See [`../backend/docs/postman/`](../backend/docs/postman/) - Ready-to-use collection for API testing
+- **Backend API Docs**: See [`../backend/docs/`](../backend/docs/) - Detailed API documentation
+
+**Note:** Enable Swagger in development by setting `SWAGGER_ENABLED=true` in `backend/.env`.
+
 ## Deployment
 
 ### Vercel (Recommended)
