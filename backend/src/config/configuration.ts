@@ -35,6 +35,14 @@ export interface EnvironmentConfig {
   GOOGLE_CLIENT_ID?: string;
   FACEBOOK_APP_ID?: string;
 
+  // OAuth
+  OAUTH_GOOGLE_CLIENT_ID?: string;
+  OAUTH_GOOGLE_CLIENT_SECRET?: string;
+  OAUTH_GOOGLE_CALLBACK_URL?: string;
+  OAUTH_FACEBOOK_CLIENT_ID?: string;
+  OAUTH_FACEBOOK_CLIENT_SECRET?: string;
+  OAUTH_FACEBOOK_CALLBACK_URL?: string;
+
   // SMTP
   SMTP_HOST?: string;
   SMTP_PORT?: number;
@@ -103,6 +111,30 @@ export class EnvironmentVariables {
   @IsString()
   @IsOptional()
   FACEBOOK_APP_ID?: string;
+
+  @IsString()
+  @IsOptional()
+  OAUTH_GOOGLE_CLIENT_ID?: string;
+
+  @IsString()
+  @IsOptional()
+  OAUTH_GOOGLE_CLIENT_SECRET?: string;
+
+  @IsString()
+  @IsOptional()
+  OAUTH_GOOGLE_CALLBACK_URL?: string;
+
+  @IsString()
+  @IsOptional()
+  OAUTH_FACEBOOK_CLIENT_ID?: string;
+
+  @IsString()
+  @IsOptional()
+  OAUTH_FACEBOOK_CLIENT_SECRET?: string;
+
+  @IsString()
+  @IsOptional()
+  OAUTH_FACEBOOK_CALLBACK_URL?: string;
 
   // SMTP
   @IsString()

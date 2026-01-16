@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
+import { OAuthController } from './oauth.controller';
 import {
   PendingRegistration,
   PendingRegistrationSchema,
@@ -10,6 +11,8 @@ import {
 import { User, UserSchema } from '../user/schemas/user.schema';
 import { Session, SessionSchema } from '../session/schemas/session.schema';
 import { SessionService } from './services/session.service';
+import { OAuthService } from './services/oauth.service';
+import { GoogleOAuthStrategy } from './strategies/google-oauth.strategy';
 import { CommonModule } from '../common/common.module';
 import { MailModule } from '../mail/mail.module';
 import { UserModule } from '../user/user.module';
@@ -31,9 +34,22 @@ import { VerifiedGuard } from './guards/verified.guard';
     UserModule,
     SessionModule,
   ],
-  controllers: [AuthController],
-  providers: [AuthService, SessionService, AuthGuard, VerifiedGuard],
-  exports: [AuthService, SessionService, AuthGuard, VerifiedGuard],
+  controllers: [AuthController, OAuthController],
+  providers: [
+    AuthService,
+    SessionService,
+    OAuthService,
+    GoogleOAuthStrategy,
+    AuthGuard,
+    VerifiedGuard,
+  ],
+  exports: [
+    AuthService,
+    SessionService,
+    OAuthService,
+    AuthGuard,
+    VerifiedGuard,
+  ],
 })
 export class AuthModule {}
 
