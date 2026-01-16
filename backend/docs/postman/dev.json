@@ -1,0 +1,42 @@
+{
+  "id": "dev-environment",
+  "name": "Development",
+  "values": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "enabled": true
+    },
+    {
+      "key": "jwtToken",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "testEmail",
+      "value": "test@example.com",
+      "enabled": true
+    },
+    {
+      "key": "testPassword",
+      "value": "Password123",
+      "enabled": true
+    },
+    {
+      "key": "testName",
+      "value": "Test User",
+      "enabled": true
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "sessionId",
+      "value": "",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment"
+}
