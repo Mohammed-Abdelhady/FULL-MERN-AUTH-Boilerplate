@@ -1,10 +1,10 @@
 import { UserResponseDto } from '../../common/dto/user-response.dto';
+import { ApiResponse } from '../../common/dto/api-response.dto';
 
 /**
  * Response DTO for successful account activation
  */
 export class ActivateResponseDto {
-  message!: string;
   user!: UserResponseDto;
 
   static success(user: {
@@ -12,10 +12,9 @@ export class ActivateResponseDto {
     email: string;
     name: string;
     role: string;
-  }): ActivateResponseDto {
+  }): ApiResponse<ActivateResponseDto> {
     const dto = new ActivateResponseDto();
-    dto.message = 'Account activated successfully';
     dto.user = UserResponseDto.fromDocument(user);
-    return dto;
+    return ApiResponse.success(dto, 'Account activated successfully');
   }
 }

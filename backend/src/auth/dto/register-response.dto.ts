@@ -1,14 +1,14 @@
+import { ApiResponse } from '../../common/dto/api-response.dto';
+
 /**
  * Response DTO for successful registration
  */
 export class RegisterResponseDto {
-  message!: string;
   email?: string;
 
-  static success(email: string): RegisterResponseDto {
+  static success(email: string): ApiResponse<RegisterResponseDto> {
     const dto = new RegisterResponseDto();
-    dto.message = 'Activation code sent to your email';
     dto.email = email;
-    return dto;
+    return ApiResponse.success(dto, 'Activation code sent to your email');
   }
 }

@@ -1,5 +1,6 @@
+import { ApiResponse } from '../../common/dto/api-response.dto';
+
 export class LoginResponseDto {
-  message!: string;
   user!: {
     id: string;
     email: string;
@@ -14,10 +15,9 @@ export class LoginResponseDto {
     name: string;
     role: string;
     isVerified: boolean;
-  }): LoginResponseDto {
-    return {
-      message: 'Login successful',
-      user,
-    };
+  }): ApiResponse<LoginResponseDto> {
+    const dto = new LoginResponseDto();
+    dto.user = user;
+    return ApiResponse.success(dto, 'Login successful');
   }
 }

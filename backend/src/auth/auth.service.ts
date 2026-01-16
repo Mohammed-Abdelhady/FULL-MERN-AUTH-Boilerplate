@@ -1,10 +1,4 @@
-import {
-  Injectable,
-  Logger,
-  ConflictException,
-  BadRequestException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, Logger, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -21,7 +15,10 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterResponseDto } from './dto/register-response.dto';
 import { ActivateResponseDto } from './dto/activate-response.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { ApiResponse } from '../common/dto/api-response.dto';
 import { HashService } from '../common/services/hash.service';
+import { AppException } from '../common/exceptions/app.exception';
+import { ErrorCode } from '../common/enums/error-code.enum';
 import { MailService } from '../mail/mail.service';
 import { SessionService } from './services/session.service';
 
@@ -55,11 +52,15 @@ export class AuthService {
    * @param dto - Registration data
    * @throws ConflictException if email already exists
    */
-  async register(dto: RegisterDto): Promise<RegisterResponseDto> {
+  async register(dto: RegisterDto): Promise<ApiResponse<RegisterResponseDto>> {
     // Check if user already exists
     const existingUser = await this.userModel.findOne({ email: dto.email });
     if (existingUser) {
-      throw new ConflictException('Email already registered');
+      throw new AppException(
+        ErrorCode.EMAIL_ALREADY_EXISTS,
+        'Email already registered',
+        HttpStatus.CONFLICT,
+      );
     }
 
     // Check if pending registration exists (select hidden fields for update)
@@ -108,7 +109,11 @@ export class AuthService {
       this.logger.error(
         `Failed to send activation email: ${error instanceof Error ? error.message : String(error)}`,
       );
-      throw new BadRequestException('Failed to send activation email');
+      throw new AppException(
+        ErrorCode.EMAIL_SEND_FAILED,
+        'Failed to send activation email',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     return RegisterResponseDto.success(dto.email);
@@ -124,27 +129,37 @@ export class AuthService {
   async activate(
     dto: ActivateDto,
     response: Response,
-  ): Promise<ActivateResponseDto> {
+  ): Promise<ApiResponse<ActivateResponseDto>> {
     // Find pending registration (select hidden fields for verification)
     const pending = await this.pendingRegistrationModel
       .findOne({ email: dto.email })
       .select('+hashedPassword +hashedCode');
 
     if (!pending) {
-      throw new BadRequestException('No pending registration found');
+      throw new AppException(
+        ErrorCode.NO_PENDING_REGISTRATION,
+        'No pending registration found',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     // Check if expired
     if (new Date() > pending.expiresAt) {
       await this.pendingRegistrationModel.deleteOne({ email: dto.email });
-      throw new BadRequestException('Activation code has expired');
+      throw new AppException(
+        ErrorCode.ACTIVATION_CODE_EXPIRED,
+        'Activation code has expired',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     // Check attempts
     if (pending.attempts >= this.maxAttempts) {
       await this.pendingRegistrationModel.deleteOne({ email: dto.email });
-      throw new UnauthorizedException(
+      throw new AppException(
+        ErrorCode.MAX_ATTEMPTS_EXCEEDED,
         'Maximum attempts exceeded. Please register again.',
+        HttpStatus.UNAUTHORIZED,
       );
     }
 
@@ -160,8 +175,11 @@ export class AuthService {
       await pending.save();
 
       const remainingAttempts = this.maxAttempts - pending.attempts;
-      throw new BadRequestException(
+      throw new AppException(
+        ErrorCode.ACTIVATION_CODE_INVALID,
         `Invalid code. ${remainingAttempts} attempts remaining.`,
+        HttpStatus.BAD_REQUEST,
+        { remainingAttempts },
       );
     }
 
@@ -214,14 +232,21 @@ export class AuthService {
    * @param response - Express response object for setting cookie
    * @throws UnauthorizedException for invalid credentials
    */
-  async login(dto: LoginDto, response: Response): Promise<LoginResponseDto> {
+  async login(
+    dto: LoginDto,
+    response: Response,
+  ): Promise<ApiResponse<LoginResponseDto>> {
     // Find user with password field selected
     const user = await this.userModel
       .findOne({ email: dto.email })
       .select('+password');
 
     if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new AppException(
+        ErrorCode.INVALID_CREDENTIALS,
+        'Invalid email or password',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     // Compare password
@@ -231,7 +256,11 @@ export class AuthService {
     );
 
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new AppException(
+        ErrorCode.INVALID_CREDENTIALS,
+        'Invalid email or password',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     // Create session
@@ -277,16 +306,22 @@ export class AuthService {
    * @param sessionToken - Session token to invalidate
    * @returns Success message
    */
-  async logout(sessionToken: string): Promise<{ message: string }> {
+  async logout(
+    sessionToken: string,
+  ): Promise<ApiResponse<{ message: string }>> {
     const invalidated =
       await this.sessionService.invalidateSession(sessionToken);
 
     if (!invalidated) {
-      throw new UnauthorizedException('Invalid session');
+      throw new AppException(
+        ErrorCode.SESSION_INVALID,
+        'Invalid session',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     this.logger.log(`User logged out with token: ${sessionToken}`);
 
-    return { message: 'Logout successful' };
+    return ApiResponse.success({ message: 'Logout successful' });
   }
 }

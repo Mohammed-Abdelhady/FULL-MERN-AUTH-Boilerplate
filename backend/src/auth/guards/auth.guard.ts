@@ -2,12 +2,14 @@ import {
   Injectable,
   CanActivate,
   ExecutionContext,
-  UnauthorizedException,
+  HttpStatus,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { SessionService } from '../services/session.service';
 import { SessionDocument } from '../../session/schemas/session.schema';
 import { UserDocument } from '../../user/schemas/user.schema';
+import { AppException } from '../../common/exceptions/app.exception';
+import { ErrorCode } from '../../common/enums/error-code.enum';
 
 export interface RequestWithUser extends Request {
   user?: {
@@ -30,13 +32,21 @@ export class AuthGuard implements CanActivate {
     const sessionToken = request.cookies?.[cookieName] as string | undefined;
 
     if (!sessionToken) {
-      throw new UnauthorizedException('Authentication required');
+      throw new AppException(
+        ErrorCode.SESSION_REQUIRED,
+        'Authentication required',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     const session = await this.sessionService.validateSession(sessionToken);
 
     if (!session) {
-      throw new UnauthorizedException('Invalid or expired session');
+      throw new AppException(
+        ErrorCode.SESSION_INVALID,
+        'Invalid or expired session',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     // Attach user and session to request for use in controllers
