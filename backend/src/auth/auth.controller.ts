@@ -8,6 +8,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { Request } from 'express';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
@@ -17,6 +18,7 @@ import { LoginDto } from './dto/login.dto';
 import { Public } from './decorators/public.decorator';
 import { AuthGuard } from './guards/auth.guard';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -28,6 +30,13 @@ export class AuthController {
   @Public()
   @Post('register')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Register a new user',
+    description:
+      'Creates a new user account with email, password, and name. ' +
+      'An activation code will be sent to provided email address.',
+  })
+  @ApiBody({ type: RegisterDto })
   async register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
   }
@@ -39,6 +48,13 @@ export class AuthController {
   @Public()
   @Post('activate')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Activate user account',
+    description:
+      'Activates a user account using email address and 6-digit activation code ' +
+      'sent to user during registration.',
+  })
+  @ApiBody({ type: ActivateDto })
   async activate(@Body() dto: ActivateDto, @Res() response: Response) {
     const result = await this.authService.activate(dto, response);
     return response.status(HttpStatus.OK).json(result);
@@ -51,6 +67,13 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Login user',
+    description:
+      'Authenticates a user with email and password. ' +
+      'Returns JWT token and sets session cookie upon successful authentication.',
+  })
+  @ApiBody({ type: LoginDto })
   async login(@Body() dto: LoginDto, @Res() response: Response) {
     const result = await this.authService.login(dto, response);
     return response.status(HttpStatus.OK).json(result);
@@ -64,6 +87,13 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: 'Logout user',
+    description:
+      'Invalidates current user session and clears session cookie. ' +
+      'Requires JWT authentication.',
+  })
   async logout(@Req() request: Request, @Res() response: Response) {
     const cookieName = process.env.SESSION_COOKIE_NAME || 'sid';
     const sessionToken = request.cookies?.[cookieName];

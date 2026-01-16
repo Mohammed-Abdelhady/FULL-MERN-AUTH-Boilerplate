@@ -1,10 +1,12 @@
 import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { HealthService } from './health.service';
 
 /**
  * Health check controller
  * Provides endpoint for monitoring application health status
  */
+@ApiTags('health')
 @Controller('health')
 export class HealthController {
   constructor(private readonly healthService: HealthService) {}
@@ -15,6 +17,11 @@ export class HealthController {
    */
   @Get()
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Health check',
+    description:
+      'Returns health status of application, including database connectivity and uptime.',
+  })
   getHealth() {
     const health = this.healthService.getHealth();
 

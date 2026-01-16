@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
@@ -54,10 +55,58 @@ async function bootstrap() {
 
   // 5. Rate Limiting - Applied via ThrottlerGuard in AppModule
 
-  // 6. Startup Logging
+  // 6. Get port and environment for logging
   const port = configService.get<number>('PORT', 3000);
   const environment = configService.get<string>('NODE_ENV', 'development');
 
+  // 7. Swagger/OpenAPI Documentation
+  const swaggerEnabled = configService.get<boolean>('SWAGGER_ENABLED', false);
+  if (swaggerEnabled) {
+    const config = new DocumentBuilder()
+      .setTitle('FULL-MERN-AUTH-Boilerplate API')
+      .setDescription(
+        'Comprehensive authentication and user management API with OAuth support',
+      )
+      .setVersion('1.0')
+      .addTag('auth', 'Authentication endpoints (register, login, logout)')
+      .addTag('oauth', 'OAuth authentication endpoints (Google, Facebook)')
+      .addTag('user', 'User profile and session management')
+      .addTag('admin', 'Admin user management endpoints')
+      .addTag('health', 'Health check endpoint')
+      .addBearerAuth(
+        {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          name: 'JWT-auth',
+          description: 'Enter JWT token',
+          in: 'header',
+        },
+        'JWT-auth',
+      )
+      .addCookieAuth(
+        'sid',
+        {
+          type: 'apiKey',
+          in: 'cookie',
+          name: 'sid',
+          description: 'Session cookie for authentication',
+        },
+        'session-auth',
+      )
+      .build();
+
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, document);
+
+    console.log('='.repeat(50));
+    console.log('📚 Swagger Documentation Enabled');
+    console.log(`📖 Swagger UI: http://localhost:${port}/api/docs`);
+    console.log(`📄 OpenAPI Spec: http://localhost:${port}/api/docs-json`);
+    console.log('='.repeat(50));
+  }
+
+  // 8. Startup Logging
   console.log('='.repeat(50));
   console.log('🚀 Backend Server Starting...');
   console.log('='.repeat(50));
@@ -67,10 +116,10 @@ async function bootstrap() {
   console.log(`🔒 CORS Origin: ${clientUrl}`);
   console.log('='.repeat(50));
 
-  // 7. Graceful Shutdown
+  // 9. Graceful Shutdown
   app.enableShutdownHooks();
 
-  // 8. Start Server
+  // 10. Start Server
   await app.listen(port);
 
   console.log('✅ Server started successfully');

@@ -10,6 +10,14 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiQuery,
+  ApiBody,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -26,6 +34,8 @@ import { AdminUserDto, UserListData } from './dto/admin-user-response.dto';
  * Admin controller for user management operations.
  * All endpoints require SUPPORT, MANAGER, or ADMIN roles.
  */
+@ApiTags('admin')
+@ApiBearerAuth('JWT-auth')
 @Controller('admin/users')
 @UseGuards(AuthGuard, RolesGuard)
 export class AdminController {
@@ -33,12 +43,55 @@ export class AdminController {
 
   /**
    * List all users with pagination and filtering.
-   * Results are filtered based on the actor's role hierarchy.
+   * Results are filtered based on actor's role hierarchy.
    *
    * @example GET /admin/users?page=1&limit=10&search=john&role=user
    */
   @Get()
   @Roles(UserRole.SUPPORT, UserRole.MANAGER, UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'List all users',
+    description:
+      'Returns a paginated list of users with optional filtering by search, role, and status. ' +
+      "Results are filtered based on actor's role hierarchy.",
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Page number (default: 1)',
+    example: 1,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Items per page (default: 10, max: 100)',
+    example: 10,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Search by email or name',
+    example: 'john',
+    type: String,
+  })
+  @ApiQuery({
+    name: 'role',
+    required: false,
+    description: 'Filter by role',
+    enum: ['USER', 'SUPPORT', 'MANAGER', 'ADMIN'],
+    example: 'USER',
+    type: String,
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    description: 'Filter by status (active, deleted)',
+    enum: ['active', 'deleted'],
+    example: 'active',
+    type: String,
+  })
   async listUsers(
     @Query() query: ListUsersQueryDto,
     @CurrentUser('role') actorRole: UserRole,
@@ -54,6 +107,17 @@ export class AdminController {
    */
   @Get(':id')
   @Roles(UserRole.SUPPORT, UserRole.MANAGER, UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Get user by ID',
+    description:
+      'Returns detailed information about a specific user. ' +
+      'Only users with same or lower role can be viewed.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID',
+    example: '507f1f77bcf86cd799439011',
+  })
   async getUserById(
     @Param('id') id: string,
     @CurrentUser('role') actorRole: UserRole,
@@ -70,6 +134,18 @@ export class AdminController {
    */
   @Patch(':id/status')
   @Roles(UserRole.SUPPORT, UserRole.MANAGER, UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Update user status',
+    description:
+      'Updates the activation status of a user (activate or deactivate). ' +
+      'Cannot modify users with higher or equal role. Cannot modify own account.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiBody({ type: UpdateUserStatusDto })
   async updateUserStatus(
     @Param('id') id: string,
     @Body() dto: UpdateUserStatusDto,
@@ -91,6 +167,18 @@ export class AdminController {
    */
   @Patch(':id/role')
   @Roles(UserRole.MANAGER, UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Update user role',
+    description:
+      'Updates the role of a user. Cannot assign ADMIN role via API. ' +
+      'Cannot modify users with higher or equal role. Cannot modify own role.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiBody({ type: UpdateUserRoleDto })
   async updateUserRole(
     @Param('id') id: string,
     @Body() dto: UpdateUserRoleDto,
@@ -110,6 +198,16 @@ export class AdminController {
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @Roles(UserRole.MANAGER, UserRole.ADMIN)
+  @ApiOperation({
+    summary: 'Delete user',
+    description:
+      'Soft deletes a user account. Cannot delete users with higher or equal role. Cannot delete own account.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID',
+    example: '507f1f77bcf86cd799439011',
+  })
   async deleteUser(
     @Param('id') id: string,
     @CurrentUser('id') actorId: string,
