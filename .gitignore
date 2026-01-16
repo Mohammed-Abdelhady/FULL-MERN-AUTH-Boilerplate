@@ -1,3 +1,5 @@
-/node_modules
-/config/config.env
-/client-react/.env
+.kilocode
+.claude
+./openspec
+AGENTS.md
+CLAUDE.md
