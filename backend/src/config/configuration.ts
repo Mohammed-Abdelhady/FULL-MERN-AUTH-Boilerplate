@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsEnum,
   IsInt,
   IsNotEmpty,
@@ -33,6 +34,25 @@ export interface EnvironmentConfig {
   MAIL_KEY?: string;
   GOOGLE_CLIENT_ID?: string;
   FACEBOOK_APP_ID?: string;
+
+  // SMTP
+  SMTP_HOST?: string;
+  SMTP_PORT?: number;
+  SMTP_SECURE?: boolean;
+  SMTP_USER?: string;
+  SMTP_PASS?: string;
+  EMAIL_FROM?: string;
+
+  // Bcrypt
+  BCRYPT_ROUNDS?: number;
+
+  // Session
+  SESSION_COOKIE_NAME?: string;
+  SESSION_COOKIE_MAX_AGE?: number;
+
+  // Activation
+  ACTIVATION_CODE_EXPIRES_IN?: number;
+  ACTIVATION_MAX_ATTEMPTS?: number;
 }
 
 /**
@@ -83,6 +103,62 @@ export class EnvironmentVariables {
   @IsString()
   @IsOptional()
   FACEBOOK_APP_ID?: string;
+
+  // SMTP
+  @IsString()
+  @IsOptional()
+  SMTP_HOST?: string;
+
+  @IsInt()
+  @Min(1)
+  @Max(65535)
+  @IsOptional()
+  SMTP_PORT?: number;
+
+  @IsBoolean()
+  @IsOptional()
+  SMTP_SECURE?: boolean;
+
+  @IsString()
+  @IsOptional()
+  SMTP_USER?: string;
+
+  @IsString()
+  @IsOptional()
+  SMTP_PASS?: string;
+
+  @IsString()
+  @IsOptional()
+  EMAIL_FROM?: string;
+
+  // Bcrypt
+  @IsInt()
+  @Min(4)
+  @Max(12)
+  @IsOptional()
+  BCRYPT_ROUNDS?: number;
+
+  // Session
+  @IsString()
+  @IsOptional()
+  SESSION_COOKIE_NAME?: string;
+
+  @IsInt()
+  @Min(1000)
+  @IsOptional()
+  SESSION_COOKIE_MAX_AGE?: number;
+
+  // Activation
+  @IsInt()
+  @Min(60000)
+  @IsOptional()
+  ACTIVATION_CODE_EXPIRES_IN?: number;
+
+  @IsInt()
+  @Min(1)
+  @Max(10)
+  @IsOptional()
+  ACTIVATION_MAX_ATTEMPTS?: number;
 }
 
 /**
@@ -104,11 +180,30 @@ export interface Configuration {
     ttl: number;
     limit: number;
   };
+  smtp: {
+    host?: string;
+    port?: number;
+    secure?: boolean;
+    user?: string;
+    pass?: string;
+    from?: string;
+  };
+  bcrypt: {
+    rounds: number;
+  };
+  session: {
+    cookieName: string;
+    cookieMaxAge: number;
+  };
+  activation: {
+    codeExpiresIn: number;
+    maxAttempts: number;
+  };
 }
 
-export default (): Configuration => ({
+const configuration = (): Configuration => ({
   server: {
-    port: parseInt(process.env.PORT || '3000', 10),
+    port: Number.parseInt(process.env.PORT || '3000', 10),
     nodeEnv: process.env.NODE_ENV || 'development',
   },
   database: {
@@ -118,7 +213,39 @@ export default (): Configuration => ({
     clientUrl: process.env.CLIENT_URL || 'http://localhost:3000',
   },
   throttle: {
-    ttl: parseInt(process.env.THROTTLE_TTL || '60', 10),
-    limit: parseInt(process.env.THROTTLE_LIMIT || '60', 10),
+    ttl: Number.parseInt(process.env.THROTTLE_TTL || '60', 10),
+    limit: Number.parseInt(process.env.THROTTLE_LIMIT || '60', 10),
+  },
+  smtp: {
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT
+      ? Number.parseInt(process.env.SMTP_PORT, 10)
+      : undefined,
+    secure: process.env.SMTP_SECURE === 'true',
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+    from: process.env.EMAIL_FROM,
+  },
+  bcrypt: {
+    rounds: Number.parseInt(process.env.BCRYPT_ROUNDS || '10', 10),
+  },
+  session: {
+    cookieName: process.env.SESSION_COOKIE_NAME || 'sid',
+    cookieMaxAge: Number.parseInt(
+      process.env.SESSION_COOKIE_MAX_AGE || '604800000',
+      10,
+    ),
+  },
+  activation: {
+    codeExpiresIn: Number.parseInt(
+      process.env.ACTIVATION_CODE_EXPIRES_IN || '900000',
+      10,
+    ),
+    maxAttempts: Number.parseInt(
+      process.env.ACTIVATION_MAX_ATTEMPTS || '5',
+      10,
+    ),
   },
 });
+
+export default configuration;
