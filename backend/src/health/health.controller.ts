@@ -1,0 +1,34 @@
+import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
+import { HealthService } from './health.service';
+
+/**
+ * Health check controller
+ * Provides endpoint for monitoring application health status
+ */
+@Controller('health')
+export class HealthController {
+  constructor(private readonly healthService: HealthService) {}
+
+  /**
+   * Get comprehensive health status
+   * @returns Health status information
+   */
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  getHealth() {
+    const health = this.healthService.getHealth();
+
+    // Return 503 if unhealthy
+    if (health.status === 'unhealthy') {
+      return {
+        httpStatus: HttpStatus.SERVICE_UNAVAILABLE,
+        ...health,
+      };
+    }
+
+    return {
+      httpStatus: HttpStatus.OK,
+      ...health,
+    };
+  }
+}

@@ -84,3 +84,41 @@ export class EnvironmentVariables {
   @IsOptional()
   FACEBOOK_APP_ID?: string;
 }
+
+/**
+ * Configuration factory function
+ * Returns a structured configuration object with type safety
+ */
+export interface Configuration {
+  server: {
+    port: number;
+    nodeEnv: string;
+  };
+  database: {
+    uri: string;
+  };
+  cors: {
+    clientUrl: string;
+  };
+  throttle: {
+    ttl: number;
+    limit: number;
+  };
+}
+
+export default (): Configuration => ({
+  server: {
+    port: parseInt(process.env.PORT || '3000', 10),
+    nodeEnv: process.env.NODE_ENV || 'development',
+  },
+  database: {
+    uri: process.env.MONGO_URI || 'mongodb://localhost:27017/authboiler',
+  },
+  cors: {
+    clientUrl: process.env.CLIENT_URL || 'http://localhost:3000',
+  },
+  throttle: {
+    ttl: parseInt(process.env.THROTTLE_TTL || '60', 10),
+    limit: parseInt(process.env.THROTTLE_LIMIT || '60', 10),
+  },
+});
