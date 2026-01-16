@@ -11,6 +11,7 @@ import { UserModule } from './user/user.module';
 import { SessionModule } from './session/session.module';
 import { PermissionModule } from './permission/permission.module';
 import { AuthModule } from './auth/auth.module';
+import { AdminModule } from './admin/admin.module';
 import { CommonModule } from './common/common.module';
 import { MailModule } from './mail/mail.module';
 import { EnvironmentVariables } from './config/configuration';
@@ -67,6 +68,7 @@ import { Connection } from 'mongoose';
     SessionModule,
     PermissionModule,
     AuthModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [
