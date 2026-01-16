@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import { store } from '@/store/store';
 
 interface ReduxProviderProps {
-  children: React.ReactNode;
+  readonly children: React.ReactNode;
 }
 
 /**
@@ -17,6 +17,6 @@ interface ReduxProviderProps {
  *   <YourApp />
  * </ReduxProvider>
  */
-export function ReduxProvider({ children }: ReduxProviderProps) {
+export function ReduxProvider({ children }: Readonly<ReduxProviderProps>) {
   return <Provider store={store}>{children}</Provider>;
 }

@@ -1,4 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
+import { baseApi } from './api/baseApi';
+import authReducer from '@/modules/auth/store/authSlice';
 
 /**
  * Redux store configuration with RTK Query integration
@@ -6,7 +8,10 @@ import { configureStore } from '@reduxjs/toolkit';
  */
 export const store = configureStore({
   reducer: {
-    // Reducers will be added here as features are implemented
+    // RTK Query API reducer
+    [baseApi.reducerPath]: baseApi.reducer,
+    // Auth slice reducer
+    auth: authReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -15,7 +20,7 @@ export const store = configureStore({
         ignoredActions: [],
         ignoredPaths: [],
       },
-    }),
+    }).concat(baseApi.middleware),
   devTools: process.env.NODE_ENV !== 'production',
 });
 
