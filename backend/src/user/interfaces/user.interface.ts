@@ -1,9 +1,10 @@
-import { Types } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 import { UserRole } from '../enums/user-role.enum';
+import { User } from '../schemas/user.schema';
 
 export interface IUser {
   email: string;
-  password: string;
+  password?: string;
   name: string;
   role: UserRole;
   googleId?: string;
@@ -17,4 +18,4 @@ export interface IUser {
   deletedAt?: Date;
 }
 
-export type UserDocument = IUser & Document & { _id: Types.ObjectId };
+export type UserDocument = HydratedDocument<User>;
