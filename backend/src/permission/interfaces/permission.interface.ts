@@ -1,4 +1,5 @@
-import { Types } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
+import { Permission } from '../schemas/permission.schema';
 
 export interface IPermission {
   user: Types.ObjectId;
@@ -9,5 +10,4 @@ export interface IPermission {
   expiresAt?: Date;
 }
 
-export type PermissionDocument = IPermission &
-  Document & { _id: Types.ObjectId };
+export type PermissionDocument = HydratedDocument<Permission>;

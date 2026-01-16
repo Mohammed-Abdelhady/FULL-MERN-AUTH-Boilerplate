@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 import { UserRole } from '../enums/user-role.enum';
 
 @Schema({ timestamps: true })
@@ -7,8 +7,8 @@ export class User {
   @Prop({ required: true, unique: true, lowercase: true, trim: true })
   email!: string;
 
-  @Prop({ required: true, select: false })
-  password!: string;
+  @Prop({ select: false })
+  password?: string;
 
   @Prop({ required: true, trim: true })
   name!: string;
@@ -44,7 +44,10 @@ export class User {
   deletedAt?: Date;
 }
 
-export const UserSchema = SchemaFactory.createForClass(User);
+export type UserDocument = HydratedDocument<User>;
+
+export const UserSchema: MongooseSchema<User> =
+  SchemaFactory.createForClass(User);
 
 // Indexes
 UserSchema.index({ email: 1 }, { unique: true });
@@ -52,5 +55,3 @@ UserSchema.index({ googleId: 1 }, { sparse: true });
 UserSchema.index({ facebookId: 1 }, { sparse: true });
 UserSchema.index({ createdAt: -1 });
 UserSchema.index({ isDeleted: 1 });
-
-export type UserDocument = User & Document & { _id: Types.ObjectId };

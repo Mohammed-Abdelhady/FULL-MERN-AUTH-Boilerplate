@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class Session {
@@ -9,11 +9,11 @@ export class Session {
   @Prop({ required: true, unique: true })
   refreshToken!: string;
 
-  @Prop()
-  userAgent?: string;
+  @Prop({ required: true })
+  userAgent!: string;
 
-  @Prop()
-  ip?: string;
+  @Prop({ required: true })
+  ip!: string;
 
   @Prop()
   deviceName?: string;
@@ -28,12 +28,13 @@ export class Session {
   expiresAt!: Date;
 }
 
-export const SessionSchema = SchemaFactory.createForClass(Session);
+export type SessionDocument = HydratedDocument<Session>;
+
+export const SessionSchema: MongooseSchema<Session> =
+  SchemaFactory.createForClass(Session);
 
 // Indexes
 SessionSchema.index({ user: 1 });
 SessionSchema.index({ refreshToken: 1 }, { unique: true });
 SessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 SessionSchema.index({ user: 1, userAgent: 1 });
-
-export type SessionDocument = Session & Document & { _id: Types.ObjectId };

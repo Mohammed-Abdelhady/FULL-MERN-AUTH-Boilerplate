@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
+import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class Permission {
@@ -22,12 +22,12 @@ export class Permission {
   expiresAt?: Date;
 }
 
-export const PermissionSchema = SchemaFactory.createForClass(Permission);
+export type PermissionDocument = HydratedDocument<Permission>;
+
+export const PermissionSchema: MongooseSchema<Permission> =
+  SchemaFactory.createForClass(Permission);
 
 // Indexes
 PermissionSchema.index({ user: 1 });
 PermissionSchema.index({ user: 1, permission: 1 }, { unique: true });
 PermissionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
-
-export type PermissionDocument = Permission &
-  Document & { _id: Types.ObjectId };
