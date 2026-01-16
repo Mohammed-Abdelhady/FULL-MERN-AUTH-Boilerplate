@@ -57,11 +57,12 @@ export class GoogleOAuthStrategy extends BaseOAuthStrategy {
    * @returns Authorization URL
    */
   getAuthorizationUrl(state?: string): string {
+    const config = this.ensureEnabled();
     const params = new URLSearchParams({
-      client_id: this.config.clientId,
-      redirect_uri: this.config.callbackUrl,
+      client_id: config.clientId,
+      redirect_uri: config.callbackUrl,
       response_type: 'code',
-      scope: this.config.scopes.join(' '),
+      scope: config.scopes.join(' '),
       access_type: 'offline',
       prompt: 'consent',
     });
@@ -83,15 +84,16 @@ export class GoogleOAuthStrategy extends BaseOAuthStrategy {
     code: string,
     _state?: string,
   ): Promise<OAuthUserProfile> {
+    const config = this.ensureEnabled();
     try {
       // Exchange authorization code for access token
       const tokenResponse = await this.httpPostForm<GoogleTokenResponse>(
         this.TOKEN_URL,
         {
           code,
-          client_id: this.config.clientId,
-          client_secret: this.config.clientSecret,
-          redirect_uri: this.config.callbackUrl,
+          client_id: config.clientId,
+          client_secret: config.clientSecret,
+          redirect_uri: config.callbackUrl,
           grant_type: 'authorization_code',
         },
       );

@@ -9,6 +9,11 @@ export interface IOAuthStrategy {
   readonly provider: string;
 
   /**
+   * Check if this OAuth provider is enabled and configured
+   */
+  readonly isEnabled: boolean;
+
+  /**
    * Get the authorization URL for the OAuth provider
    * @param state - Optional state parameter for CSRF protection
    * @returns Authorization URL

@@ -13,13 +13,31 @@ import {
 @Injectable()
 export abstract class BaseOAuthStrategy implements IOAuthStrategy {
   protected readonly logger = new Logger(this.constructor.name);
-  protected readonly config: OAuthConfig;
+  protected readonly config: OAuthConfig | null;
+  private readonly _isEnabled: boolean;
 
   constructor(
     protected readonly configService: ConfigService,
     protected readonly providerName: string,
   ) {
-    this.config = this.loadConfig();
+    this._isEnabled = this.configService.get<boolean>(
+      `oauth.${this.providerName}.enabled`,
+      false,
+    );
+    this.config = this._isEnabled ? this.loadConfig() : null;
+
+    if (!this._isEnabled) {
+      this.logger.log(
+        `OAuth provider '${this.providerName}' is disabled (missing or incomplete configuration)`,
+      );
+    }
+  }
+
+  /**
+   * Check if this OAuth provider is enabled
+   */
+  get isEnabled(): boolean {
+    return this._isEnabled;
   }
 
   /**
@@ -31,6 +49,7 @@ export abstract class BaseOAuthStrategy implements IOAuthStrategy {
 
   /**
    * Load OAuth configuration from environment variables
+   * Only called when provider is enabled
    */
   protected loadConfig(): OAuthConfig {
     const clientId = this.configService.get<string>(
@@ -44,6 +63,7 @@ export abstract class BaseOAuthStrategy implements IOAuthStrategy {
     );
     const scopes = this.getScopes();
 
+    // This should not happen since we check enabled first, but safeguard anyway
     if (!clientId || !clientSecret || !callbackUrl) {
       throw new Error(
         `Missing OAuth configuration for ${this.providerName}. Required: clientId, clientSecret, callbackUrl`,
@@ -63,6 +83,22 @@ export abstract class BaseOAuthStrategy implements IOAuthStrategy {
    * Override in provider-specific implementations
    */
   protected abstract getScopes(): string[];
+
+  /**
+   * Ensure the provider is enabled and return the config
+   * Throws an error if provider is disabled
+   */
+  protected ensureEnabled(): OAuthConfig {
+    if (!this._isEnabled || !this.config) {
+      throw new Error(
+        `OAuth provider '${this.providerName}' is not configured. ` +
+          `Please set OAUTH_${this.providerName.toUpperCase()}_CLIENT_ID, ` +
+          `OAUTH_${this.providerName.toUpperCase()}_CLIENT_SECRET, and ` +
+          `OAUTH_${this.providerName.toUpperCase()}_CALLBACK_URL environment variables.`,
+      );
+    }
+    return this.config;
+  }
 
   /**
    * Get the authorization URL for the OAuth provider

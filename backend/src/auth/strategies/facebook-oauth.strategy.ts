@@ -54,10 +54,11 @@ export class FacebookOAuthStrategy extends BaseOAuthStrategy {
    * @returns Authorization URL
    */
   getAuthorizationUrl(state?: string): string {
+    const config = this.ensureEnabled();
     const params = new URLSearchParams({
-      client_id: this.config.clientId,
-      redirect_uri: this.config.callbackUrl,
-      scope: this.config.scopes.join(','),
+      client_id: config.clientId,
+      redirect_uri: config.callbackUrl,
+      scope: config.scopes.join(','),
       response_type: 'code',
     });
 
@@ -118,10 +119,11 @@ export class FacebookOAuthStrategy extends BaseOAuthStrategy {
   private async exchangeCodeForToken(
     code: string,
   ): Promise<FacebookTokenResponse> {
+    const config = this.ensureEnabled();
     const params = new URLSearchParams({
-      client_id: this.config.clientId,
-      client_secret: this.config.clientSecret,
-      redirect_uri: this.config.callbackUrl,
+      client_id: config.clientId,
+      client_secret: config.clientSecret,
+      redirect_uri: config.callbackUrl,
       code,
     });
 

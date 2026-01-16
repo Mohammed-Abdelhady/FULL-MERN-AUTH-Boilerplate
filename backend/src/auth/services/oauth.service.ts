@@ -40,27 +40,72 @@ export class OAuthService {
     private readonly facebookStrategy: FacebookOAuthStrategy,
   ) {
     this.registerStrategies();
+    this.logEnabledProviders();
   }
 
   /**
-   * Register available OAuth strategies
+   * Register only enabled OAuth strategies
    */
   private registerStrategies(): void {
-    this.strategies.set('google', this.googleStrategy);
-    this.strategies.set('github', this.githubStrategy);
-    this.strategies.set('facebook', this.facebookStrategy);
+    const allStrategies: [OAuthProvider, IOAuthStrategy][] = [
+      ['google', this.googleStrategy],
+      ['github', this.githubStrategy],
+      ['facebook', this.facebookStrategy],
+    ];
+
+    for (const [provider, strategy] of allStrategies) {
+      if (strategy.isEnabled) {
+        this.strategies.set(provider, strategy);
+      }
+    }
+  }
+
+  /**
+   * Log which OAuth providers are enabled
+   */
+  private logEnabledProviders(): void {
+    const enabled = this.getSupportedProviders();
+    if (enabled.length > 0) {
+      this.logger.log(`OAuth providers enabled: ${enabled.join(', ')}`);
+    } else {
+      this.logger.log('No OAuth providers enabled');
+    }
+  }
+
+  /**
+   * Check if a specific provider is enabled
+   * @param provider - OAuth provider name
+   * @returns true if provider is enabled
+   */
+  isProviderEnabled(provider: OAuthProvider): boolean {
+    return this.strategies.has(provider);
   }
 
   /**
    * Get strategy for a specific provider
    * @param provider - OAuth provider name
    * @returns OAuth strategy
-   * @throws Error if provider is not supported
+   * @throws AppException if provider is not supported or not enabled
    */
   private getStrategy(provider: OAuthProvider): IOAuthStrategy {
     const strategy = this.strategies.get(provider);
 
     if (!strategy) {
+      // Check if it's a known provider that's just disabled
+      const knownProviders: OAuthProvider[] = ['google', 'facebook', 'github'];
+      if (knownProviders.includes(provider)) {
+        const errorCodeMap: Record<OAuthProvider, ErrorCode> = {
+          google: ErrorCode.GOOGLE_NOT_CONFIGURED,
+          facebook: ErrorCode.FACEBOOK_NOT_CONFIGURED,
+          github: ErrorCode.GITHUB_NOT_CONFIGURED,
+        };
+        throw new AppException(
+          errorCodeMap[provider],
+          `OAuth provider '${provider}' is not configured`,
+          HttpStatus.SERVICE_UNAVAILABLE,
+        );
+      }
+
       throw new AppException(
         ErrorCode.INVALID_OAUTH_PROVIDER,
         `OAuth provider '${provider}' is not supported`,

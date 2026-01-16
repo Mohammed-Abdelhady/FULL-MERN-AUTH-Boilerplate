@@ -40,8 +40,9 @@ export class OAuthController {
   @ApiQuery({
     name: 'provider',
     required: true,
-    description: 'OAuth provider name (google, facebook)',
-    enum: ['google', 'facebook'],
+    description:
+      'OAuth provider name (google, facebook, github). Only configured providers are available.',
+    enum: ['google', 'facebook', 'github'],
     example: 'google',
   })
   getAuthorizationUrl(
@@ -82,16 +83,17 @@ export class OAuthController {
   }
 
   /**
-   * Get list of supported OAuth providers
+   * Get list of enabled OAuth providers
    * GET /api/auth/oauth/providers
    */
   @Public()
   @Get('providers')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Get supported OAuth providers',
+    summary: 'Get enabled OAuth providers',
     description:
-      'Returns a list of all supported OAuth providers for authentication.',
+      'Returns a list of enabled OAuth providers for authentication. ' +
+      'Only providers with complete configuration (clientId, clientSecret, callbackUrl) are enabled.',
   })
   getProviders(): ApiResponse<{ providers: string[] }> {
     const providers = this.oauthService.getSupportedProviders();

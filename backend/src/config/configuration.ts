@@ -248,16 +248,19 @@ export interface Configuration {
   };
   oauth: {
     google: {
+      enabled: boolean;
       clientId?: string;
       clientSecret?: string;
       callbackUrl?: string;
     };
     facebook: {
+      enabled: boolean;
       clientId?: string;
       clientSecret?: string;
       callbackUrl?: string;
     };
     github: {
+      enabled: boolean;
       clientId?: string;
       clientSecret?: string;
       callbackUrl?: string;
@@ -312,16 +315,31 @@ const configuration = (): Configuration => ({
   },
   oauth: {
     google: {
+      enabled: !!(
+        process.env.OAUTH_GOOGLE_CLIENT_ID &&
+        process.env.OAUTH_GOOGLE_CLIENT_SECRET &&
+        process.env.OAUTH_GOOGLE_CALLBACK_URL
+      ),
       clientId: process.env.OAUTH_GOOGLE_CLIENT_ID,
       clientSecret: process.env.OAUTH_GOOGLE_CLIENT_SECRET,
       callbackUrl: process.env.OAUTH_GOOGLE_CALLBACK_URL,
     },
     facebook: {
+      enabled: !!(
+        process.env.OAUTH_FACEBOOK_CLIENT_ID &&
+        process.env.OAUTH_FACEBOOK_CLIENT_SECRET &&
+        process.env.OAUTH_FACEBOOK_CALLBACK_URL
+      ),
       clientId: process.env.OAUTH_FACEBOOK_CLIENT_ID,
       clientSecret: process.env.OAUTH_FACEBOOK_CLIENT_SECRET,
       callbackUrl: process.env.OAUTH_FACEBOOK_CALLBACK_URL,
     },
     github: {
+      enabled: !!(
+        process.env.OAUTH_GITHUB_CLIENT_ID &&
+        process.env.OAUTH_GITHUB_CLIENT_SECRET &&
+        process.env.OAUTH_GITHUB_CALLBACK_URL
+      ),
       clientId: process.env.OAUTH_GITHUB_CLIENT_ID,
       clientSecret: process.env.OAUTH_GITHUB_CLIENT_SECRET,
       callbackUrl: process.env.OAUTH_GITHUB_CALLBACK_URL,

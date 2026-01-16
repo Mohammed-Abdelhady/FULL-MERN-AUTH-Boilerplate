@@ -61,10 +61,11 @@ export class GitHubOAuthStrategy extends BaseOAuthStrategy {
    * @returns Authorization URL
    */
   getAuthorizationUrl(state?: string): string {
+    const config = this.ensureEnabled();
     const params = new URLSearchParams({
-      client_id: this.config.clientId,
-      redirect_uri: this.config.callbackUrl,
-      scope: this.config.scopes.join(' '),
+      client_id: config.clientId,
+      redirect_uri: config.callbackUrl,
+      scope: config.scopes.join(' '),
     });
 
     if (state) {
@@ -133,6 +134,7 @@ export class GitHubOAuthStrategy extends BaseOAuthStrategy {
   private async exchangeCodeForToken(
     code: string,
   ): Promise<GitHubTokenResponse> {
+    const config = this.ensureEnabled();
     const response = await fetch(this.TOKEN_URL, {
       method: 'POST',
       headers: {
@@ -140,8 +142,8 @@ export class GitHubOAuthStrategy extends BaseOAuthStrategy {
         Accept: 'application/json',
       },
       body: JSON.stringify({
-        client_id: this.config.clientId,
-        client_secret: this.config.clientSecret,
+        client_id: config.clientId,
+        client_secret: config.clientSecret,
         code,
       }),
     });
