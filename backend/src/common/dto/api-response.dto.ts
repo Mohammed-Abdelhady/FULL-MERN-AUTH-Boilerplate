@@ -1,12 +1,27 @@
 import { ErrorCode } from '../enums/error-code.enum';
+import { ApiProperty } from '@nestjs/swagger';
 
 /**
  * Standard success response wrapper.
  * All successful API responses should use this format.
  */
 export class ApiResponse<T> {
+  @ApiProperty({
+    description: 'Indicates if the request was successful',
+    example: true,
+  })
   success = true as const;
+
+  @ApiProperty({
+    description: 'Response data payload',
+  })
   data: T;
+
+  @ApiProperty({
+    description: 'Optional human-readable message',
+    example: 'Operation completed successfully',
+    required: false,
+  })
   message?: string;
 
   constructor(data: T, message?: string) {
@@ -30,7 +45,15 @@ export class ApiResponse<T> {
  * All error API responses should use this format.
  */
 export class ErrorResponse {
+  @ApiProperty({
+    description: 'Indicates if the request was successful',
+    example: false,
+  })
   success = false as const;
+
+  @ApiProperty({
+    description: 'Error details including code and message',
+  })
   error: {
     code: ErrorCode;
     message: string;
