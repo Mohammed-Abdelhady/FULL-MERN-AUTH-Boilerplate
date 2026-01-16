@@ -33,8 +33,8 @@ services:
       target: production
     container_name: authboiler-backend-prod
     restart: unless-stopped
-    ports:
-      - '5000:5000'
+    expose:
+      - '5000'
     environment:
       NODE_ENV: production
       MONGO_URI: mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD:-changeme}@mongodb:27017/authboiler?authSource=admin
@@ -66,11 +66,11 @@ services:
       target: production
     container_name: authboiler-frontend-prod
     restart: unless-stopped
-    ports:
-      - '3000:80'
+    expose:
+      - '3000'
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.yourdomain.com}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://yourdomain.com}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://yourdomain.com}
     depends_on:
       - backend
@@ -91,8 +91,59 @@ services:
           memory: 256M
           cpus: '0.25'
 
+  nginx:
+    build:
+      context: ./nginx
+    container_name: authboiler-nginx-prod
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - certbot-webroot:/var/www/certbot
+      - certbot-conf:/etc/letsencrypt
+    environment:
+      NGINX_HOST: ${NGINX_HOST:-yourdomain.com}
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - app-network-prod
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.25'
+
+  certbot:
+    image: certbot/certbot:latest
+    container_name: authboiler-certbot-prod
+    restart: unless-stopped
+    volumes:
+      - certbot-webroot:/var/www/certbot
+      - certbot-conf:/etc/letsencrypt
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done;'"
+    networks:
+      - app-network-prod
+
 volumes:
   mongo-data-prod:
+    driver: local
+  certbot-webroot:
+    driver: local
+  certbot-conf:
     driver: local
 
 networks:

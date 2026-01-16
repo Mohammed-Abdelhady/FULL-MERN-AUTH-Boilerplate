@@ -1,0 +1,28 @@
+# SSL Certificates - Never commit to version control
+ssl/
+*.pem
+*.crt
+*.key
+*.csr
+
+# Nginx logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.swp
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.sublime-*
+
+# Backup files
+*.bak
+*.backup
