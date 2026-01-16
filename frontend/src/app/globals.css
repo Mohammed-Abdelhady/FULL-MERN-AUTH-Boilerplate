@@ -1,26 +1,185 @@
 @import 'tailwindcss';
 
+/*
+ * shadcn/ui Theme Configuration
+ * Colors inspired by legacy design (indigo-based with gray backgrounds)
+ *
+ * Color Reference:
+ * - Primary: Indigo-500 (#6366f1) -> Indigo-700 (#4338ca) hover
+ * - Background: Gray-100 (#f3f4f6) page, white cards
+ * - Text: Gray-900 (#111827) headings, Gray-600 (#4b5563) body
+ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Page and content backgrounds */
+  --background: 220 14% 96%;
+  --foreground: 224 71% 4%;
+
+  /* Card surfaces */
+  --card: 0 0% 100%;
+  --card-foreground: 224 71% 4%;
+
+  /* Popover surfaces */
+  --popover: 0 0% 100%;
+  --popover-foreground: 224 71% 4%;
+
+  /* Primary action color - Indigo-500 */
+  --primary: 239 84% 67%;
+  --primary-foreground: 0 0% 100%;
+
+  /* Secondary - Gray-100 for OAuth buttons */
+  --secondary: 220 14% 96%;
+  --secondary-foreground: 224 71% 4%;
+
+  /* Muted backgrounds */
+  --muted: 220 14% 96%;
+  --muted-foreground: 220 9% 46%;
+
+  /* Accent highlights */
+  --accent: 220 14% 96%;
+  --accent-foreground: 224 71% 4%;
+
+  /* Destructive actions */
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+
+  /* Borders and inputs */
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --ring: 239 84% 67%;
+
+  /* Chart colors for data visualization */
+  --chart-1: 239 84% 67%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 30 80% 55%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 75% 55%;
+
+  /* Border radius - matches rounded-lg */
+  --radius: 0.5rem;
+
+  /* Sidebar colors (for future dashboard) */
+  --sidebar: 0 0% 100%;
+  --sidebar-foreground: 224 71% 4%;
+  --sidebar-primary: 239 84% 67%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 220 14% 96%;
+  --sidebar-accent-foreground: 224 71% 4%;
+  --sidebar-border: 220 13% 91%;
+  --sidebar-ring: 239 84% 67%;
 }
 
+.dark {
+  /* Dark mode - slate-based with indigo accent */
+  --background: 224 71% 4%;
+  --foreground: 210 20% 98%;
+
+  --card: 224 71% 4%;
+  --card-foreground: 210 20% 98%;
+
+  --popover: 224 71% 4%;
+  --popover-foreground: 210 20% 98%;
+
+  /* Keep indigo primary in dark mode */
+  --primary: 239 84% 67%;
+  --primary-foreground: 224 71% 4%;
+
+  --secondary: 215 28% 17%;
+  --secondary-foreground: 210 20% 98%;
+
+  --muted: 215 28% 17%;
+  --muted-foreground: 217 11% 65%;
+
+  --accent: 215 28% 17%;
+  --accent-foreground: 210 20% 98%;
+
+  --destructive: 0 63% 31%;
+  --destructive-foreground: 210 20% 98%;
+
+  --border: 215 28% 17%;
+  --input: 215 28% 17%;
+  --ring: 239 84% 67%;
+
+  /* Chart colors for dark mode */
+  --chart-1: 239 84% 67%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 30 80% 55%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 75% 55%;
+
+  /* Sidebar dark mode */
+  --sidebar: 224 71% 4%;
+  --sidebar-foreground: 210 20% 98%;
+  --sidebar-primary: 239 84% 67%;
+  --sidebar-primary-foreground: 224 71% 4%;
+  --sidebar-accent: 215 28% 17%;
+  --sidebar-accent-foreground: 210 20% 98%;
+  --sidebar-border: 215 28% 17%;
+  --sidebar-ring: 239 84% 67%;
+}
+
+/*
+ * Tailwind CSS 4 Theme Configuration
+ * Maps CSS variables to Tailwind color utilities
+ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  /* Colors from CSS variables */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  /* Border radius */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/*
+ * Base layer styles
+ */
+@layer base {
+  * {
+    @apply border-border;
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
+  }
 }
