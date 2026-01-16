@@ -1,0 +1,29 @@
+{
+    "name": "full-mern-auth-boilerplate",
+    "version": "1.0.0",
+    "description": "Full-stack MERN authentication boilerplate with NestJS backend and Next.js frontend",
+    "private": true,
+    "workspaces": [
+        "backend",
+        "frontend"
+    ],
+    "scripts": {
+        "prepare": "husky",
+        "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+        "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+        "type-check": "tsc --noEmit",
+        "test": "npm run test --workspaces"
+    },
+    "devDependencies": {
+        "@commitlint/cli": "^18.6.1",
+        "@commitlint/config-conventional": "^18.6.2",
+        "husky": "^9.0.10",
+        "lint-staged": "^15.2.2",
+        "prettier": "^3.2.5"
+    },
+    "engines": {
+        "node": ">=18.0.0",
+        "npm": ">=9.0.0"
+    }
+}
