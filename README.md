@@ -53,7 +53,29 @@ Modern authentication system built with NestJS and Next.js, featuring email veri
 
 ## Getting Started
 
+### Quick Start with Docker (Recommended)
+
+The fastest way to get started is using Docker Compose:
+
+```bash
+# Clone the repository
+git clone https://github.com/your-username/FULL-MERN-AUTH-Boilerplate.git
+cd FULL-MERN-AUTH-Boilerplate
+
+# Start all services (MongoDB, Backend, Frontend)
+docker compose up
+
+# Access the application
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:5000
+# MongoDB: mongodb://localhost:27017
+```
+
+See [Docker Development Setup](#docker-development-setup) for more details.
+
 ### Prerequisites
+
+For native development (without Docker):
 
 - Node.js 18+ (20 LTS recommended)
 - MongoDB 6+
@@ -283,6 +305,7 @@ GET    /api/user/list              # List users (admin only)
 ## Documentation
 
 - [Code Quality Standards](./docs/code-quality.md) - Pre-commit hooks, linting, formatting
+- [Deployment Guide](./docs/deployment.md) - Docker and Vercel deployment instructions
 - [CLAUDE.md](./CLAUDE.md) - Complete project guidelines for AI assistants
 - [OpenSpec Project](./openspec/project.md) - Project context and conventions
 
@@ -338,6 +361,70 @@ cd frontend && tsc --noEmit
 ```
 
 See [Code Quality Troubleshooting](./docs/code-quality.md#troubleshooting) for more.
+
+## Deployment
+
+### Docker Development Setup
+
+For local development with Docker Compose:
+
+```bash
+# Start all services with hot reload
+docker compose up
+
+# Start in detached mode
+docker compose up -d
+
+# View logs
+docker compose logs -f
+
+# Stop services
+docker compose down
+
+# Stop and remove volumes (deletes database data)
+docker compose down -v
+```
+
+See [Deployment Guide](./docs/deployment.md#docker-development-setup) for complete Docker setup instructions.
+
+### Docker Production Setup
+
+For production deployment with Docker Compose:
+
+```bash
+# Create production environment file
+cp .env.docker.example .env.docker.prod
+
+# Edit with production values
+# Then start production stack
+docker compose -f docker-compose.prod.yml up -d
+```
+
+See [Deployment Guide](./docs/deployment.md#docker-production-setup) for production deployment details.
+
+### Vercel Deployment
+
+Deploy the frontend to Vercel:
+
+```bash
+cd frontend
+
+# Login to Vercel
+vercel login
+
+# Deploy preview
+vercel
+
+# Deploy to production
+vercel --prod
+```
+
+Configure environment variables in Vercel dashboard:
+
+- `NEXT_PUBLIC_API_URL` - Your backend API URL
+- `NEXT_PUBLIC_APP_URL` - Your frontend URL
+
+See [Deployment Guide](./docs/deployment.md#vercel-deployment) for complete Vercel deployment instructions.
 
 ## Resources
 
