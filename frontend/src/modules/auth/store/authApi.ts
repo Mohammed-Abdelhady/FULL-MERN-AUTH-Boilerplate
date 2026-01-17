@@ -7,6 +7,10 @@ import type {
   RegisterResponse,
   ActivateRequest,
   ActivateResponse,
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
+  ResetPasswordRequest,
+  ResetPasswordResponse,
 } from '../types/auth.types';
 
 /**
@@ -85,6 +89,30 @@ export const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Auth', 'User'],
     }),
+
+    /**
+     * Forgot password mutation
+     * Sends password reset link to user's email
+     */
+    forgotPassword: builder.mutation<ForgotPasswordResponse, ForgotPasswordRequest>({
+      query: (data) => ({
+        url: '/api/auth/forgot-password',
+        method: 'POST',
+        body: data,
+      }),
+    }),
+
+    /**
+     * Reset password mutation
+     * Resets user password with token from email
+     */
+    resetPassword: builder.mutation<ResetPasswordResponse, ResetPasswordRequest>({
+      query: (data) => ({
+        url: '/api/auth/reset-password',
+        method: 'POST',
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -96,4 +124,6 @@ export const {
   useGetCurrentUserQuery,
   useRegisterMutation,
   useActivateMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
 } = authApi;

@@ -85,3 +85,35 @@ export interface ActivateResponse {
   token: string;
   user: User;
 }
+
+/**
+ * Forgot password request payload
+ */
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+/**
+ * Forgot password response from API
+ */
+export interface ForgotPasswordResponse {
+  success: boolean;
+  message: string;
+}
+
+/**
+ * Reset password request payload
+ */
+export interface ResetPasswordRequest {
+  email: string;
+  code: string;
+  newPassword: string;
+}
+
+/**
+ * Reset password response from API
+ */
+export interface ResetPasswordResponse {
+  success: boolean;
+  message: string;
+}
