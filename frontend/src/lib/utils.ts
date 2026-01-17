@@ -8,7 +8,7 @@ import { twMerge } from 'tailwind-merge';
  * @example
  * cn("p-4", "p-2") // Returns "p-2"
  * cn("base-class", isActive && "active-class") // Conditional
- * cn("text-red-500", className) // Merges with passed className
+ * cn("text-destructive", className) // Merges with passed className
  */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

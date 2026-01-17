@@ -67,35 +67,106 @@ export const zodTrimmedString = (options?: {
 
 /**
  * Email validator (RFC 5322 compliant)
+ * Returns required schema by default, optional when required: false
  */
-export const zodEmail = (options?: { required?: boolean; message?: string }) => {
+export function zodEmail(options?: {
+  required?: false;
+  messages?: {
+    required?: string;
+    invalid?: string;
+  };
+}): z.ZodOptional<z.ZodString>;
+export function zodEmail(options: {
+  required: true;
+  messages?: {
+    required?: string;
+    invalid?: string;
+  };
+}): z.ZodString;
+export function zodEmail(options?: {
+  required?: boolean;
+  messages?: {
+    required?: string;
+    invalid?: string;
+  };
+}): z.ZodString | z.ZodOptional<z.ZodString>;
+export function zodEmail(options?: {
+  required?: boolean;
+  messages?: {
+    required?: string;
+    invalid?: string;
+  };
+}) {
+  const requiredMessage = options?.messages?.required || 'Email is required';
   const schema = z
-    .string()
+    .string({ required_error: requiredMessage })
     .trim()
     .toLowerCase()
-    .email(options?.message || 'Please enter a valid email address');
-  return options?.required !== false
-    ? schema.min(1, 'Email is required')
-    : makeOptional(schema, options?.required);
-};
+    .min(1, requiredMessage)
+    .email(options?.messages?.invalid || 'Please enter a valid email address');
+
+  if (options?.required === false) {
+    return schema.optional();
+  }
+  return schema;
+}
 
 /**
  * Password validator (min 8 chars, uppercase, lowercase, number)
+ * Returns required schema by default, optional when required: false
  */
-export const zodPassword = (options?: {
-  required?: boolean;
+export function zodPassword(options?: {
+  required?: false;
   min?: number;
   messages?: {
+    required?: string;
     min?: string;
     uppercase?: string;
     lowercase?: string;
     number?: string;
   };
-}) => {
+}): z.ZodOptional<z.ZodString>;
+export function zodPassword(options: {
+  required: true;
+  min?: number;
+  messages?: {
+    required?: string;
+    min?: string;
+    uppercase?: string;
+    lowercase?: string;
+    number?: string;
+  };
+}): z.ZodString;
+export function zodPassword(options?: {
+  required?: boolean;
+  min?: number;
+  messages?: {
+    required?: string;
+    min?: string;
+    uppercase?: string;
+    lowercase?: string;
+    number?: string;
+  };
+}): z.ZodString | z.ZodOptional<z.ZodString>;
+export function zodPassword(options?: {
+  required?: boolean;
+  min?: number;
+  messages?: {
+    required?: string;
+    min?: string;
+    uppercase?: string;
+    lowercase?: string;
+    number?: string;
+  };
+}) {
   const min = options?.min || 8;
+  const requiredMessage = options?.messages?.required || 'Password is required';
+  const minMessage = options?.messages?.min || `Password must be at least ${min} characters`;
+
   const schema = z
-    .string()
-    .min(min, options?.messages?.min || `Password must be at least ${min} characters`)
+    .string({ required_error: requiredMessage })
+    .min(1, requiredMessage)
+    .min(min, minMessage)
     .regex(
       /[A-Z]/,
       options?.messages?.uppercase || 'Password must contain at least one uppercase letter',
@@ -106,27 +177,72 @@ export const zodPassword = (options?: {
     )
     .regex(/\d/, options?.messages?.number || 'Password must contain at least one number');
 
-  return makeOptional(schema, options?.required);
-};
+  if (options?.required === false) {
+    return schema.optional();
+  }
+  return schema;
+}
 
 /**
  * Strong password validator (adds special character requirement)
+ * Returns required schema by default, optional when required: false
  */
-export const zodStrongPassword = (options?: {
-  required?: boolean;
+export function zodStrongPassword(options?: {
+  required?: false;
   min?: number;
   messages?: {
+    required?: string;
     min?: string;
     uppercase?: string;
     lowercase?: string;
     number?: string;
     special?: string;
   };
-}) => {
+}): z.ZodOptional<z.ZodString>;
+export function zodStrongPassword(options: {
+  required: true;
+  min?: number;
+  messages?: {
+    required?: string;
+    min?: string;
+    uppercase?: string;
+    lowercase?: string;
+    number?: string;
+    special?: string;
+  };
+}): z.ZodString;
+export function zodStrongPassword(options?: {
+  required?: boolean;
+  min?: number;
+  messages?: {
+    required?: string;
+    min?: string;
+    uppercase?: string;
+    lowercase?: string;
+    number?: string;
+    special?: string;
+  };
+}): z.ZodString | z.ZodOptional<z.ZodString>;
+export function zodStrongPassword(options?: {
+  required?: boolean;
+  min?: number;
+  messages?: {
+    required?: string;
+    min?: string;
+    uppercase?: string;
+    lowercase?: string;
+    number?: string;
+    special?: string;
+  };
+}) {
   const min = options?.min || 8;
+  const requiredMessage = options?.messages?.required || 'Password is required';
+  const minMessage = options?.messages?.min || `Password must be at least ${min} characters`;
+
   const schema = z
-    .string()
-    .min(min, options?.messages?.min || `Password must be at least ${min} characters`)
+    .string({ required_error: requiredMessage })
+    .min(1, requiredMessage)
+    .min(min, minMessage)
     .regex(
       /[A-Z]/,
       options?.messages?.uppercase || 'Password must contain at least one uppercase letter',
@@ -141,8 +257,11 @@ export const zodStrongPassword = (options?: {
       options?.messages?.special || 'Password must contain at least one special character',
     );
 
-  return makeOptional(schema, options?.required);
-};
+  if (options?.required === false) {
+    return schema.optional();
+  }
+  return schema;
+}
 
 /**
  * Person name validator (2-50 chars, letters, spaces, hyphens, apostrophes)
