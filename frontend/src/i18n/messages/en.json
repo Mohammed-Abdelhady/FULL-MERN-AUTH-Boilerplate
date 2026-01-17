@@ -29,6 +29,7 @@
       "forgotPassword": "Forgot password?",
       "noAccount": "Don't have an account?",
       "signUp": "Sign up",
+      "divider": "Or sign in with e-mail",
       "success": "Login successful! Redirecting...",
       "errors": {
         "invalidCredentials": "Invalid email or password",
@@ -41,5 +42,79 @@
         "tooManyAttempts": "Too many login attempts. Please try again later"
       }
     }
+  },
+  "toast": {
+    "success": {
+      "loginSuccess": "Welcome back!",
+      "logoutSuccess": "Logged out successfully",
+      "registrationSuccess": "Account created! Please verify your email",
+      "emailVerified": "Email verified successfully",
+      "passwordResetSent": "Password reset email sent",
+      "passwordChanged": "Password changed successfully",
+      "profileUpdated": "Profile updated successfully",
+      "avatarUploaded": "Avatar uploaded successfully",
+      "saveSuccess": "Saved successfully",
+      "deleteSuccess": "Deleted successfully",
+      "copySuccess": "Copied to clipboard"
+    },
+    "error": {
+      "networkError": "Network error. Please check your connection",
+      "timeoutError": "Request timed out. Please try again",
+      "connectionLost": "Connection lost. Please check your internet",
+      "invalidCredentials": "Invalid email or password",
+      "sessionExpired": "Your session has expired. Please login again",
+      "unauthorized": "You are not authorized to access this resource",
+      "forbidden": "Access denied. You don't have permission",
+      "validationFailed": "Validation failed. Please check your input",
+      "invalidInput": "Invalid input. Please correct the errors",
+      "requiredFields": "Please fill in all required fields",
+      "serverError": "Something went wrong. Please try again later",
+      "serviceUnavailable": "Service temporarily unavailable",
+      "maintenanceMode": "System is under maintenance. Please try again later",
+      "unknownError": "An unexpected error occurred",
+      "operationFailed": "Operation failed. Please try again",
+      "notFound": "Resource not found",
+      "tooManyRequests": "Too many requests. Please slow down",
+      "badGateway": "Bad gateway. Please try again"
+    },
+    "warning": {
+      "unsavedChanges": "You have unsaved changes",
+      "slowConnection": "Slow connection detected",
+      "sessionExpiring": "Your session is about to expire",
+      "quotaLimit": "Approaching quota limit",
+      "deprecatedFeature": "This feature is deprecated"
+    },
+    "info": {
+      "loading": "Loading...",
+      "processing": "Processing...",
+      "pleaseWait": "Please wait...",
+      "featureComingSoon": "Feature coming soon",
+      "tipOfTheDay": "Tip of the day"
+    }
+  },
+  "errors": {
+    "404": {
+      "title": "Page Not Found",
+      "description": "The page you're looking for doesn't exist or has been moved",
+      "subtitle": "Lost in space?",
+      "goHome": "Go Home",
+      "goBack": "Go Back"
+    },
+    "403": {
+      "title": "Access Denied",
+      "description": "You don't have permission to access this resource. Please contact support if you believe this is an error.",
+      "subtitle": "Access restricted",
+      "goDashboard": "Go to Dashboard",
+      "contactSupport": "Contact Support"
+    },
+    "500": {
+      "title": "Something Went Wrong",
+      "description": "We're experiencing technical difficulties. Please try reloading the page.",
+      "subtitle": "Oops! Something broke",
+      "reload": "Reload Page",
+      "reportIssue": "Report Issue",
+      "errorId": "Error ID"
+    },
+    "comingSoon": "Coming Soon"
   }
 }
