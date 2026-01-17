@@ -91,7 +91,57 @@
         "serverError": "An error occurred. Please try again later",
         "networkError": "Network error. Please check your connection"
       }
+    },
+    "forgotPassword": {
+      "title": "Forgot Your Password?",
+      "subtitle": "Enter your email address and we'll send you a reset link",
+      "email": "Email Address",
+      "submit": "Send Reset Link",
+      "backToLogin": "Back to Login",
+      "success": "If this email is registered, you'll receive a reset link shortly",
+      "errors": {
+        "emailRequired": "Email is required",
+        "emailInvalid": "Please enter a valid email address",
+        "serverError": "An error occurred. Please try again later",
+        "networkError": "Network error. Please check your connection"
+      }
+    },
+    "resetPassword": {
+      "title": "Reset Your Password",
+      "subtitle": "Enter the 6-digit code sent to your email",
+      "email": "Email Address",
+      "code": "Verification Code",
+      "password": "New Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Reset Password",
+      "backToLogin": "Back to Login",
+      "success": "Password updated successfully",
+      "invalidToken": "Invalid or missing reset link",
+      "requestNew": "Request new reset link",
+      "errors": {
+        "emailRequired": "Email is required",
+        "emailInvalid": "Please enter a valid email address",
+        "codeRequired": "Verification code is required",
+        "codeInvalid": "Invalid verification code",
+        "codeExpired": "Code has expired. Please request a new one",
+        "codeLength": "Code must be exactly 6 digits",
+        "passwordRequired": "Password is required",
+        "passwordMinLength": "Password must be at least 8 characters",
+        "passwordWeak": "Password must contain letters and numbers",
+        "confirmRequired": "Please confirm your password",
+        "passwordMismatch": "Passwords don't match",
+        "tokenInvalid": "Invalid reset token",
+        "tokenExpired": "Reset link has expired",
+        "serverError": "An error occurred. Please try again later",
+        "networkError": "Network error. Please check your connection"
+      }
     }
+  },
+  "welcome": {
+    "title": "Welcome aboard, {name}!",
+    "subtitle": "Your account is now active",
+    "message": "Thank you for joining us. We're excited to have you on board!",
+    "cta": "Get Started"
   },
   "toast": {
     "success": {
@@ -100,6 +150,8 @@
       "registrationSuccess": "Account created! Check your email",
       "activationSuccess": "Email verified successfully!",
       "emailVerified": "Email verified successfully",
+      "resetLinkSent": "If the email is registered, you'll receive a reset link",
+      "passwordReset": "Password updated successfully! You can now log in",
       "passwordResetSent": "Password reset email sent",
       "passwordChanged": "Password changed successfully",
       "profileUpdated": "Profile updated successfully",
@@ -115,6 +167,8 @@
       "invalidCredentials": "Invalid email or password",
       "registrationFailed": "Registration failed",
       "activationFailed": "Invalid verification code",
+      "resetFailed": "Failed to reset password",
+      "invalidToken": "Invalid or expired reset link",
       "sessionExpired": "Your session has expired. Please login again",
       "unauthorized": "You are not authorized to access this resource",
       "forbidden": "Access denied. You don't have permission",
