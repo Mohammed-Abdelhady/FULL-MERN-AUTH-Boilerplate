@@ -10,10 +10,11 @@ import { useActivateMutation } from '../store/authApi';
 import { zodEmail } from '@/lib/validations';
 import { ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCallback, useMemo, useEffect } from 'react';
+import { useCallback, useMemo, useEffect, useState } from 'react';
 import { toast } from '@/lib/toast';
 import { useAppDispatch } from '@/store/hooks';
 import { setUser, setToken } from '@/store/slices/authSlice';
+import { WelcomeModal } from '@/components/welcome/WelcomeModal';
 
 /**
  * Activation form validation schema
@@ -50,6 +51,8 @@ export function ActivationForm() {
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const [activate, { isLoading }] = useActivateMutation();
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [userName, setUserName] = useState('');
 
   // Get email from URL params
   const emailFromUrl = searchParams.get('email') || '';
@@ -98,8 +101,9 @@ export function ActivationForm() {
 
         toast.success(tToast('success.activationSuccess'));
 
-        // Redirect to home page
-        router.push('/');
+        // Show welcome modal with user name
+        setUserName(result.user.name);
+        setShowWelcome(true);
       } catch (err: unknown) {
         // Handle API errors
         const error = err as { data?: { message?: string; code?: string } };
@@ -231,6 +235,13 @@ export function ActivationForm() {
           </form>
         </FormProvider>
       </div>
+
+      {/* Welcome Modal */}
+      <WelcomeModal
+        isOpen={showWelcome}
+        userName={userName}
+        onClose={() => setShowWelcome(false)}
+      />
     </section>
   );
 }
