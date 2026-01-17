@@ -49,3 +49,39 @@ export interface AuthError {
   code?: string;
   field?: string;
 }
+
+/**
+ * Registration request payload
+ */
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+/**
+ * Registration response from API
+ */
+export interface RegisterResponse {
+  success: boolean;
+  message: string;
+  data: {
+    email: string;
+  };
+}
+
+/**
+ * Account activation request payload
+ */
+export interface ActivateRequest {
+  email: string;
+  code: string;
+}
+
+/**
+ * Account activation response from API
+ */
+export interface ActivateResponse {
+  token: string;
+  user: User;
+}

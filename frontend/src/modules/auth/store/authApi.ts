@@ -1,5 +1,13 @@
 import { baseApi } from '@/store/api/baseApi';
-import type { User, LoginRequest, LoginResponse } from '../types/auth.types';
+import type {
+  User,
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  RegisterResponse,
+  ActivateRequest,
+  ActivateResponse,
+} from '../types/auth.types';
 
 /**
  * Auth API slice with authentication endpoints
@@ -52,6 +60,31 @@ export const authApi = baseApi.injectEndpoints({
       query: () => '/api/auth/me',
       providesTags: ['User'],
     }),
+
+    /**
+     * Register mutation
+     * Creates new user account and sends activation email
+     */
+    register: builder.mutation<RegisterResponse, RegisterRequest>({
+      query: (data) => ({
+        url: '/api/auth/register',
+        method: 'POST',
+        body: data,
+      }),
+    }),
+
+    /**
+     * Activate mutation
+     * Verifies email with activation code and logs user in
+     */
+    activate: builder.mutation<ActivateResponse, ActivateRequest>({
+      query: (data) => ({
+        url: '/api/auth/activate',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Auth', 'User'],
+    }),
   }),
 });
 
@@ -61,4 +94,6 @@ export const {
   useLogoutMutation,
   useRefreshTokenMutation,
   useGetCurrentUserQuery,
+  useRegisterMutation,
+  useActivateMutation,
 } = authApi;
