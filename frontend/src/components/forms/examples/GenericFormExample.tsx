@@ -43,7 +43,13 @@ import { z } from 'zod';
 const exampleSchema = z.object({
   // Text inputs
   name: zodName({ required: true }),
-  email: zodEmail({ message: 'Please enter a valid email address' }),
+  email: zodEmail({
+    required: true,
+    messages: {
+      required: 'Email is required',
+      invalid: 'Please enter a valid email address',
+    },
+  }),
   website: zodUrl({ required: false }),
 
   // Password with confirmation
@@ -234,9 +240,11 @@ export function GenericFormExample() {
 
           {/* Display form errors if any */}
           {Object.keys(form.formState.errors).length > 0 && (
-            <div className="rounded-md border border-red-200 bg-red-50 p-4">
-              <h3 className="mb-2 font-semibold text-red-800">Please fix the following errors:</h3>
-              <ul className="list-inside list-disc space-y-1 text-sm text-red-700">
+            <div className="rounded-md border border-destructive bg-destructive/10 p-4">
+              <h3 className="mb-2 font-semibold text-destructive">
+                Please fix the following errors:
+              </h3>
+              <ul className="list-inside list-disc space-y-1 text-sm text-destructive">
                 {Object.entries(form.formState.errors).map(([field, error]) => (
                   <li key={field}>
                     <strong>{field}:</strong> {error?.message}
@@ -250,11 +258,9 @@ export function GenericFormExample() {
 
       {/* Display submitted data */}
       {submittedData && (
-        <div className="mt-8 rounded-md border bg-green-50 p-6">
-          <h2 className="mb-4 text-xl font-semibold text-green-800">
-            Form Submitted Successfully!
-          </h2>
-          <pre className="overflow-x-auto rounded bg-white p-4 text-sm">
+        <div className="mt-8 rounded-md border border-success/20 bg-success/10 p-6">
+          <h2 className="mb-4 text-xl font-semibold text-success">Form Submitted Successfully!</h2>
+          <pre className="overflow-x-auto rounded bg-card border border-border p-4 text-sm text-foreground">
             {JSON.stringify(submittedData, null, 2)}
           </pre>
         </div>
