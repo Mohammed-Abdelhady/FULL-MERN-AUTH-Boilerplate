@@ -22,10 +22,6 @@ export const FormSwitch = <TFieldValues extends FieldValues = FieldValues>({
   return (
     <BaseFormField
       name={name}
-      label={label}
-      description={description}
-      showLabel={false}
-      showDescription={false}
       className="flex flex-row items-center justify-between rounded-lg border p-4"
       render={(field) => (
         <>

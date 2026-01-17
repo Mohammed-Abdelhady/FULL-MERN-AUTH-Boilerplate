@@ -43,9 +43,6 @@ export const FormCheckbox = <TFieldValues extends FieldValues = FieldValues>({
     return (
       <BaseFormField
         name={name}
-        label={label}
-        description={description}
-        showLabel={false}
         className="flex flex-row items-start space-x-3 space-y-0"
         render={(field) => (
           <>

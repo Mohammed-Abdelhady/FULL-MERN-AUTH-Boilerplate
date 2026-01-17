@@ -12,27 +12,22 @@ import {
   FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { FORM_STYLES } from '@/lib/config/form-styles';
+import { cn } from '@/lib/utils';
 
 export interface BaseFormFieldProps<TFieldValues extends FieldValues = FieldValues> {
   name: FieldPath<TFieldValues>;
-  label?: string;
   description?: string;
   render: (field: ControllerRenderProps<TFieldValues, FieldPath<TFieldValues>>) => React.ReactNode;
-  showLabel?: boolean;
-  showDescription?: boolean;
   className?: string;
 }
 
 export const BaseFormField = <TFieldValues extends FieldValues = FieldValues>({
   name,
-  label,
   description,
   render,
-  showLabel = true,
-  showDescription = true,
   className,
 }: BaseFormFieldProps<TFieldValues>) => {
   const { control } = useFormContext<TFieldValues>();
@@ -42,10 +37,9 @@ export const BaseFormField = <TFieldValues extends FieldValues = FieldValues>({
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem className={className}>
-          {showLabel && label && <FormLabel>{label}</FormLabel>}
+        <FormItem className={cn(FORM_STYLES.container, className)}>
           <FormControl>{render(field)}</FormControl>
-          {showDescription && description && <FormDescription>{description}</FormDescription>}
+          {description && <FormDescription>{description}</FormDescription>}
           <FormMessage />
         </FormItem>
       )}

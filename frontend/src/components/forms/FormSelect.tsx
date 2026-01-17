@@ -11,6 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
+import { getInputClassName } from '@/lib/config/form-styles';
 import { BaseFormField } from './BaseFormField';
 
 export interface SelectOption {
@@ -25,31 +27,30 @@ export interface SelectOptionGroup {
 
 export interface FormSelectProps<TFieldValues extends FieldValues = FieldValues> {
   name: FieldPath<TFieldValues>;
-  label?: string;
   description?: string;
   placeholder?: string;
   options?: SelectOption[];
   groups?: SelectOptionGroup[];
   disabled?: boolean;
+  className?: string;
 }
 
 export const FormSelect = <TFieldValues extends FieldValues = FieldValues>({
   name,
-  label,
   description,
   placeholder,
   options,
   groups,
   disabled,
+  className,
 }: FormSelectProps<TFieldValues>) => {
   return (
     <BaseFormField
       name={name}
-      label={label}
       description={description}
       render={(field) => (
         <Select onValueChange={field.onChange} defaultValue={field.value} disabled={disabled}>
-          <SelectTrigger>
+          <SelectTrigger className={cn(getInputClassName(), className)}>
             <SelectValue placeholder={placeholder || 'Select an option'} />
           </SelectTrigger>
           <SelectContent>
