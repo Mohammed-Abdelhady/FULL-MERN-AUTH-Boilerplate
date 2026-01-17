@@ -116,4 +116,14 @@ export enum ErrorCode {
   CANNOT_REVOKE_CURRENT_SESSION = 'CANNOT_REVOKE_CURRENT_SESSION',
   /** Admin cannot deactivate their own account */
   ADMIN_CANNOT_DEACTIVATE_SELF = 'ADMIN_CANNOT_DEACTIVATE_SELF',
+
+  // Password reset errors
+  /** No password reset request found for email */
+  NO_PENDING_PASSWORD_RESET = 'NO_PENDING_PASSWORD_RESET',
+  /** Password reset code has expired */
+  PASSWORD_RESET_CODE_EXPIRED = 'PASSWORD_RESET_CODE_EXPIRED',
+  /** Invalid password reset code provided */
+  PASSWORD_RESET_CODE_INVALID = 'PASSWORD_RESET_CODE_INVALID',
+  /** User not found for password reset */
+  USER_NOT_FOUND_FOR_RESET = 'USER_NOT_FOUND_FOR_RESET',
 }

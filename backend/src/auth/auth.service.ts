@@ -9,12 +9,20 @@ import {
   PendingRegistration,
   PendingRegistrationDocument,
 } from './schemas/pending-registration.schema';
+import {
+  PendingPasswordReset,
+  PendingPasswordResetDocument,
+} from './schemas/pending-password-reset.schema';
 import { RegisterDto } from './dto/register.dto';
 import { ActivateDto } from './dto/activate.dto';
 import { LoginDto } from './dto/login.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { RegisterResponseDto } from './dto/register-response.dto';
 import { ActivateResponseDto } from './dto/activate-response.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { ForgotPasswordResponseDto } from './dto/forgot-password-response.dto';
+import { ResetPasswordResponseDto } from './dto/reset-password-response.dto';
 import { ApiResponse } from '../common/dto/api-response.dto';
 import { HashService } from '../common/services/hash.service';
 import { AppException } from '../common/exceptions/app.exception';
@@ -32,6 +40,8 @@ export class AuthService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(PendingRegistration.name)
     private pendingRegistrationModel: Model<PendingRegistrationDocument>,
+    @InjectModel(PendingPasswordReset.name)
+    private pendingPasswordResetModel: Model<PendingPasswordResetDocument>,
     private readonly hashService: HashService,
     private readonly mailService: MailService,
     private readonly sessionService: SessionService,
@@ -324,5 +334,158 @@ export class AuthService {
     this.logger.log(`User logged out with token: ${sessionToken}`);
 
     return ApiResponse.success({ message: 'Logout successful' });
+  }
+
+  /**
+   * Request password reset by sending 6-digit code to email
+   * @param dto - Forgot password data
+   * @throws NotFoundException if user doesn't exist
+   * @throws BadRequestException if email sending fails
+   */
+  async forgotPassword(
+    dto: ForgotPasswordDto,
+  ): Promise<ApiResponse<ForgotPasswordResponseDto>> {
+    // Check if user exists
+    const user = await this.userModel.findOne({ email: dto.email });
+    if (!user) {
+      throw new AppException(
+        ErrorCode.USER_NOT_FOUND_FOR_RESET,
+        'No account found with this email address',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    // Check if pending reset exists (select hidden field for update)
+    const existingReset = await this.pendingPasswordResetModel
+      .findOne({ email: dto.email })
+      .select('+hashedCode');
+
+    // Generate cryptographically secure 6-digit reset code
+    const code = crypto.randomInt(100000, 1000000).toString();
+    const hashedCode = await this.hashService.hash(code);
+
+    // Calculate expiry
+    const expiresAt = new Date(Date.now() + this.codeExpiresIn);
+
+    if (existingReset) {
+      // Update existing pending reset
+      existingReset.hashedCode = hashedCode;
+      existingReset.attempts = 0;
+      existingReset.expiresAt = expiresAt;
+      await existingReset.save();
+
+      this.logger.log(`Updated pending password reset for ${dto.email}`);
+    } else {
+      // Create new pending reset
+      await this.pendingPasswordResetModel.create({
+        email: dto.email,
+        hashedCode,
+        attempts: 0,
+        expiresAt,
+      });
+
+      this.logger.log(`Created pending password reset for ${dto.email}`);
+    }
+
+    // Send password reset email
+    try {
+      await this.mailService.sendPasswordResetCode(dto.email, code, user.name);
+    } catch (error) {
+      this.logger.error(
+        `Failed to send password reset email: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      throw new AppException(
+        ErrorCode.EMAIL_SEND_FAILED,
+        'Failed to send password reset email',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return ForgotPasswordResponseDto.success(dto.email);
+  }
+
+  /**
+   * Reset password using email and 6-digit code
+   * @param dto - Reset password data
+   * @throws BadRequestException for invalid/expired code
+   * @throws UnauthorizedException for max attempts exceeded
+   */
+  async resetPassword(
+    dto: ResetPasswordDto,
+  ): Promise<ApiResponse<ResetPasswordResponseDto>> {
+    // Find pending reset (select hidden field for verification)
+    const pending = await this.pendingPasswordResetModel
+      .findOne({ email: dto.email })
+      .select('+hashedCode');
+
+    if (!pending) {
+      throw new AppException(
+        ErrorCode.NO_PENDING_PASSWORD_RESET,
+        'No password reset request found',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // Check if expired
+    if (new Date() > pending.expiresAt) {
+      await this.pendingPasswordResetModel.deleteOne({ email: dto.email });
+      throw new AppException(
+        ErrorCode.PASSWORD_RESET_CODE_EXPIRED,
+        'Password reset code has expired',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // Check attempts
+    if (pending.attempts >= this.maxAttempts) {
+      await this.pendingPasswordResetModel.deleteOne({ email: dto.email });
+      throw new AppException(
+        ErrorCode.MAX_ATTEMPTS_EXCEEDED,
+        'Maximum attempts exceeded. Please request a new code.',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    // Verify code
+    const isCodeValid = await this.hashService.compare(
+      dto.code,
+      pending.hashedCode,
+    );
+
+    if (!isCodeValid) {
+      // Increment attempts
+      pending.attempts += 1;
+      await pending.save();
+
+      const remainingAttempts = this.maxAttempts - pending.attempts;
+      throw new AppException(
+        ErrorCode.PASSWORD_RESET_CODE_INVALID,
+        `Invalid code. ${remainingAttempts} attempts remaining.`,
+        HttpStatus.BAD_REQUEST,
+        { remainingAttempts },
+      );
+    }
+
+    // Find user and update password
+    const user = await this.userModel.findOne({ email: dto.email });
+    if (!user) {
+      throw new AppException(
+        ErrorCode.USER_NOT_FOUND_FOR_RESET,
+        'User not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    // Hash new password
+    const hashedPassword = await this.hashService.hash(dto.newPassword);
+    user.password = hashedPassword;
+    await user.save();
+
+    this.logger.log(`Password reset successful for: ${user.email}`);
+
+    // Delete pending reset
+    await this.pendingPasswordResetModel.deleteOne({ email: dto.email });
+
+    return ResetPasswordResponseDto.success();
   }
 }
