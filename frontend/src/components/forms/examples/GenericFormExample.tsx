@@ -134,6 +134,7 @@ export function GenericFormExample() {
             label="Full Name"
             placeholder="John Doe"
             description="Enter your full name as it appears on official documents"
+            autoFocus
           />
 
           {/* Email Input - Email validation */}

@@ -153,6 +153,7 @@ export function LoginForm() {
               placeholder={t('email')}
               autoComplete="email"
               disabled={isLoading}
+              autoFocus
               aria-label={t('email')}
               aria-required="true"
               aria-invalid={!!errors.email}
