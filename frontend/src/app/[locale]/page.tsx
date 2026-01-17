@@ -1,68 +1,72 @@
-import Image from 'next/image';
+import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+import { Rocket, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
+/**
+ * Home Page
+ *
+ * Split-screen design matching AuthLayout and error pages aesthetic.
+ * Left: Welcome message and CTAs | Right: Decorative illustration
+ *
+ * Features:
+ * - Fully localized (English/Arabic with RTL support)
+ * - Theme-aware with semantic color tokens
+ * - Responsive design (illustration hidden on mobile)
+ * - Accessible with proper ARIA attributes
+ */
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'common' });
+  const t = await getTranslations({ locale, namespace: 'home' });
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            {t('loading')}
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{' '}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{' '}
-            or the{' '}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{' '}
-            center.
-          </p>
+    <div className="min-h-screen bg-background text-foreground flex justify-center">
+      <div className="max-w-screen-xl m-0 sm:m-20 bg-card shadow sm:rounded-lg flex justify-center flex-1">
+        {/* Left Side - Welcome Content */}
+        <section className="lg:w-1/2 xl:w-5/12 p-6 sm:p-12 flex flex-col justify-center">
+          <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
+            {/* Main Heading */}
+            <h1 className="text-3xl xl:text-4xl font-extrabold text-foreground mb-4">
+              {t('title')}
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-lg font-semibold text-primary mb-4 max-w-md">{t('subtitle')}</p>
+
+            {/* Description */}
+            <p className="text-lg text-muted-foreground mb-8 max-w-md">{t('description')}</p>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <Button asChild className="w-full sm:w-auto">
+                <Link href="/auth/login">
+                  <ChevronRight className="w-5 h-5 mr-2" />
+                  {t('ctaPrimary')}
+                </Link>
+              </Button>
+              <Button variant="outline" asChild className="w-full sm:w-auto">
+                <Link
+                  href="https://github.com/anthropics/claude-code"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {t('ctaSecondary')}
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Right Side - Illustration */}
+        <div className="flex-1 bg-primary/10 text-center hidden lg:flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center p-12">
+            <Rocket className="w-64 h-64 text-primary/30" strokeWidth={1} aria-hidden="true" />
+            <p className="mt-8 text-xl font-semibold text-primary/60">
+              {t('illustrationSubtitle')}
+            </p>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </div>
     </div>
   );
 }
