@@ -43,6 +43,18 @@
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
 
+  /* Success states */
+  --success: 142 76% 36%;
+  --success-foreground: 0 0% 100%;
+
+  /* Warning states */
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 100%;
+
+  /* Info states */
+  --info: 199 89% 48%;
+  --info-foreground: 0 0% 100%;
+
   /* Borders and inputs */
   --border: 220 13% 91%;
   --input: 220 13% 91%;
@@ -96,6 +108,18 @@
   --destructive: 0 63% 31%;
   --destructive-foreground: 210 20% 98%;
 
+  /* Success states - dark mode */
+  --success: 142 71% 45%;
+  --success-foreground: 210 20% 98%;
+
+  /* Warning states - dark mode */
+  --warning: 38 92% 50%;
+  --warning-foreground: 224 71% 4%;
+
+  /* Info states - dark mode */
+  --info: 199 89% 48%;
+  --info-foreground: 224 71% 4%;
+
   --border: 215 28% 17%;
   --input: 215 28% 17%;
   --ring: 239 84% 67%;
@@ -140,6 +164,12 @@
   --color-accent-foreground: hsl(var(--accent-foreground));
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-info: hsl(var(--info));
+  --color-info-foreground: hsl(var(--info-foreground));
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
