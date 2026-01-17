@@ -94,4 +94,49 @@ export class MailService {
       text,
     });
   }
+
+  /**
+   * Send a password reset code email to a user
+   * @param email - Recipient email address
+   * @param code - 6-digit password reset code
+   * @param name - Recipient's name
+   */
+  async sendPasswordResetCode(
+    email: string,
+    code: string,
+    name: string,
+  ): Promise<void> {
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Reset Your Password</title>
+        </head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #333;">Reset Your Password</h2>
+            <p>Hi ${name},</p>
+            <p>You requested to reset your password. Please use the following 6-digit code to reset your password:</p>
+            <div style="background-color: #f5f5f5; padding: 20px; text-align: center; border-radius: 5px; margin: 20px 0;">
+              <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #dc3545;">${code}</span>
+            </div>
+            <p>This code will expire in 15 minutes.</p>
+            <p>If you didn't request this code, you can safely ignore this email. Your password will remain unchanged.</p>
+            <p>Best regards,<br>The Team</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const text = `Hi ${name},\n\nYou requested to reset your password. Please use the following 6-digit code to reset your password:\n\n${code}\n\nThis code will expire in 15 minutes.\n\nIf you didn't request this code, you can safely ignore this email. Your password will remain unchanged.\n\nBest regards,\nThe Team`;
+
+    await this.sendMail({
+      to: email,
+      subject: 'Reset Your Password',
+      html,
+      text,
+    });
+  }
 }
