@@ -108,3 +108,57 @@ export function getErrorMessage(error: unknown): string {
 
   return 'An unexpected error occurred';
 }
+
+/**
+ * Maps API error messages to translation keys
+ * Provides translation key for common error scenarios
+ *
+ * @param error - Error object from API
+ * @param t - Translation function from next-intl
+ * @returns Translated error message
+ *
+ * @example
+ * translateAuthError(apiError, t) // 'Invalid email or password'
+ */
+export function translateAuthError(error: unknown, t: (key: string) => string): string {
+  const rawMessage = getErrorMessage(error).toLowerCase();
+
+  // Map common error messages to translation keys
+  const errorMap: Record<string, string> = {
+    'invalid credentials': 'errors.invalidCredentials',
+    'invalid email or password': 'errors.invalidCredentials',
+    'user not found': 'errors.invalidCredentials',
+    'incorrect password': 'errors.invalidCredentials',
+    'network error': 'errors.networkError',
+    'failed to fetch': 'errors.networkError',
+    'too many attempts': 'errors.tooManyAttempts',
+    'too many requests': 'errors.tooManyAttempts',
+    'rate limit exceeded': 'errors.tooManyAttempts',
+  };
+
+  // Check if error message matches any known pattern
+  for (const [pattern, key] of Object.entries(errorMap)) {
+    if (rawMessage.includes(pattern)) {
+      return t(key);
+    }
+  }
+
+  // Check for HTTP status codes in error object
+  if (error && typeof error === 'object') {
+    if ('status' in error) {
+      const status = Number(error.status);
+      if (status === 401 || status === 403) {
+        return t('errors.invalidCredentials');
+      }
+      if (status === 429) {
+        return t('errors.tooManyAttempts');
+      }
+      if (status >= 500) {
+        return t('errors.serverError');
+      }
+    }
+  }
+
+  // Default to server error translation
+  return t('errors.serverError');
+}

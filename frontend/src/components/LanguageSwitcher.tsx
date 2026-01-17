@@ -25,8 +25,8 @@ export function LanguageSwitcher() {
         onClick={() => handleLanguageChange('en')}
         className={`px-3 py-1 rounded ${
           currentLocale === 'en'
-            ? 'bg-indigo-500 text-white'
-            : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+            ? 'bg-primary text-primary-foreground'
+            : 'bg-secondary text-secondary-foreground'
         }`}
         aria-label="Switch to English"
       >
@@ -36,8 +36,8 @@ export function LanguageSwitcher() {
         onClick={() => handleLanguageChange('ar')}
         className={`px-3 py-1 rounded ${
           currentLocale === 'ar'
-            ? 'bg-indigo-500 text-white'
-            : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+            ? 'bg-primary text-primary-foreground'
+            : 'bg-secondary text-secondary-foreground'
         }`}
         aria-label="Switch to Arabic"
       >
