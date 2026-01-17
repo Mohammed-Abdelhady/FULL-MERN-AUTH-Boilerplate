@@ -12,16 +12,19 @@ import {
 import storage from 'redux-persist/lib/storage';
 import { baseApi } from './api/baseApi';
 import authReducer from '@/modules/auth/store/authSlice';
+import toastReducer from './slices/toastSlice';
+import { errorInterceptor } from './middleware/errorInterceptor';
 
 /**
  * Redux persist configuration
  * Persists only the auth slice to localStorage
+ * Toast slice is explicitly excluded (ephemeral notifications only)
  */
 const persistConfig = {
   key: 'root',
   version: 1,
   storage,
-  whitelist: ['auth'], // Only persist auth slice
+  whitelist: ['auth'], // Only persist auth slice, NOT toast
 };
 
 /**
@@ -32,6 +35,8 @@ const rootReducer = combineReducers({
   [baseApi.reducerPath]: baseApi.reducer,
   // Auth slice reducer
   auth: authReducer,
+  // Toast slice reducer (not persisted)
+  toast: toastReducer,
 });
 
 /**
@@ -43,6 +48,10 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
  * Redux store configuration with RTK Query integration and redux-persist
  * Includes Redux DevTools support and middleware configuration
  */
+/**
+ * Redux store configuration with RTK Query integration and redux-persist
+ * Middleware order: errorInterceptor → RTK Query → defaults
+ */
 export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
@@ -51,7 +60,9 @@ export const store = configureStore({
         // Ignore redux-persist actions
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(baseApi.middleware),
+    })
+      .concat(errorInterceptor) // Error interceptor MUST be before RTK Query
+      .concat(baseApi.middleware),
   devTools: process.env.NODE_ENV !== 'production',
 });
 
