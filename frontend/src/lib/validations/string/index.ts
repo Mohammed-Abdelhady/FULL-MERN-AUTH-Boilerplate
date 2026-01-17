@@ -7,7 +7,7 @@
  */
 
 import { z } from 'zod';
-import { makeOptional, createStringValidator, createBoundedString } from '../utils';
+import { makeOptional, createStringValidator } from '../utils';
 
 /**
  * Generic string validator with configurable min/max length
@@ -265,27 +265,58 @@ export function zodStrongPassword(options?: {
 
 /**
  * Person name validator (2-50 chars, letters, spaces, hyphens, apostrophes)
+ * Returns required schema by default, optional when required: false
  */
-export const zodName = (options?: {
-  required?: boolean;
+export function zodName(options?: {
+  required?: false;
   min?: number;
   max?: number;
   messages?: {
+    required?: string;
     min?: string;
     max?: string;
     pattern?: string;
   };
-}) =>
-  createBoundedString(2, 50, {
-    ...options,
-    pattern: /^[a-zA-Z\s'-]+$/,
-    messages: {
-      ...options?.messages,
-      pattern:
-        options?.messages?.pattern ||
+}): z.ZodOptional<z.ZodString>;
+export function zodName(options: {
+  required: true;
+  min?: number;
+  max?: number;
+  messages?: {
+    required?: string;
+    min?: string;
+    max?: string;
+    pattern?: string;
+  };
+}): z.ZodString;
+export function zodName(options?: {
+  required?: boolean;
+  min?: number;
+  max?: number;
+  messages?: {
+    required?: string;
+    min?: string;
+    max?: string;
+    pattern?: string;
+  };
+}) {
+  const min = options?.min ?? 2;
+  const max = options?.max ?? 50;
+
+  const schema = z
+    .string({ required_error: options?.messages?.required || 'Name is required' })
+    .trim()
+    .min(1, options?.messages?.required || 'Name is required')
+    .min(min, options?.messages?.min || `Name must be at least ${min} characters`)
+    .max(max, options?.messages?.max || `Name must not exceed ${max} characters`)
+    .regex(
+      /^[a-zA-Z\s'-]+$/,
+      options?.messages?.pattern ||
         'Name can only contain letters, spaces, hyphens, and apostrophes',
-    },
-  });
+    );
+
+  return makeOptional(schema, options?.required);
+}
 
 /**
  * Username validator (3-20 alphanumeric + underscore)

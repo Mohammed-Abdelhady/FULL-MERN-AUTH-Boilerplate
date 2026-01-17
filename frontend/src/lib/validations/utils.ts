@@ -10,10 +10,17 @@ import { z } from 'zod';
 
 /**
  * Make a schema optional based on the required flag
+ * Returns exact type based on required parameter for better TypeScript inference
  */
-export const makeOptional = <T extends z.ZodTypeAny>(schema: T, required?: boolean) => {
+export function makeOptional<T extends z.ZodTypeAny>(schema: T, required: false): z.ZodOptional<T>;
+export function makeOptional<T extends z.ZodTypeAny>(schema: T, required?: true): T;
+export function makeOptional<T extends z.ZodTypeAny>(schema: T, required?: boolean): T;
+export function makeOptional<T extends z.ZodTypeAny>(
+  schema: T,
+  required?: boolean,
+): T | z.ZodOptional<T> {
   return required === false ? schema.optional() : schema;
-};
+}
 
 /**
  * Create a simple string validator with regex pattern
