@@ -15,6 +15,8 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { ActivateDto } from './dto/activate.dto';
 import { LoginDto } from './dto/login.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { Public } from './decorators/public.decorator';
 import { AuthGuard } from './guards/auth.guard';
 
@@ -108,5 +110,41 @@ export class AuthController {
     });
 
     return response.status(HttpStatus.OK).json(result);
+  }
+
+  /**
+   * Request password reset code
+   * POST /api/auth/forgot-password
+   */
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Request password reset',
+    description:
+      'Sends a 6-digit password reset code to the user email address. ' +
+      'The code expires in 15 minutes.',
+  })
+  @ApiBody({ type: ForgotPasswordDto })
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto);
+  }
+
+  /**
+   * Reset password with email and code
+   * POST /api/auth/reset-password
+   */
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Reset password',
+    description:
+      'Resets user password using email address and 6-digit reset code. ' +
+      'The code must be valid and not expired.',
+  })
+  @ApiBody({ type: ResetPasswordDto })
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
   }
 }

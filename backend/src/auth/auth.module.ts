@@ -8,6 +8,10 @@ import {
   PendingRegistration,
   PendingRegistrationSchema,
 } from './schemas/pending-registration.schema';
+import {
+  PendingPasswordReset,
+  PendingPasswordResetSchema,
+} from './schemas/pending-password-reset.schema';
 import { User, UserSchema } from '../user/schemas/user.schema';
 import { Session, SessionSchema } from '../session/schemas/session.schema';
 import { SessionService } from './services/session.service';
@@ -27,6 +31,7 @@ import { VerifiedGuard } from './guards/verified.guard';
     ConfigModule,
     MongooseModule.forFeature([
       { name: PendingRegistration.name, schema: PendingRegistrationSchema },
+      { name: PendingPasswordReset.name, schema: PendingPasswordResetSchema },
       { name: User.name, schema: UserSchema },
       { name: Session.name, schema: SessionSchema },
     ]),
