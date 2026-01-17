@@ -49,13 +49,56 @@
         "networkError": "Network error. Please check your connection",
         "tooManyAttempts": "Too many login attempts. Please try again later"
       }
+    },
+    "register": {
+      "title": "Create Your Account",
+      "subtitle": "Join us today",
+      "name": "Full Name",
+      "email": "Email Address",
+      "password": "Password",
+      "submit": "Create Account",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "divider": "Or sign up with e-mail",
+      "errors": {
+        "nameRequired": "Name is required",
+        "nameMinLength": "Name must be at least 2 characters",
+        "nameMaxLength": "Name must not exceed 50 characters",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Please enter a valid email address",
+        "emailExists": "Email already registered",
+        "passwordRequired": "Password is required",
+        "passwordMinLength": "Password must be at least 8 characters",
+        "passwordWeak": "Password must contain letters and numbers",
+        "serverError": "An error occurred. Please try again later",
+        "networkError": "Network error. Please check your connection"
+      }
+    },
+    "activate": {
+      "title": "Verify Your Email",
+      "description": "Enter the 6-digit code sent to your email",
+      "email": "Email Address",
+      "code": "Verification Code",
+      "submit": "Verify and Continue",
+      "resend": "Resend Code",
+      "didntReceive": "Didn't receive the code?",
+      "errors": {
+        "emailRequired": "Email is required",
+        "codeRequired": "Verification code is required",
+        "codeInvalid": "Invalid verification code",
+        "codeExpired": "Code has expired. Please register again",
+        "codeLength": "Code must be exactly 6 digits",
+        "serverError": "An error occurred. Please try again later",
+        "networkError": "Network error. Please check your connection"
+      }
     }
   },
   "toast": {
     "success": {
       "loginSuccess": "Welcome back!",
       "logoutSuccess": "Logged out successfully",
-      "registrationSuccess": "Account created! Please verify your email",
+      "registrationSuccess": "Account created! Check your email",
+      "activationSuccess": "Email verified successfully!",
       "emailVerified": "Email verified successfully",
       "passwordResetSent": "Password reset email sent",
       "passwordChanged": "Password changed successfully",
@@ -70,6 +113,8 @@
       "timeoutError": "Request timed out. Please try again",
       "connectionLost": "Connection lost. Please check your internet",
       "invalidCredentials": "Invalid email or password",
+      "registrationFailed": "Registration failed",
+      "activationFailed": "Invalid verification code",
       "sessionExpired": "Your session has expired. Please login again",
       "unauthorized": "You are not authorized to access this resource",
       "forbidden": "Access denied. You don't have permission",
