@@ -40,7 +40,7 @@ Modern authentication system built with NestJS and Next.js, featuring email veri
 - **Language**: TypeScript 5.7.3
 - **Database**: MongoDB with Mongoose ODM
 - **Authentication**: JWT with Passport strategies
-- **Email**: SendGrid
+- **Email**: Nodemailer (supports Gmail, Outlook, AWS SES, Mailgun, SendGrid, custom SMTP)
 - **Testing**: Jest + Supertest
 
 ### Frontend (Next.js)
@@ -50,6 +50,17 @@ Modern authentication system built with NestJS and Next.js, featuring email veri
 - **UI Library**: React 19.2.3
 - **Styling**: Tailwind CSS 4.x
 - **State Management**: React Context API
+
+## Setup Guides
+
+Before you start, configure the required external services:
+
+- **[SMTP Setup (Nodemailer)](./docs/setup-smtp.md)** - Email delivery for verification codes and password resets (supports Gmail, Outlook, custom SMTP, Mailgun, AWS SES, etc.)
+- **[Google OAuth Setup](./docs/setup-google-oauth.md)** - Google social login integration
+- **[Facebook OAuth Setup](./docs/setup-facebook-oauth.md)** - Facebook social login integration
+- **[GitHub OAuth Setup](./docs/setup-github-oauth.md)** - GitHub social login integration
+
+Each guide provides step-by-step instructions with screenshots, troubleshooting tips, and best practices.
 
 ## Getting Started
 
@@ -80,8 +91,13 @@ For native development (without Docker):
 - Node.js 18+ (20 LTS recommended)
 - MongoDB 6+
 - npm or yarn
-- SendGrid API key (for email features)
-- Google/Facebook OAuth credentials (for social auth)
+
+**External Services** (see [Setup Guides](#setup-guides)):
+
+- SMTP credentials (for email features) - [Setup Guide](./docs/setup-smtp.md)
+- Google OAuth credentials (optional) - [Setup Guide](./docs/setup-google-oauth.md)
+- Facebook OAuth credentials (optional) - [Setup Guide](./docs/setup-facebook-oauth.md)
+- GitHub OAuth credentials (optional) - [Setup Guide](./docs/setup-github-oauth.md)
 
 ### Installation
 
@@ -119,19 +135,45 @@ For native development (without Docker):
    PORT=3000
    MONGO_URI=mongodb://localhost:27017/authboiler
    JWT_SECRET=your-super-secret-key
-   MAIL_KEY=your-sendgrid-api-key
-   CLIENT_URL=http://localhost:3000
-   GOOGLE_CLIENT_ID=your-google-client-id
+
+   # SMTP (Nodemailer) - See docs/setup-smtp.md
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_SECURE=false
+   SMTP_USER=your-email@gmail.com
+   SMTP_PASS=your-app-password
+   EMAIL_FROM=your-email@gmail.com
+   EMAIL_FROM_NAME=Auth Boilerplate
+
+   # Google OAuth (Optional) - See docs/setup-google-oauth.md
+   GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+   # Facebook OAuth (Optional) - See docs/setup-facebook-oauth.md
    FACEBOOK_APP_ID=your-facebook-app-id
+   FACEBOOK_APP_SECRET=your-facebook-app-secret
+
+   # GitHub OAuth (Optional) - See docs/setup-github-oauth.md
+   GITHUB_CLIENT_ID=your-github-client-id
+   GITHUB_CLIENT_SECRET=your-github-client-secret
+
+   # Frontend URL
+   CLIENT_URL=http://localhost:3000
    ```
 
    **Frontend** (`frontend/.env.local`):
 
    ```bash
+   # API Configuration
    NEXT_PUBLIC_API_URL=http://localhost:3000/api
-   NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id
+
+   # OAuth Client IDs (Optional)
+   NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
    NEXT_PUBLIC_FACEBOOK_APP_ID=your-facebook-app-id
+   NEXT_PUBLIC_GITHUB_CLIENT_ID=your-github-client-id
    ```
+
+   📖 **Detailed setup instructions**: See [Setup Guides](#setup-guides) for obtaining these credentials.
 
 4. **Start MongoDB**
 
@@ -332,6 +374,13 @@ npm test
 
 ## Documentation
 
+### Setup Guides
+
+- [SMTP Setup (SendGrid)](./docs/setup-smtp.md) - Configure email delivery
+- [Google OAuth Setup](./docs/setup-google-oauth.md) - Enable Google social login
+- [Facebook OAuth Setup](./docs/setup-facebook-oauth.md) - Enable Facebook social login
+- [GitHub OAuth Setup](./docs/setup-github-oauth.md) - Enable GitHub social login
+
 ### Backend API
 
 - [Authentication Flow](./backend/docs/authentication-flow.md) - Registration, login, logout, sessions
@@ -341,6 +390,7 @@ npm test
 
 - [Code Quality Standards](./docs/code-quality.md) - Pre-commit hooks, linting, formatting
 - [Deployment Guide](./docs/deployment.md) - Docker and Vercel deployment instructions
+- [Production Setup](./docs/PRODUCTION-SETUP.md) - Production deployment checklist
 - [CLAUDE.md](./CLAUDE.md) - Complete project guidelines for AI assistants
 - [OpenSpec Project](./openspec/project.md) - Project context and conventions
 
