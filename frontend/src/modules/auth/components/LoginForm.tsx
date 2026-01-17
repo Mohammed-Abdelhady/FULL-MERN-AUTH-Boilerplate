@@ -84,6 +84,7 @@ export function LoginForm() {
           type: 'manual',
           message: errorMessage,
         });
+        // Error toast is automatically shown by errorInterceptor middleware
       }
     },
     [login, searchParams, router, setError, t],
