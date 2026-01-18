@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAppSelector } from '@/store/hooks';
 import { selectIsAuthenticated, selectAuthLoading } from '@/modules/auth/store/authSlice';
-import { useAuthValidation } from '@/modules/auth/hooks/useAuthValidation';
 
 interface AuthGuardProps {
   readonly children: React.ReactNode;
@@ -13,7 +12,7 @@ interface AuthGuardProps {
 /**
  * AuthGuard component to protect routes requiring authentication
  * Redirects unauthenticated users to login page with return URL
- * Shows nothing while validating authentication state
+ * Relies on AuthProvider for global session validation
  *
  * @example
  * // In a protected page
@@ -30,11 +29,10 @@ export function AuthGuard({ children }: Readonly<AuthGuardProps>) {
   const pathname = usePathname();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const isAuthLoading = useAppSelector(selectAuthLoading);
-  const isValidating = useAuthValidation();
 
   useEffect(() => {
-    // Wait for validation to complete
-    if (isValidating || isAuthLoading) {
+    // Wait for auth state to be determined
+    if (isAuthLoading) {
       return;
     }
 
@@ -43,10 +41,10 @@ export function AuthGuard({ children }: Readonly<AuthGuardProps>) {
       const returnUrl = encodeURIComponent(pathname);
       router.push(`/auth/login?redirect=${returnUrl}`);
     }
-  }, [isAuthenticated, isAuthLoading, isValidating, pathname, router]);
+  }, [isAuthenticated, isAuthLoading, pathname, router]);
 
-  // Show nothing while validating or loading
-  if (isValidating || isAuthLoading) {
+  // Show nothing while loading auth state
+  if (isAuthLoading) {
     return null;
   }
 
