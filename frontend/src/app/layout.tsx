@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import { ReduxProvider, ThemeProvider } from '@/components/providers';
+import { ReduxProvider, AuthProvider, ThemeProvider } from '@/components/providers';
 import { routing } from '@/i18n/routing';
 import './globals.css';
 
@@ -43,7 +43,9 @@ export default async function RootLayout({
     <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ReduxProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <AuthProvider>
+            <ThemeProvider>{children}</ThemeProvider>
+          </AuthProvider>
         </ReduxProvider>
       </body>
     </html>
