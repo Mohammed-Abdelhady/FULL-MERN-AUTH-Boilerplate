@@ -7,6 +7,8 @@ import type {
   RegisterResponse,
   ActivateRequest,
   ActivateResponse,
+  ResendActivationRequest,
+  ResendActivationResponse,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
   ResetPasswordRequest,
@@ -29,6 +31,8 @@ export const authApi = baseApi.injectEndpoints({
         method: 'POST',
         body: credentials,
       }),
+      transformResponse: (response: { success: boolean; data: LoginResponse; message: string }) =>
+        response.data,
       invalidatesTags: ['Auth', 'User'],
     }),
 
@@ -87,7 +91,24 @@ export const authApi = baseApi.injectEndpoints({
         method: 'POST',
         body: data,
       }),
+      transformResponse: (response: {
+        success: boolean;
+        data: ActivateResponse;
+        message: string;
+      }) => response.data,
       invalidatesTags: ['Auth', 'User'],
+    }),
+
+    /**
+     * Resend activation code mutation
+     * Sends a new activation code to the user's email
+     */
+    resendActivation: builder.mutation<ResendActivationResponse, ResendActivationRequest>({
+      query: (data) => ({
+        url: '/api/auth/resend-activation',
+        method: 'POST',
+        body: data,
+      }),
     }),
 
     /**
@@ -124,6 +145,7 @@ export const {
   useGetCurrentUserQuery,
   useRegisterMutation,
   useActivateMutation,
+  useResendActivationMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,
 } = authApi;
