@@ -17,8 +17,10 @@ import { ActivateDto } from './dto/activate.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ResendActivationDto } from './dto/resend-activation.dto';
 import { Public } from './decorators/public.decorator';
 import { AuthGuard } from './guards/auth.guard';
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -60,6 +62,25 @@ export class AuthController {
   async activate(@Body() dto: ActivateDto, @Res() response: Response) {
     const result = await this.authService.activate(dto, response);
     return response.status(HttpStatus.OK).json(result);
+  }
+
+  /**
+   * Resend activation code
+   * POST /api/auth/resend-activation
+   */
+  @Public()
+  @Throttle({ default: { limit: 3, ttl: 3600000 } })
+  @Post('resend-activation')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Resend activation code',
+    description:
+      'Sends a new 6-digit activation code to the provided email address. ' +
+      'Rate limited to 3 requests per hour per email.',
+  })
+  @ApiBody({ type: ResendActivationDto })
+  async resendActivation(@Body() dto: ResendActivationDto) {
+    return this.authService.resendActivation(dto);
   }
 
   /**

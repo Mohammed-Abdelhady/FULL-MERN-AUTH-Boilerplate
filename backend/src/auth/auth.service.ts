@@ -23,6 +23,8 @@ import { ActivateResponseDto } from './dto/activate-response.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { ForgotPasswordResponseDto } from './dto/forgot-password-response.dto';
 import { ResetPasswordResponseDto } from './dto/reset-password-response.dto';
+import { ResendActivationDto } from './dto/resend-activation.dto';
+import { ResendActivationResponseDto } from './dto/resend-activation-response.dto';
 import { ApiResponse } from '../common/dto/api-response.dto';
 import { HashService } from '../common/services/hash.service';
 import { AppException } from '../common/exceptions/app.exception';
@@ -234,6 +236,60 @@ export class AuthService {
     });
 
     return ActivateResponseDto.success(user);
+  }
+
+  /**
+   * Resend activation code for pending registration
+   * @param dto - Resend activation data
+   * @throws NotFoundException if no pending registration exists
+   * @throws BadRequestException if email sending fails
+   */
+  async resendActivation(
+    dto: ResendActivationDto,
+  ): Promise<ApiResponse<ResendActivationResponseDto>> {
+    // Find pending registration (select hidden fields for update)
+    const pending = await this.pendingRegistrationModel
+      .findOne({ email: dto.email })
+      .select('+hashedPassword +hashedCode');
+
+    if (!pending) {
+      throw new AppException(
+        ErrorCode.NO_PENDING_REGISTRATION_FOR_RESEND,
+        'No pending registration found. Please register again.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    // Generate cryptographically secure 6-digit activation code
+    const code = crypto.randomInt(100000, 1000000).toString();
+    const hashedCode = await this.hashService.hash(code);
+
+    // Calculate new expiry
+    const expiresAt = new Date(Date.now() + this.codeExpiresIn);
+
+    // Update pending registration
+    pending.hashedCode = hashedCode;
+    pending.attempts = 0;
+    pending.expiresAt = expiresAt;
+    await pending.save();
+
+    this.logger.log(`Resent activation code for ${dto.email}`);
+
+    // Send activation email
+    try {
+      await this.mailService.sendActivationCode(dto.email, code, pending.name);
+    } catch (error) {
+      this.logger.error(
+        `Failed to send resend activation email: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      throw new AppException(
+        ErrorCode.EMAIL_SEND_FAILED,
+        'Failed to send activation email',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return ResendActivationResponseDto.success(dto.email);
   }
 
   /**
