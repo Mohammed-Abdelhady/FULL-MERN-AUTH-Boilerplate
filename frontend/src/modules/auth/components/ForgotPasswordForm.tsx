@@ -76,13 +76,16 @@ export function ForgotPasswordForm() {
         router.push(`/auth/reset-password?email=${encodeURIComponent(data.email)}`);
       } catch (err: unknown) {
         // Handle API errors
-        const error = err as { data?: { message?: string; code?: string } };
+        const error = err as { data?: { error?: { code?: string; message?: string } } };
         let errorMessage = t('errors.serverError');
 
-        if (error.data?.code === 'NETWORK_ERROR') {
+        const errorCode = error.data?.error?.code;
+        const errorMsg = error.data?.error?.message;
+
+        if (errorCode === 'NETWORK_ERROR') {
           errorMessage = t('errors.networkError');
-        } else if (error.data?.message) {
-          errorMessage = error.data.message;
+        } else if (errorMsg) {
+          errorMessage = errorMsg;
         }
 
         setError('root', {

@@ -94,13 +94,16 @@ export function RegisterForm() {
         router.push(`/auth/activate?email=${encodeURIComponent(result.data.email)}`);
       } catch (err: unknown) {
         // Handle API errors
-        const error = err as { data?: { message?: string; code?: string } };
+        const error = err as { data?: { error?: { code?: string; message?: string } } };
         let errorMessage = t('errors.serverError');
 
-        if (error.data?.code === 'EMAIL_EXISTS' || error.data?.message?.includes('already')) {
+        const errorCode = error.data?.error?.code;
+        const errorMsg = error.data?.error?.message;
+
+        if (errorCode === 'EMAIL_ALREADY_EXISTS' || errorMsg?.includes('already')) {
           errorMessage = t('errors.emailExists');
-        } else if (error.data?.message) {
-          errorMessage = error.data.message;
+        } else if (errorMsg) {
+          errorMessage = errorMsg;
         }
 
         setError('root', {

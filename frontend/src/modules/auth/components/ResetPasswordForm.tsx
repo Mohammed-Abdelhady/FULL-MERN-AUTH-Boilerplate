@@ -117,20 +117,20 @@ export function ResetPasswordForm() {
         }, 1500);
       } catch (err: unknown) {
         // Handle API errors
-        const error = err as { data?: { message?: string; code?: string } };
+        const error = err as { data?: { error?: { code?: string; message?: string } } };
         let errorMessage = t('errors.serverError');
 
-        if (error.data?.code === 'INVALID_CODE' || error.data?.message?.includes('Invalid')) {
+        const errorCode = error.data?.error?.code;
+        const errorMsg = error.data?.error?.message;
+
+        if (errorCode === 'RESET_CODE_INVALID' || errorMsg?.includes('Invalid')) {
           errorMessage = t('errors.codeInvalid');
-        } else if (
-          error.data?.code === 'CODE_EXPIRED' ||
-          error.data?.message?.includes('expired')
-        ) {
+        } else if (errorCode === 'RESET_CODE_EXPIRED' || errorMsg?.includes('expired')) {
           errorMessage = t('errors.codeExpired');
-        } else if (error.data?.code === 'NETWORK_ERROR') {
+        } else if (errorCode === 'NETWORK_ERROR') {
           errorMessage = t('errors.networkError');
-        } else if (error.data?.message) {
-          errorMessage = error.data.message;
+        } else if (errorMsg) {
+          errorMessage = errorMsg;
         }
 
         setError('root', {
