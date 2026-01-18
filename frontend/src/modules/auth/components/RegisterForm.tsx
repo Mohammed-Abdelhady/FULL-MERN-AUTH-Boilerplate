@@ -65,6 +65,11 @@ export function RegisterForm() {
   // Initialize form with validation
   const form = useFormWithValidation({
     schema: registerSchema,
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+    },
     mode: 'onBlur',
   });
 
