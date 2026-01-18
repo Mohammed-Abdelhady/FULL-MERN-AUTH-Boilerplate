@@ -80,6 +80,8 @@
       "email": "عنوان البريد الإلكتروني",
       "code": "رمز التحقق",
       "submit": "تحقق ومتابعة",
+      "logout": "تسجيل الخروج",
+      "loggingOut": "جارٍ تسجيل الخروج...",
       "resendButton": "إعادة إرسال الرمز",
       "resendSending": "جارٍ الإرسال...",
       "resendCooldown": "إعادة إرسال الرمز ({seconds}ث)",
@@ -196,7 +198,8 @@
       "slowConnection": "تم اكتشاف اتصال بطيء",
       "sessionExpiring": "جلستك على وشك الانتهاء",
       "quotaLimit": "اقتراب من حد الحصة",
-      "deprecatedFeature": "هذه الميزة مهملة"
+      "deprecatedFeature": "هذه الميزة مهملة",
+      "logoutError": "فشل تسجيل الخروج، لكن تم مسح الجلسة محلياً"
     },
     "info": {
       "loading": "جارٍ التحميل...",

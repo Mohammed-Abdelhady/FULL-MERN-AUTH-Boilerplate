@@ -80,6 +80,8 @@
       "email": "Email Address",
       "code": "Verification Code",
       "submit": "Verify and Continue",
+      "logout": "Logout",
+      "loggingOut": "Logging out...",
       "resendButton": "Resend Code",
       "resendSending": "Sending...",
       "resendCooldown": "Resend Code ({seconds}s)",
@@ -196,7 +198,8 @@
       "slowConnection": "Slow connection detected",
       "sessionExpiring": "Your session is about to expire",
       "quotaLimit": "Approaching quota limit",
-      "deprecatedFeature": "This feature is deprecated"
+      "deprecatedFeature": "This feature is deprecated",
+      "logoutError": "Logout failed, but session cleared locally"
     },
     "info": {
       "loading": "Loading...",
