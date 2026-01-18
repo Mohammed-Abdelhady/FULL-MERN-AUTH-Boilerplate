@@ -82,9 +82,25 @@ const getErrorMessage = (error: FetchBaseQueryError): string => {
 
   // Check if error has custom message in response data
   if (error.data && typeof error.data === 'object') {
-    const data = error.data as { message?: string; error?: string };
-    if (data.message) return data.message;
-    if (data.error) return data.error;
+    const data = error.data as {
+      message?: string;
+      error?: string | { code?: string; message?: string };
+    };
+
+    // Check for direct message field
+    if (data.message && typeof data.message === 'string') {
+      return data.message;
+    }
+
+    // Check for nested error object (backend format: { error: { code, message } })
+    if (data.error) {
+      if (typeof data.error === 'string') {
+        return data.error;
+      }
+      if (typeof data.error === 'object' && data.error.message) {
+        return data.error.message;
+      }
+    }
   }
 
   // Network errors
