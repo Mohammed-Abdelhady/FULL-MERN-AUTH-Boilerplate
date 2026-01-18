@@ -15,18 +15,11 @@ import type { ToastType } from '@/types/toast.types';
 import { STATUS_CODE_MESSAGES, ERROR_MESSAGES, TOAST_DURATION } from '@/constants/toastMessages';
 
 /**
- * Check if error is from token refresh (should be silent)
- */
-const isTokenRefreshError = (endpoint: string | undefined): boolean => {
-  return endpoint?.includes('/auth/refresh') || endpoint?.includes('/refresh') || false;
-};
-
-/**
  * Check if error should be silent (no toast)
  */
-const isSilentError = (error: FetchBaseQueryError, endpoint?: string): boolean => {
-  // Silent 401 during token refresh
-  if (error.status === 401 && isTokenRefreshError(endpoint)) {
+const isSilentError = (error: FetchBaseQueryError): boolean => {
+  // Silent all 401 errors (unauthorized is expected when not authenticated)
+  if (error.status === 401) {
     return true;
   }
 
@@ -155,7 +148,7 @@ export const errorInterceptor: Middleware = (store) => (next) => (action) => {
     const method = getHttpMethod(action);
 
     // Skip silent errors
-    if (isSilentError(error, endpoint)) {
+    if (isSilentError(error)) {
       return next(action);
     }
 
