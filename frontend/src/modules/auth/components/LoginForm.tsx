@@ -56,6 +56,10 @@ export function LoginForm() {
   // Initialize form with validation
   const form = useFormWithValidation({
     schema: loginSchema,
+    defaultValues: {
+      email: '',
+      password: '',
+    },
     mode: 'onBlur',
   });
 
