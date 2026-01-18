@@ -15,6 +15,7 @@ export interface User {
 
 /**
  * Authentication state managed by Redux
+ * Session tokens stored in httpOnly cookies (not in Redux state)
  */
 export interface AuthState {
   user: User | null;
@@ -34,10 +35,10 @@ export interface LoginRequest {
 
 /**
  * Login response from API
+ * Uses httpOnly cookies for session management (no token in response)
  */
 export interface LoginResponse {
   user: User;
-  token: string;
   message?: string;
 }
 
@@ -80,10 +81,28 @@ export interface ActivateRequest {
 
 /**
  * Account activation response from API
+ * Uses httpOnly cookies for session management (no token in response)
  */
 export interface ActivateResponse {
-  token: string;
   user: User;
+}
+
+/**
+ * Resend activation code request payload
+ */
+export interface ResendActivationRequest {
+  email: string;
+}
+
+/**
+ * Resend activation code response from API
+ */
+export interface ResendActivationResponse {
+  success: boolean;
+  message: string;
+  data: {
+    email: string;
+  };
 }
 
 /**

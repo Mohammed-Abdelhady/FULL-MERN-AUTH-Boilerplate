@@ -5,6 +5,7 @@ import { authApi } from './authApi';
 
 /**
  * Initial authentication state
+ * Note: Session managed via httpOnly cookies, no token in state
  */
 const initialState: AuthState = {
   user: null,
@@ -32,7 +33,19 @@ export const authSlice = createSlice({
     },
 
     /**
+     * Set user data (for activation flow)
+     * Session managed via httpOnly cookie
+     */
+    setUser: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
+      state.isAuthenticated = true;
+      state.isLoading = false;
+      state.error = null;
+    },
+
+    /**
      * Clear user session and mark as logged out
+     * Backend will clear httpOnly cookie
      */
     logout: (state) => {
       state.user = null;
@@ -94,7 +107,7 @@ export const authSlice = createSlice({
 });
 
 // Export actions
-export const { loginFulfilled, logout, setLoading, setError } = authSlice.actions;
+export const { loginFulfilled, setUser, logout, setLoading, setError } = authSlice.actions;
 
 // Selectors
 export const selectUser = (state: RootState) => state.auth.user;

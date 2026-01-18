@@ -3,20 +3,21 @@ import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolk
 
 /**
  * Base query configuration for RTK Query
- * Includes credentials for cookie-based auth
+ * Uses httpOnly cookies for authentication (credentials: 'include')
  */
 const baseQuery = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
-  credentials: 'include', // Send cookies with requests
+  credentials: 'include', // Send httpOnly cookies automatically
   prepareHeaders: (headers) => {
     headers.set('Content-Type', 'application/json');
+    // Session managed via httpOnly cookies sent automatically
     return headers;
   },
 });
 
 /**
- * Base query with automatic token refresh on 401 errors
- * Intercepts failed requests and attempts to refresh auth token
+ * Base query with automatic session refresh on 401 errors
+ * Uses cookie-based session refresh
  */
 const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
   args,
@@ -25,17 +26,19 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 ) => {
   let result = await baseQuery(args, api, extraOptions);
 
-  // If request fails with 401, attempt token refresh
+  // If request fails with 401, attempt session refresh
   if (result.error?.status === 401) {
-    // Try to refresh the token
+    // Try to refresh the session (cookie-based)
     const refreshResult = await baseQuery('/api/auth/refresh', api, extraOptions);
 
     if (refreshResult.data) {
       // Refresh successful, retry the original request
+      // New session cookie automatically set by backend
       result = await baseQuery(args, api, extraOptions);
     } else {
       // Refresh failed, user needs to login again
-      // The authSlice will handle logout via matcher
+      // Trigger logout to clear client state
+      api.dispatch({ type: 'auth/logout' });
     }
   }
 

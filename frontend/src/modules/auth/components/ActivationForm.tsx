@@ -6,14 +6,14 @@ import { z } from 'zod';
 import { FormProvider } from 'react-hook-form';
 import { useFormWithValidation } from '@/hooks/useFormWithValidation';
 import { FormInput } from '@/components/forms';
-import { useActivateMutation } from '../store/authApi';
+import { useActivateMutation, useResendActivationMutation } from '../store/authApi';
 import { zodEmail } from '@/lib/validations';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCallback, useMemo, useEffect, useState } from 'react';
 import { toast } from '@/lib/toast';
 import { useAppDispatch } from '@/store/hooks';
-import { setUser, setToken } from '@/store/slices/authSlice';
+import { setUser } from '@/modules/auth/store/authSlice';
 import { WelcomeModal } from '@/components/welcome/WelcomeModal';
 
 /**
@@ -51,8 +51,10 @@ export function ActivationForm() {
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const [activate, { isLoading }] = useActivateMutation();
+  const [resendActivation, { isLoading: isResending }] = useResendActivationMutation();
   const [showWelcome, setShowWelcome] = useState(false);
   const [userName, setUserName] = useState('');
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
 
   // Get email from URL params
   const emailFromUrl = searchParams.get('email') || '';
@@ -77,6 +79,16 @@ export function ActivationForm() {
     setValue,
   } = form;
 
+  // Cooldown timer effect
+  useEffect(() => {
+    if (cooldownSeconds > 0) {
+      const timer = setTimeout(() => {
+        setCooldownSeconds((prev) => prev - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [cooldownSeconds]);
+
   // Redirect to register if no email in URL
   useEffect(() => {
     if (!emailFromUrl) {
@@ -95,8 +107,7 @@ export function ActivationForm() {
           code: data.code,
         }).unwrap();
 
-        // Successful activation - auto-login user
-        dispatch(setToken(result.token));
+        // Successful activation - session cookie set by backend
         dispatch(setUser(result.user));
 
         toast.success(tToast('success.activationSuccess'));
@@ -106,20 +117,20 @@ export function ActivationForm() {
         setShowWelcome(true);
       } catch (err: unknown) {
         // Handle API errors
-        const error = err as { data?: { message?: string; code?: string } };
+        const error = err as { data?: { error?: { code?: string; message?: string } } };
         let errorMessage = t('errors.serverError');
 
-        if (error.data?.code === 'INVALID_CODE' || error.data?.message?.includes('Invalid')) {
+        const errorCode = error.data?.error?.code;
+        const errorMsg = error.data?.error?.message;
+
+        if (errorCode === 'ACTIVATION_CODE_INVALID' || errorMsg?.includes('Invalid')) {
           errorMessage = t('errors.codeInvalid');
-        } else if (
-          error.data?.code === 'CODE_EXPIRED' ||
-          error.data?.message?.includes('expired')
-        ) {
+        } else if (errorCode === 'ACTIVATION_CODE_EXPIRED' || errorMsg?.includes('expired')) {
           errorMessage = t('errors.codeExpired');
           // Redirect to register after short delay
           setTimeout(() => router.push('/auth/register'), 2000);
-        } else if (error.data?.message) {
-          errorMessage = error.data.message;
+        } else if (errorMsg) {
+          errorMessage = errorMsg;
         }
 
         setError('root', {
@@ -135,6 +146,34 @@ export function ActivationForm() {
     [activate, dispatch, router, setError, setValue, t, tToast],
   );
 
+  // Handle resend activation code
+  const handleResend = useCallback(async () => {
+    try {
+      await resendActivation({ email: emailFromUrl }).unwrap();
+      toast.success(tToast('success.resendSuccess'));
+      // Start 60-second cooldown
+      setCooldownSeconds(60);
+    } catch (err: unknown) {
+      const error = err as { data?: { error?: { code?: string; message?: string } } };
+      let errorMessage = tToast('error.resendError');
+
+      const errorCode = error.data?.error?.code;
+      const errorMsg = error.data?.error?.message;
+
+      if (errorCode === 'NO_PENDING_REGISTRATION_FOR_RESEND') {
+        errorMessage = tToast('error.resendNoPending');
+        // Redirect to register after short delay
+        setTimeout(() => router.push('/auth/register'), 3000);
+      } else if (errorCode === 'RATE_LIMIT_EXCEEDED') {
+        errorMessage = tToast('error.resendRateLimit');
+      } else if (errorMsg) {
+        errorMessage = errorMsg;
+      }
+
+      toast.error(errorMessage);
+    }
+  }, [resendActivation, emailFromUrl, router, tToast]);
+
   // Handle code input to only allow numeric characters
   const handleCodeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -143,6 +182,8 @@ export function ActivationForm() {
     },
     [setValue],
   );
+
+  const isDisabled = isLoading || isResending || cooldownSeconds > 0;
 
   return (
     <section className="mt-12 flex flex-col items-center" aria-labelledby="activate-heading">
@@ -220,7 +261,7 @@ export function ActivationForm() {
             {/* Submit Button */}
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isDisabled}
               className="h-14 mt-5 tracking-wide font-semibold w-full py-4 rounded-lg transition-all duration-300 ease-in-out flex items-center justify-center"
               data-testid="activate-submit"
               aria-label={isLoading ? `${t('submit')}...` : t('submit')}
@@ -230,8 +271,35 @@ export function ActivationForm() {
               <span className="ms-3">{isLoading ? `${t('submit')}...` : t('submit')}</span>
             </Button>
 
-            {/* Resend Code Text (Future Enhancement) */}
-            <p className="text-sm text-muted-foreground text-center mt-6">{t('didntReceive')}</p>
+            {/* Resend Code Button */}
+            <Button
+              type="button"
+              onClick={handleResend}
+              disabled={isDisabled}
+              variant="ghost"
+              className="mt-4 w-full flex items-center justify-center gap-2"
+              data-testid="resend-button"
+              aria-label={
+                isResending
+                  ? t('resendSending')
+                  : cooldownSeconds > 0
+                    ? t('resendCooldown', { seconds: cooldownSeconds })
+                    : t('resendButton')
+              }
+              aria-busy={isResending || cooldownSeconds > 0}
+            >
+              <RefreshCw
+                className={`w-4 h-4 ${isResending || cooldownSeconds > 0 ? 'animate-spin' : ''}`}
+                aria-hidden="true"
+              />
+              <span>
+                {isResending
+                  ? t('resendSending')
+                  : cooldownSeconds > 0
+                    ? t('resendCooldown', { seconds: cooldownSeconds })
+                    : t('resendButton')}
+              </span>
+            </Button>
           </form>
         </FormProvider>
       </div>
