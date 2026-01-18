@@ -18,6 +18,10 @@ export enum ErrorCode {
   MAX_ATTEMPTS_EXCEEDED = 'MAX_ATTEMPTS_EXCEEDED',
   /** No pending registration found for email */
   NO_PENDING_REGISTRATION = 'NO_PENDING_REGISTRATION',
+  /** No pending registration found for resend activation */
+  NO_PENDING_REGISTRATION_FOR_RESEND = 'NO_PENDING_REGISTRATION_FOR_RESEND',
+  /** Resend activation rate limit exceeded */
+  RESEND_RATE_LIMIT_EXCEEDED = 'RESEND_RATE_LIMIT_EXCEEDED',
 
   // Email errors
   /** Failed to send email */
