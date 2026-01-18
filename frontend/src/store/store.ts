@@ -9,11 +9,35 @@ import {
   PURGE,
   REGISTER,
 } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
+import createWebStorage from 'redux-persist/lib/storage/createWebStorage';
 import { baseApi } from './api/baseApi';
 import authReducer from '@/modules/auth/store/authSlice';
 import toastReducer from './slices/toastSlice';
 import { errorInterceptor } from './middleware/errorInterceptor';
+
+/**
+ * Create a noop storage for server-side rendering
+ * Prevents redux-persist from trying to access localStorage during SSR
+ */
+const createNoopStorage = () => {
+  return {
+    getItem(_key: string) {
+      return Promise.resolve(null);
+    },
+    setItem(_key: string, value: string) {
+      return Promise.resolve(value);
+    },
+    removeItem(_key: string) {
+      return Promise.resolve();
+    },
+  };
+};
+
+/**
+ * Use browser localStorage only when running in the browser
+ * Falls back to noop storage during SSR
+ */
+const storage = typeof window !== 'undefined' ? createWebStorage('local') : createNoopStorage();
 
 /**
  * Redux persist configuration
