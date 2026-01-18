@@ -19,6 +19,10 @@ NestJS 11 backend API with authentication, session management, and role-based ac
 # Install dependencies
 npm install
 
+# Database setup
+npm run migration:up   # Apply database migrations
+npm run seed           # Seed database with test users
+
 # Development with hot reload
 npm run start:dev
 
@@ -37,10 +41,27 @@ npm run lint          # ESLint
 npm run format        # Prettier
 ```
 
+### Database Management
+
+```bash
+# Migrations
+npm run migration:create <name>    # Create new migration
+npm run migration:up               # Apply pending migrations
+npm run migration:down             # Rollback last migration
+npm run migration:status           # Check migration status
+
+# Seeding
+npm run seed                     # Seed database with test users
+npm run seed:reset                # Clear and reseed database
+```
+
+**See:** [Database Management Guide](docs/database-management.md) for detailed instructions.
+
 ## Documentation
 
 | Document                                                    | Description                                                   |
 | ----------------------------------------------------------- | ------------------------------------------------------------- |
+| [Database Management](docs/database-management.md)          | Database migrations, seeding, and troubleshooting             |
 | [Authentication Flow](docs/authentication-flow.md)          | Registration, activation, login, logout, session management   |
 | [User, Roles & Permissions](docs/user-roles-permissions.md) | User model, role hierarchy (USER/SUPPORT/MANAGER/ADMIN), RBAC |
 | [API Responses](docs/api-responses.md)                      | Standardized API response format and error codes              |
@@ -122,6 +143,13 @@ src/
 │   └── schemas/            # Permission schema
 ├── mail/                   # Mail module
 │   └── mail.service.ts     # Nodemailer service
+├── database/               # Database module
+│   ├── database.module.ts   # Database configuration
+│   └── seeds/             # Seed data
+│       ├── seed.module.ts    # Seed module
+│       ├── seed.service.ts   # Seed service
+│       ├── user.seed.ts      # User seed data
+│       └── index.ts         # CLI entry point
 ├── common/                 # Shared utilities
 │   ├── dto/                # Common DTOs
 │   └── services/           # HashService
@@ -136,9 +164,13 @@ docs/
 │   ├── staging.json
 │   ├── production.json
 │   └── README.md
+├── database-management.md  # Database management guide
 ├── authentication-flow.md
 ├── user-roles-permissions.md
 └── api-responses.md
+
+migrations/                # Database migrations
+└── 20260118000001-initial-indexes.js
 ```
 
 ## Environment Variables

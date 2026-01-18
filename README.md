@@ -213,6 +213,31 @@ For native development (without Docker):
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:3000/api
 
+### Database Setup (Optional)
+
+After starting MongoDB, you can setup the database with migrations and seed data:
+
+```bash
+cd backend
+
+# Apply database migrations
+npm run migration:up
+
+# Seed database with test users
+npm run seed
+```
+
+**Seed User Credentials:**
+
+| Role    | Email                | Password      |
+| ------- | -------------------- | ------------- |
+| USER    | `user@seed.local`    | `User123!`    |
+| SUPPORT | `support@seed.local` | `Support123!` |
+| MANAGER | `manager@seed.local` | `Manager123!` |
+| ADMIN   | `admin@seed.local`   | `Admin123!`   |
+
+📖 **See**: [Database Management Guide](./backend/docs/database-management.md) for detailed instructions.
+
 ## Development Workflow
 
 ### Code Quality Automation
@@ -383,6 +408,7 @@ npm test
 
 ### Backend API
 
+- [Database Management](./backend/docs/database-management.md) - Database migrations, seeding, and troubleshooting
 - [Authentication Flow](./backend/docs/authentication-flow.md) - Registration, login, logout, sessions
 - [User, Roles & Permissions](./backend/docs/user-roles-permissions.md) - User model, role hierarchy, RBAC
 
