@@ -80,10 +80,13 @@
       "email": "Email Address",
       "code": "Verification Code",
       "submit": "Verify and Continue",
-      "resend": "Resend Code",
+      "resendButton": "Resend Code",
+      "resendSending": "Sending...",
+      "resendCooldown": "Resend Code ({seconds}s)",
       "didntReceive": "Didn't receive the code?",
       "errors": {
         "emailRequired": "Email is required",
+        "emailInvalid": "Please enter a valid email address",
         "codeRequired": "Verification code is required",
         "codeInvalid": "Invalid verification code",
         "codeExpired": "Code has expired. Please register again",
@@ -150,6 +153,7 @@
       "registrationSuccess": "Account created! Check your email",
       "activationSuccess": "Email verified successfully!",
       "emailVerified": "Email verified successfully",
+      "resendSuccess": "New activation code sent to your email",
       "resetLinkSent": "If the email is registered, you'll receive a reset link",
       "passwordReset": "Password updated successfully! You can now log in",
       "passwordResetSent": "Password reset email sent",
@@ -182,7 +186,10 @@
       "operationFailed": "Operation failed. Please try again",
       "notFound": "Resource not found",
       "tooManyRequests": "Too many requests. Please slow down",
-      "badGateway": "Bad gateway. Please try again"
+      "badGateway": "Bad gateway. Please try again",
+      "resendError": "Failed to send activation code. Please try again",
+      "resendRateLimit": "Too many resend attempts. Please wait before trying again",
+      "resendNoPending": "No pending registration found. Please register again"
     },
     "warning": {
       "unsavedChanges": "You have unsaved changes",
