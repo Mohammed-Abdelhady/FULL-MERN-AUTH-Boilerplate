@@ -4,6 +4,9 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { useAppSelector } from '@/store/hooks';
+import { selectUser } from '@/modules/auth/store/authSlice';
+import { getRoleDashboard } from '@/modules/auth/utils/roleRouting';
 
 interface WelcomeModalProps {
   isOpen: boolean;
@@ -14,10 +17,13 @@ interface WelcomeModalProps {
 export function WelcomeModal({ isOpen, userName, onClose }: WelcomeModalProps) {
   const t = useTranslations('welcome');
   const router = useRouter();
+  const user = useAppSelector(selectUser);
 
   const handleGetStarted = () => {
     onClose?.();
-    router.push('/');
+    // Navigate to role-based dashboard
+    const dashboardUrl = user ? getRoleDashboard(user.role) : '/dashboard';
+    router.push(dashboardUrl);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
