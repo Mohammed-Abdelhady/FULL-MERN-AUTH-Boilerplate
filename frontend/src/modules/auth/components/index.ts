@@ -5,3 +5,7 @@ export { ActivationForm } from './ActivationForm';
 export { OAuthButton } from './OAuthButton';
 export { OAuthButtons } from './OAuthButtons';
 export { OAuthDivider } from './OAuthDivider';
+export { LinkedAccounts } from './LinkedAccounts';
+export { LinkedAccountCard } from './LinkedAccountCard';
+export { LinkProviderButton } from './LinkProviderButton';
+export { ProfileSyncStatus } from './ProfileSyncStatus';

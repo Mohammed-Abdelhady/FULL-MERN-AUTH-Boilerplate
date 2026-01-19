@@ -15,6 +15,15 @@ export {
   useGetEnabledProvidersQuery,
 } from './oauthApi';
 
+// Account Linking API exports
+export {
+  accountLinkingApi,
+  useGetLinkedProvidersQuery,
+  useLinkProviderMutation,
+  useUnlinkProviderMutation,
+  useSetPrimaryProviderMutation,
+} from './accountLinkingApi';
+
 // Auth slice exports
 export {
   authSlice,
