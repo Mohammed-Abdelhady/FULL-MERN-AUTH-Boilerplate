@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { AuthService } from './auth.service';
@@ -38,7 +38,7 @@ import { VerifiedGuard } from './guards/verified.guard';
     // ThrottlerModule is already configured globally in AppModule
     CommonModule,
     MailModule,
-    UserModule,
+    forwardRef(() => UserModule),
     SessionModule,
   ],
   controllers: [AuthController, OAuthController],
