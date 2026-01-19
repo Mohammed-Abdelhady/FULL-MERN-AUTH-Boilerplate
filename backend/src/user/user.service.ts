@@ -289,6 +289,12 @@ export class UserService {
       isVerified: user.isVerified,
       googleId: user.googleId,
       facebookId: user.facebookId,
+      githubId: user.githubId,
+      linkedProviders: user.linkedProviders,
+      primaryProvider: user.primaryProvider,
+      profileSyncedAt: user.profileSyncedAt,
+      createdAt: (user as unknown as Record<string, unknown>).createdAt as Date,
+      updatedAt: (user as unknown as Record<string, unknown>).updatedAt as Date,
     };
   }
 }

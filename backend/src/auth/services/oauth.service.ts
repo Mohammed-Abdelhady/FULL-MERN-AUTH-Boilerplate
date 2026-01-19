@@ -217,13 +217,32 @@ export class OAuthService {
     });
 
     if (existingUserByProvider) {
-      // Update user info if needed
+      // Update user info if needed (profile sync)
+      let updated = false;
       if (
         existingUserByProvider.name !== oauthProfile.name ||
         existingUserByProvider.email !== oauthProfile.email
       ) {
         existingUserByProvider.name = oauthProfile.name;
         existingUserByProvider.email = oauthProfile.email;
+        updated = true;
+      }
+
+      // Update profile sync timestamp if this is the primary provider
+      const authProviderMap: Record<OAuthProvider, AuthProvider> = {
+        google: AuthProvider.GOOGLE,
+        facebook: AuthProvider.FACEBOOK,
+        github: AuthProvider.GITHUB,
+      };
+      const mappedProvider = authProviderMap[provider];
+
+      if (existingUserByProvider.primaryProvider === mappedProvider) {
+        existingUserByProvider.profileSyncedAt = new Date();
+        existingUserByProvider.lastSyncedProvider = provider;
+        updated = true;
+      }
+
+      if (updated) {
         await existingUserByProvider.save();
       }
       return existingUserByProvider;
@@ -234,25 +253,40 @@ export class OAuthService {
       email: oauthProfile.email,
     });
 
-    if (existingUserByEmail) {
-      // Link OAuth account to existing user
-      (existingUserByEmail[providerIdField] as string) =
-        oauthProfile.providerId;
-      existingUserByEmail.isVerified = true;
-      await existingUserByEmail.save();
-
-      this.logger.log(
-        `Linked ${provider} account to existing user: ${oauthProfile.email}`,
-      );
-      return existingUserByEmail;
-    }
-
     // Map provider to AuthProvider enum
     const authProviderMap: Record<OAuthProvider, AuthProvider> = {
       google: AuthProvider.GOOGLE,
       facebook: AuthProvider.FACEBOOK,
       github: AuthProvider.GITHUB,
     };
+    const mappedProvider = authProviderMap[provider];
+
+    if (existingUserByEmail) {
+      // Link OAuth account to existing user (auto-linking)
+      (existingUserByEmail[providerIdField] as string) =
+        oauthProfile.providerId;
+      existingUserByEmail.isVerified = true;
+
+      // Add provider to linkedProviders if not already present
+      if (!existingUserByEmail.linkedProviders.includes(mappedProvider)) {
+        existingUserByEmail.linkedProviders.push(mappedProvider);
+      }
+
+      // If no primary provider set and this is an OAuth provider, set it as primary
+      if (
+        !existingUserByEmail.primaryProvider &&
+        mappedProvider !== AuthProvider.EMAIL
+      ) {
+        existingUserByEmail.primaryProvider = mappedProvider;
+      }
+
+      await existingUserByEmail.save();
+
+      this.logger.log(
+        `Auto-linked ${provider} account to existing user: ${oauthProfile.email}`,
+      );
+      return existingUserByEmail;
+    }
 
     // Create new user
     const newUser = await this.userModel.create({
@@ -260,7 +294,9 @@ export class OAuthService {
       name: oauthProfile.name,
       [providerIdField]: oauthProfile.providerId,
       isVerified: oauthProfile.emailVerified ?? true,
-      authProvider: authProviderMap[provider],
+      authProvider: mappedProvider,
+      linkedProviders: [mappedProvider],
+      primaryProvider: mappedProvider,
       role: 'user',
     });
 
@@ -276,6 +312,23 @@ export class OAuthService {
       Math.random().toString(36).substring(2, 15) +
       Math.random().toString(36).substring(2, 15)
     );
+  }
+
+  /**
+   * Get user profile from OAuth provider without creating session
+   * Used for account linking flow
+   * @param provider - OAuth provider name
+   * @param code - Authorization code from OAuth callback
+   * @param state - State parameter for CSRF protection
+   * @returns OAuth user profile
+   */
+  async getUserProfile(
+    provider: OAuthProvider,
+    code: string,
+    state?: string,
+  ): Promise<OAuthUserProfile> {
+    const strategy = this.getStrategy(provider);
+    return strategy.getUserProfile(code, state);
   }
 
   /**
