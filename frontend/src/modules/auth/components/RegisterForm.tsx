@@ -13,6 +13,8 @@ import { IconLinkButton } from '@/components/ui/icon-link-button';
 import { Button } from '@/components/ui/button';
 import { useCallback, useMemo } from 'react';
 import { toast } from '@/lib/toast';
+import { OAuthButtons } from './OAuthButtons';
+import { OAuthDivider } from './OAuthDivider';
 
 /**
  * Registration form validation schema using centralized validators
@@ -141,12 +143,13 @@ export function RegisterForm() {
           </IconLinkButton>
         </div>
 
-        {/* Divider */}
-        <div className="my-12 border-b border-border text-center" aria-hidden="true">
-          <div className="leading-none px-2 inline-block text-sm text-muted-foreground tracking-wide font-medium bg-card transform translate-y-1/2">
-            {t('divider')}
-          </div>
+        {/* OAuth Buttons */}
+        <div className="my-6">
+          <OAuthButtons mode="signin" />
         </div>
+
+        {/* Divider */}
+        <OAuthDivider />
 
         {/* Registration Form */}
         <FormProvider {...form}>

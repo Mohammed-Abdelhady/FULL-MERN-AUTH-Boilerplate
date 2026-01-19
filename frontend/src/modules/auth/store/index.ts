@@ -7,6 +7,14 @@ export {
   useGetCurrentUserQuery,
 } from './authApi';
 
+// OAuth API exports
+export {
+  oauthApi,
+  useGetAuthorizationUrlQuery,
+  useHandleCallbackMutation,
+  useGetEnabledProvidersQuery,
+} from './oauthApi';
+
 // Auth slice exports
 export {
   authSlice,

@@ -140,6 +140,17 @@
         "serverError": "An error occurred. Please try again later",
         "networkError": "Network error. Please check your connection"
       }
+    },
+    "oauth": {
+      "signInWith": "Sign in with {provider}",
+      "continue": "Or continue with",
+      "connecting": "Connecting to {provider}...",
+      "error": "Failed to sign in with {provider}",
+      "callback": {
+        "title": "Completing authentication...",
+        "error": "Authentication failed",
+        "success": "Authentication successful"
+      }
     }
   },
   "welcome": {
