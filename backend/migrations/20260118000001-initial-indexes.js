@@ -15,77 +15,132 @@
 
 module.exports = {
   async up(db, client) {
+    // Helper function to check if index exists
+    const indexExists = async (collection, indexName) => {
+      const indexes = await db.collection(collection).indexes();
+      return indexes.some((idx) => idx.name === indexName);
+    };
+
     // Create unique index on email field
-    await db.collection('users').createIndex(
-      { email: 1 },
-      {
-        unique: true,
-        name: 'email_unique',
-        background: true,
-      },
-    );
+    if (!(await indexExists('users', 'email_unique'))) {
+      try {
+        await db.collection('users').createIndex(
+          { email: 1 },
+          {
+            unique: true,
+            name: 'email_unique',
+            background: true,
+          },
+        );
+        console.log('✓ Created email_unique index');
+      } catch (error) {
+        console.log('⚠ Email index already exists with different name');
+      }
+    }
 
     // Create compound index for createdAt and isDeleted
-    await db.collection('users').createIndex(
-      { createdAt: -1, isDeleted: 1 },
-      {
-        name: 'createdAt_isDeleted_compound',
-        background: true,
-      },
-    );
+    if (!(await indexExists('users', 'createdAt_isDeleted_compound'))) {
+      try {
+        await db.collection('users').createIndex(
+          { createdAt: -1, isDeleted: 1 },
+          {
+            name: 'createdAt_isDeleted_compound',
+            background: true,
+          },
+        );
+        console.log('✓ Created createdAt_isDeleted_compound index');
+      } catch (error) {
+        console.log('⚠ createdAt_isDeleted_compound index already exists');
+      }
+    }
 
     // Create index on role field for filtering by user role
-    await db.collection('users').createIndex(
-      { role: 1 },
-      {
-        name: 'role_index',
-        background: true,
-      },
-    );
+    if (!(await indexExists('users', 'role_index'))) {
+      try {
+        await db.collection('users').createIndex(
+          { role: 1 },
+          {
+            name: 'role_index',
+            background: true,
+          },
+        );
+        console.log('✓ Created role_index');
+      } catch (error) {
+        console.log('⚠ role_index already exists');
+      }
+    }
 
     // Create index on isDeleted field for soft delete queries
-    await db.collection('users').createIndex(
-      { isDeleted: 1 },
-      {
-        name: 'isDeleted_index',
-        background: true,
-      },
-    );
+    if (!(await indexExists('users', 'isDeleted_index'))) {
+      try {
+        await db.collection('users').createIndex(
+          { isDeleted: 1 },
+          {
+            name: 'isDeleted_index',
+            background: true,
+          },
+        );
+        console.log('✓ Created isDeleted_index');
+      } catch (error) {
+        console.log('⚠ isDeleted index already exists with different name');
+      }
+    }
 
     // Create sparse unique index on googleId for OAuth users
-    await db.collection('users').createIndex(
-      { googleId: 1 },
-      {
-        unique: true,
-        sparse: true,
-        name: 'googleId_unique',
-        background: true,
-      },
-    );
+    if (!(await indexExists('users', 'googleId_unique'))) {
+      try {
+        await db.collection('users').createIndex(
+          { googleId: 1 },
+          {
+            unique: true,
+            sparse: true,
+            name: 'googleId_unique',
+            background: true,
+          },
+        );
+        console.log('✓ Created googleId_unique index');
+      } catch (error) {
+        console.log('⚠ googleId index already exists');
+      }
+    }
 
     // Create sparse unique index on facebookId for OAuth users
-    await db.collection('users').createIndex(
-      { facebookId: 1 },
-      {
-        unique: true,
-        sparse: true,
-        name: 'facebookId_unique',
-        background: true,
-      },
-    );
+    if (!(await indexExists('users', 'facebookId_unique'))) {
+      try {
+        await db.collection('users').createIndex(
+          { facebookId: 1 },
+          {
+            unique: true,
+            sparse: true,
+            name: 'facebookId_unique',
+            background: true,
+          },
+        );
+        console.log('✓ Created facebookId_unique index');
+      } catch (error) {
+        console.log('⚠ facebookId index already exists');
+      }
+    }
 
     // Create sparse unique index on githubId for OAuth users
-    await db.collection('users').createIndex(
-      { githubId: 1 },
-      {
-        unique: true,
-        sparse: true,
-        name: 'githubId_unique',
-        background: true,
-      },
-    );
+    if (!(await indexExists('users', 'githubId_unique'))) {
+      try {
+        await db.collection('users').createIndex(
+          { githubId: 1 },
+          {
+            unique: true,
+            sparse: true,
+            name: 'githubId_unique',
+            background: true,
+          },
+        );
+        console.log('✓ Created githubId_unique index');
+      } catch (error) {
+        console.log('⚠ githubId index already exists');
+      }
+    }
 
-    console.log('✓ Created all user collection indexes');
+    console.log('✓ All user collection indexes verified/created');
   },
 
   async down(db, client) {

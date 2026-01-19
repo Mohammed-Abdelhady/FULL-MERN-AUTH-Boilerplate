@@ -130,4 +130,18 @@ export enum ErrorCode {
   PASSWORD_RESET_CODE_INVALID = 'PASSWORD_RESET_CODE_INVALID',
   /** User not found for password reset */
   USER_NOT_FOUND_FOR_RESET = 'USER_NOT_FOUND_FOR_RESET',
+
+  // Account linking errors
+  /** Provider is already linked to this account */
+  PROVIDER_ALREADY_LINKED = 'PROVIDER_ALREADY_LINKED',
+  /** Provider ID is already linked to another account */
+  PROVIDER_LINKED_TO_OTHER_ACCOUNT = 'PROVIDER_LINKED_TO_OTHER_ACCOUNT',
+  /** Email mismatch when linking provider */
+  EMAIL_MISMATCH_ON_LINK = 'EMAIL_MISMATCH_ON_LINK',
+  /** Cannot unlink last authentication provider */
+  CANNOT_UNLINK_LAST_PROVIDER = 'CANNOT_UNLINK_LAST_PROVIDER',
+  /** Provider is not linked to this account */
+  PROVIDER_NOT_LINKED = 'PROVIDER_NOT_LINKED',
+  /** Re-authentication required for sensitive operation */
+  REAUTH_REQUIRED = 'REAUTH_REQUIRED',
 }
