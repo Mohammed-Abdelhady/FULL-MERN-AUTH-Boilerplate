@@ -2,7 +2,11 @@
 
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
-import { useGetAuthorizationUrlQuery } from '@/modules/auth/store/oauthApi';
+import { useRouter } from 'next/navigation';
+import {
+  useGetAuthorizationUrlQuery,
+  useHandleCallbackMutation,
+} from '@/modules/auth/store/oauthApi';
 import { OAuthProvider } from '@/modules/auth/types/auth.types';
 import {
   formatProviderName,
@@ -34,6 +38,8 @@ export function OAuthButton({
   disabled = false,
 }: OAuthButtonProps) {
   const t = useTranslations('auth.oauth');
+  const tCallback = useTranslations('auth.oauth.callback');
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   // Fetch authorization URL for the provider
@@ -41,10 +47,12 @@ export function OAuthButton({
     skip: isLoading || disabled,
   });
 
+  const [handleOAuthCallback] = useHandleCallbackMutation();
+
   const handleOAuthClick = async () => {
     if (!authUrlData?.url) {
-      toast.error(t('auth.oauth.error', { provider: formatProviderName(provider) }));
-      onError?.(t('auth.oauth.error', { provider: formatProviderName(provider) }));
+      toast.error(t('error', { provider: formatProviderName(provider) }));
+      onError?.(t('error', { provider: formatProviderName(provider) }));
       return;
     }
 
@@ -59,35 +67,43 @@ export function OAuthButton({
       }
 
       // Wait for callback from popup
-      const callbackData = await waitForOAuthCallback();
+      const callbackData = await waitForOAuthCallback(popup);
 
       if (!callbackData || !callbackData.code) {
         throw new Error('Invalid OAuth callback data');
       }
 
-      // Store callback data in session storage for the callback page to process
-      sessionStorage.setItem('oauth_callback_data', JSON.stringify(callbackData));
+      // Call the backend callback endpoint directly
+      await handleOAuthCallback({
+        provider: callbackData.provider,
+        code: callbackData.code,
+        state: callbackData.state,
+      }).unwrap();
 
-      // Redirect to callback page
-      window.location.href = `/auth/oauth/callback?provider=${callbackData.provider}`;
+      // Show success message
+      toast.success(tCallback('success'));
+
+      // Redirect to dashboard
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 500);
 
       onSuccess?.();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'OAuth authentication failed';
-      toast.error(t('auth.oauth.error', { provider: formatProviderName(provider) }));
+      toast.error(t('error', { provider: formatProviderName(provider) }));
       onError?.(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const buttonVariant = provider === 'github' ? 'outline' : 'default';
   const providerColor = getProviderColor(provider);
 
   return (
     <Button
       type="button"
-      variant={buttonVariant}
+      variant="default"
       className={`w-full ${providerColor}`}
       onClick={handleOAuthClick}
       disabled={disabled || isLoading || isFetchingUrl}
@@ -96,14 +112,14 @@ export function OAuthButton({
       {isLoading || isFetchingUrl ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          {t('auth.oauth.connecting', { provider: formatProviderName(provider) })}
+          {t('connecting', { provider: formatProviderName(provider) })}
         </>
       ) : (
         <>
           <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <path d={getOAuthProviderIconPath(provider)} />
           </svg>
-          {t('auth.oauth.signInWith', { provider: formatProviderName(provider) })}
+          {t('signInWith', { provider: formatProviderName(provider) })}
         </>
       )}
     </Button>

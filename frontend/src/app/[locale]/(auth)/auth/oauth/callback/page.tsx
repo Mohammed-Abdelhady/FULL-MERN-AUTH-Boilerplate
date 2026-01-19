@@ -21,7 +21,70 @@ export default function OAuthCallbackPage() {
   useEffect(() => {
     const processCallback = async () => {
       try {
-        // Get callback data from session storage
+        // Check for error in URL params first (OAuth provider returned error)
+        const error = searchParams.get('error');
+        const errorDescription = searchParams.get('error_description');
+
+        if (error) {
+          setIsProcessing(false);
+          const errorMessage = errorDescription || `OAuth error: ${error}`;
+          toast.error(errorMessage);
+
+          // If in popup, notify parent window
+          if (window.opener) {
+            window.close();
+          } else {
+            // Redirect to login with error after a delay
+            setTimeout(() => {
+              router.push('/auth/login?error=oauth_failed');
+            }, 2000);
+          }
+          return;
+        }
+
+        // Get code and state from URL params
+        const code = searchParams.get('code');
+        const state = searchParams.get('state');
+        const provider = searchParams.get('provider');
+
+        // If we have code and state in URL (direct redirect from OAuth provider)
+        if (code && state) {
+          // Check if this is a popup window
+          if (window.opener) {
+            // Send data back to parent window via postMessage
+            window.opener.postMessage(
+              {
+                type: 'oauth_callback',
+                code,
+                state,
+                provider: provider || 'github',
+              },
+              window.location.origin,
+            );
+
+            // Close the popup
+            window.close();
+            return;
+          }
+
+          // Not a popup, process directly
+          await handleCallback({
+            provider: (provider as any) || 'github',
+            code,
+            state,
+          }).unwrap();
+
+          // Show success message
+          toast.success(t('success'));
+
+          // Redirect to dashboard after successful authentication
+          setTimeout(() => {
+            router.push('/dashboard');
+          }, 500);
+          return;
+        }
+
+        // Fallback: Try to get callback data from session storage
         const callbackDataStr = sessionStorage.getItem('oauth_callback_data');
 
         if (!callbackDataStr) {
@@ -52,15 +115,20 @@ export default function OAuthCallbackPage() {
         setIsProcessing(false);
         toast.error(t('error'));
 
-        // Redirect to login with error after a delay
-        setTimeout(() => {
-          router.push('/auth/login');
-        }, 3000);
+        // If in popup, just close it
+        if (window.opener) {
+          window.close();
+        } else {
+          // Redirect to login with error after a delay
+          setTimeout(() => {
+            router.push('/auth/login?error=oauth_failed');
+          }, 2000);
+        }
       }
     };
 
     processCallback();
-  }, [handleCallback, router, t]);
+  }, [handleCallback, router, searchParams, t]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">

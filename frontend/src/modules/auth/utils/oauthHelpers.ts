@@ -35,16 +35,28 @@ export function openOAuthPopup(
 
 /**
  * Waits for OAuth callback data from popup window via postMessage
- * @param timeout - Maximum time to wait in milliseconds (default: 5 minutes)
+ * @param popup - The popup window reference
+ * @param timeout - Maximum time to wait in milliseconds (default: 2 minutes)
  * @returns Promise that resolves with OAuth callback data or rejects on timeout/error
  */
-export function waitForOAuthCallback(timeout: number = 5 * 60 * 1000): Promise<OAuthCallbackData> {
+export function waitForOAuthCallback(
+  popup: Window | null,
+  timeout: number = 2 * 60 * 1000,
+): Promise<OAuthCallbackData> {
   return new Promise((resolve, reject) => {
     // Set up timeout
     const timeoutId = setTimeout(() => {
       cleanup();
       reject(new Error('OAuth authorization timed out'));
     }, timeout);
+
+    // Check if popup was closed by user
+    const checkPopupClosed = setInterval(() => {
+      if (popup && popup.closed) {
+        cleanup();
+        reject(new Error('OAuth authorization was cancelled'));
+      }
+    }, 500);
 
     // Handle message from popup
     const handleMessage = (event: MessageEvent) => {
@@ -60,22 +72,15 @@ export function waitForOAuthCallback(timeout: number = 5 * 60 * 1000): Promise<O
       }
     };
 
-    // Handle popup close
-    const handleBeforeUnload = () => {
-      cleanup();
-      reject(new Error('OAuth authorization was cancelled'));
-    };
-
     // Cleanup function
     const cleanup = () => {
       clearTimeout(timeoutId);
+      clearInterval(checkPopupClosed);
       window.removeEventListener('message', handleMessage);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
 
     // Set up event listeners
     window.addEventListener('message', handleMessage);
-    window.addEventListener('beforeunload', handleBeforeUnload);
   });
 }
 
@@ -98,12 +103,18 @@ export function getOAuthProviderIconPath(provider: string): string {
 }
 
 /**
- * Formats provider name for display (capitalizes first letter)
+ * Formats provider name for display
  * @param provider - The OAuth provider name (e.g., 'github')
  * @returns Formatted provider name (e.g., 'GitHub')
  */
 export function formatProviderName(provider: string): string {
-  return provider.charAt(0).toUpperCase() + provider.slice(1);
+  const nameMap: Record<string, string> = {
+    github: 'GitHub',
+    google: 'Google',
+    facebook: 'Facebook',
+  };
+
+  return nameMap[provider] || provider.charAt(0).toUpperCase() + provider.slice(1);
 }
 
 /**
