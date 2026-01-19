@@ -220,6 +220,52 @@
       "tipOfTheDay": "نصيحة اليوم"
     }
   },
+  "settings": {
+    "accounts": {
+      "title": "الحسابات المرتبطة",
+      "description": "إدارة مزودي OAuth المتصلين وتعيين حسابك الأساسي لمزامنة الملف الشخصي",
+      "linkedAccountsLabel": "الحسابات المتصلة",
+      "availableProvidersLabel": "المزودون المتاحون",
+      "primary": "أساسي",
+      "primaryDescription": "يُستخدم هذا الحساب لمزامنة الملف الشخصي",
+      "linkedDescription": "متصل بحسابك",
+      "setPrimary": "تعيين كأساسي",
+      "unlink": "إلغاء الربط",
+      "linkWith": "ربط {provider}",
+      "connecting": "جارٍ الاتصال بـ {provider}...",
+      "linkSuccess": "تم ربط حساب {provider} بنجاح",
+      "linkError": "فشل ربط حساب {provider}",
+      "linkTimeout": "انتهت مهلة تفويض OAuth",
+      "linkCancelled": "تم إلغاء تفويض OAuth",
+      "unlinkSuccess": "تم إلغاء ربط حساب {provider} بنجاح",
+      "unlinkError": "فشل إلغاء ربط حساب {provider}",
+      "setPrimarySuccess": "تم تعيين {provider} كحساب أساسي",
+      "setPrimaryError": "فشل تعيين {provider} كحساب أساسي",
+      "unlinkConfirmTitle": "إلغاء ربط الحساب؟",
+      "unlinkConfirmDescription": "هل أنت متأكد أنك تريد إلغاء ربط حساب {provider}؟ يمكنك دائماً ربطه مرة أخرى لاحقاً.",
+      "cancel": "إلغاء",
+      "confirmUnlink": "إلغاء ربط الحساب",
+      "cannotUnlinkWarning": "يجب الاحتفاظ بطريقة مصادقة واحدة على الأقل مرتبطة بحسابك",
+      "allProvidersLinked": "جميع المزودين المتاحين مرتبطون بالفعل بحسابك"
+    },
+    "profileSync": {
+      "title": "مزامنة الملف الشخصي",
+      "description": "مزامنة معلومات ملفك الشخصي من مزود OAuth الأساسي",
+      "lastSynced": "آخر مزامنة",
+      "syncedFrom": "تمت المزامنة من",
+      "primaryProvider": "المزود الأساسي",
+      "never": "أبداً",
+      "none": "لا يوجد",
+      "cannotSyncInfo": "قم بتعيين مزود OAuth كمزود أساسي لتمكين مزامنة الملف الشخصي",
+      "syncNow": "مزامنة الملف الشخصي",
+      "syncing": "جارٍ المزامنة...",
+      "loading": "جارٍ تحميل حالة المزامنة...",
+      "syncSuccess": "تمت مزامنة الملف الشخصي بنجاح",
+      "syncSuccessDescription": "تم تحديث ملفك الشخصي من المزود الأساسي",
+      "syncError": "فشلت مزامنة الملف الشخصي",
+      "syncErrorDescription": "فشل في مزامنة الملف الشخصي. يرجى المحاولة مرة أخرى لاحقاً"
+    }
+  },
   "errors": {
     "404": {
       "title": "الصفحة غير موجودة",
