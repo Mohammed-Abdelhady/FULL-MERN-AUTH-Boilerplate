@@ -59,6 +59,35 @@ export class UserProfileDto {
   facebookId?: string | null;
 
   @ApiProperty({
+    description: 'GitHub OAuth ID (if authenticated via GitHub)',
+    example: null,
+    required: false,
+  })
+  githubId?: string | null;
+
+  @ApiProperty({
+    description: 'List of linked authentication providers',
+    example: ['LOCAL', 'GOOGLE'],
+    type: [String],
+  })
+  linkedProviders!: string[];
+
+  @ApiProperty({
+    description: 'Primary provider for profile synchronization',
+    enum: ['LOCAL', 'GOOGLE', 'FACEBOOK', 'GITHUB'],
+    example: 'GOOGLE',
+    required: false,
+  })
+  primaryProvider?: AuthProvider;
+
+  @ApiProperty({
+    description: 'Timestamp of last profile synchronization',
+    example: '2024-01-15T09:00:00.000Z',
+    required: false,
+  })
+  profileSyncedAt?: Date;
+
+  @ApiProperty({
     description: 'Account creation timestamp',
     example: '2024-01-15T10:30:00.000Z',
   })

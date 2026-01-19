@@ -49,6 +49,18 @@ export class User {
 
   @Prop()
   deletedAt?: Date;
+
+  @Prop({ type: [String], default: [] })
+  linkedProviders!: string[];
+
+  @Prop({ enum: AuthProvider, nullable: true })
+  primaryProvider?: AuthProvider;
+
+  @Prop()
+  profileSyncedAt?: Date;
+
+  @Prop()
+  lastSyncedProvider?: string;
 }
 
 export type UserDocument = HydratedDocument<User>;
@@ -59,3 +71,4 @@ export const UserSchema: MongooseSchema<User> =
 // Indexes
 UserSchema.index({ createdAt: -1 });
 UserSchema.index({ isDeleted: 1 });
+UserSchema.index({ linkedProviders: 1 });
