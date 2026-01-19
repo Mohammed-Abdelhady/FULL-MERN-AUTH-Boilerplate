@@ -1,26 +1,40 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams, useRouter, useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useHandleCallbackMutation } from '@/modules/auth/store/oauthApi';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { OAuthProvider } from '@/modules/auth/types/auth.types';
 
 /**
- * OAuth Callback Page
- * Handles the OAuth callback from providers after user authentication
+ * OAuth Callback Page with Dynamic Provider
+ * Handles provider-specific callback URLs:
+ * - /auth/oauth/callback/google
+ * - /auth/oauth/callback/github
+ * - /auth/oauth/callback/facebook
  */
-export default function OAuthCallbackPage() {
+export default function OAuthProviderCallbackPage() {
   const t = useTranslations('auth.oauth.callback');
   const router = useRouter();
+  const params = useParams();
   const searchParams = useSearchParams();
   const [handleCallback, { isLoading }] = useHandleCallbackMutation();
   const [isProcessing, setIsProcessing] = useState(true);
 
+  // Extract provider from URL path
+  const provider = params.provider as OAuthProvider;
+
   useEffect(() => {
     const processCallback = async () => {
       try {
+        // Validate provider
+        const validProviders: OAuthProvider[] = ['google', 'github', 'facebook'];
+        if (!validProviders.includes(provider)) {
+          throw new Error(`Invalid OAuth provider: ${provider}`);
+        }
+
         // Check for error in URL params first (OAuth provider returned error)
         const error = searchParams.get('error');
         const errorDescription = searchParams.get('error_description');
@@ -45,7 +59,6 @@ export default function OAuthCallbackPage() {
         // Get code and state from URL params
         const code = searchParams.get('code');
         const state = searchParams.get('state');
-        const provider = searchParams.get('provider');
 
         // If we have code and state in URL (direct redirect from OAuth provider)
         if (code && state) {
@@ -57,7 +70,7 @@ export default function OAuthCallbackPage() {
                 type: 'oauth_callback',
                 code,
                 state,
-                provider: provider || 'github',
+                provider, // Use provider from URL path
               },
               window.location.origin,
             );
@@ -69,7 +82,7 @@ export default function OAuthCallbackPage() {
 
           // Not a popup, process directly
           await handleCallback({
-            provider: (provider as 'google' | 'github' | 'facebook') || 'github',
+            provider,
             code,
             state,
           }).unwrap();
@@ -84,32 +97,8 @@ export default function OAuthCallbackPage() {
           return;
         }
 
-        // Fallback: Try to get callback data from session storage
-        const callbackDataStr = sessionStorage.getItem('oauth_callback_data');
-
-        if (!callbackDataStr) {
-          throw new Error('No OAuth callback data found');
-        }
-
-        const callbackData = JSON.parse(callbackDataStr);
-
-        // Call the backend callback endpoint
-        await handleCallback({
-          provider: callbackData.provider,
-          code: callbackData.code,
-          state: callbackData.state,
-        }).unwrap();
-
-        // Clear session storage
-        sessionStorage.removeItem('oauth_callback_data');
-
-        // Show success message
-        toast.success(t('success'));
-
-        // Redirect to dashboard after successful authentication
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 500);
+        // If no code/state, something went wrong
+        throw new Error('No authorization code received from OAuth provider');
       } catch (error) {
         console.error('OAuth callback error:', error);
         setIsProcessing(false);
@@ -128,7 +117,7 @@ export default function OAuthCallbackPage() {
     };
 
     processCallback();
-  }, [handleCallback, router, searchParams, t]);
+  }, [handleCallback, router, searchParams, provider, t]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
@@ -137,9 +126,7 @@ export default function OAuthCallbackPage() {
           <>
             <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
             <h1 className="mt-4 text-2xl font-semibold text-foreground">{t('title')}</h1>
-            <p className="mt-2 text-muted-foreground">
-              Please wait while we complete your authentication...
-            </p>
+            <p className="mt-2 text-muted-foreground">Completing {provider} authentication...</p>
           </>
         ) : (
           <>

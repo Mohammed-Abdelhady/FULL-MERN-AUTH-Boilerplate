@@ -2,6 +2,14 @@
 
 This guide explains how to set up Facebook Login for social authentication in your application.
 
+## 📚 Related Documentation
+
+- **Permissions Guide**: See `docs/facebook-oauth-permissions.md` for detailed information about:
+  - What permissions the app requests (`email`, `public_profile`)
+  - Why profile pictures DON'T require `user_photos` permission
+  - App Review requirements (spoiler: none needed for basic login)
+  - What users see during OAuth authorization
+
 ## Overview
 
 Facebook Login allows users to sign in with their Facebook account. The application implements OAuth 2.0 for secure authentication.
@@ -75,11 +83,15 @@ Facebook Login allows users to sign in with their Facebook account. The applicat
 **Valid OAuth Redirect URIs**:
 
 ```
-http://localhost:3000/api/auth/oauth/callback
-https://yourdomain.com/api/auth/oauth/callback
+http://localhost:3000/auth/oauth/callback/facebook
+https://yourdomain.com/auth/oauth/callback/facebook
 ```
 
-**Important**: Add both development and production URLs.
+**Important**:
+
+- The callback URL must include `/facebook` at the end (provider-specific)
+- Add both development and production URLs
+- Must match exactly with backend `.env` configuration
 
 3. Configure other settings:
    - **Login with the JavaScript SDK**: No (we use backend OAuth)
@@ -116,28 +128,58 @@ https://yourdomain.com/api/auth/oauth/callback
 
 ---
 
-## Step 5: Request Permissions
+## Step 5: Verify Permissions Configuration
 
-By default, you can only access basic user data (`public_profile`, `email`).
+The app requests only default permissions that **DO NOT require App Review**.
 
-### Default Permissions (No Review Required)
+### Required Permissions (Default - No Review Needed)
 
-- `public_profile`: Name, profile picture
-- `email`: User's email address
+| Permission       | What It Provides                   | Used For                                       |
+| ---------------- | ---------------------------------- | ---------------------------------------------- |
+| `email`          | User's email address               | Account creation and identification (REQUIRED) |
+| `public_profile` | Name, profile picture, Facebook ID | User profile sync                              |
 
-### Advanced Permissions (Review Required)
+**Important Notes**:
 
-If you need additional data:
+- ✅ These are **default permissions** - automatically available when you add "Facebook Login" product
+- ✅ **Profile pictures** are included in `public_profile` permission
+- ❌ **NO need** for `user_photos` permission (that's for photo albums, not profile pictures)
+- ✅ No Facebook App Review required for basic login
+
+### Verify Permissions Are Active
 
 1. Navigate to **App Review** → **Permissions and Features**
-2. Request permissions:
-   - `user_birthday`: User's birthday
-   - `user_gender`: User's gender
-   - `user_location`: User's location
-3. Provide detailed use case explanation
-4. Submit for review (can take 3-5 business days)
+2. You should see:
+   - ✅ **email** - Status: Available (Default)
+   - ✅ **public_profile** - Status: Available (Default)
+3. No action needed - these are automatically approved
 
-**For basic auth, default permissions are sufficient.**
+### What Users See During Login
+
+When users click "Sign in with Facebook", they see:
+
+```
+"MERN Auth Boilerplate wants to access your Facebook information"
+
+✓ Public profile (Your name and profile picture)
+✓ Email address (Your primary email address)
+
+[Cancel]  [Continue as John Doe]
+```
+
+### Advanced Permissions (NOT Used by This App)
+
+The following permissions are **NOT requested** by the app:
+
+- ❌ `user_photos` - Access to user's photo albums (not needed, profile picture is in `public_profile`)
+- ❌ `user_birthday` - User's birthday
+- ❌ `user_gender` - User's gender
+- ❌ `user_location` - User's location
+- ❌ `user_friends` - User's friends list
+
+**Note**: Advanced permissions would require Facebook App Review before going live.
+
+**For detailed information about permissions**, see: `docs/facebook-oauth-permissions.md`
 
 ---
 
@@ -149,24 +191,32 @@ Add to `backend/.env`:
 
 ```bash
 # Facebook OAuth Configuration
-FACEBOOK_APP_ID=your-app-id-here
-FACEBOOK_APP_SECRET=your-app-secret-here
-FACEBOOK_CALLBACK_URL=http://localhost:3000/api/auth/oauth/callback
+OAUTH_FACEBOOK_CLIENT_ID=your-app-id-here
+OAUTH_FACEBOOK_CLIENT_SECRET=your-app-secret-here
+OAUTH_FACEBOOK_CALLBACK_URL=http://localhost:3000/auth/oauth/callback/facebook
 
 # Production overrides
-# FACEBOOK_CALLBACK_URL=https://yourdomain.com/api/auth/oauth/callback
+# OAUTH_FACEBOOK_CALLBACK_URL=https://yourdomain.com/auth/oauth/callback/facebook
 ```
+
+**Important**:
+
+- Use `OAUTH_FACEBOOK_CLIENT_ID` (not `FACEBOOK_APP_ID`)
+- Callback URL must end with `/facebook` (provider-specific)
+- Must match exactly with Facebook Developer Console redirect URI
+- App Secret must NEVER be committed to version control
 
 ### Frontend Configuration
 
-Add to `frontend/.env.local`:
+**No frontend environment variables needed!**
 
-```bash
-# Facebook OAuth Configuration
-NEXT_PUBLIC_FACEBOOK_APP_ID=your-app-id-here
+The frontend automatically detects enabled OAuth providers by calling:
+
+```
+GET /api/auth/oauth/providers
 ```
 
-**Note**: Only App ID is needed in frontend. App Secret must stay on backend.
+When Facebook is configured in backend, the Facebook button appears automatically.
 
 ---
 

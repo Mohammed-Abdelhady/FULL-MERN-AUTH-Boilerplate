@@ -4,7 +4,7 @@ module.exports = {
   'backend/**/*.ts': [
     // Check for forbidden patterns - use bash -c to properly handle shell operators
     (filenames) =>
-      `bash -c 'grep -l -E "(eslint-disable-next-line|@ts-ignore)" ${filenames.join(' ')} && exit 1 || exit 0'`,
+      `bash -c 'grep -l -E "(eslint-disable-next-line|@ts-ignore)" ${filenames.map((f) => `"${f}"`).join(' ')} && exit 1 || exit 0'`,
     'eslint --fix --config backend/eslint.config.mjs',
     () => 'cd backend && npx tsc --noEmit',
     (filenames) => `cd backend && npm test -- --bail --findRelatedTests ${filenames.join(' ')}`,
@@ -15,7 +15,7 @@ module.exports = {
   'frontend/**/*.{ts,tsx}': [
     // Check for forbidden patterns - use bash -c to properly handle shell operators
     (filenames) =>
-      `bash -c 'grep -l -E "(eslint-disable-next-line|@ts-ignore)" ${filenames.join(' ')} && exit 1 || exit 0'`,
+      `bash -c 'grep -l -E "(eslint-disable-next-line|@ts-ignore)" ${filenames.map((f) => `"${f}"`).join(' ')} && exit 1 || exit 0'`,
     'eslint --fix --config frontend/eslint.config.mjs',
     () => 'cd frontend && npx tsc --noEmit',
     // Frontend tests not yet configured, will be added later

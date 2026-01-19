@@ -1,6 +1,5 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import {
@@ -28,15 +27,9 @@ interface OAuthButtonProps {
 
 /**
  * OAuthButton Component
- * Displays a button for OAuth authentication with a specific provider
+ * Displays an icon-only button for OAuth authentication with a specific provider
  */
-export function OAuthButton({
-  provider,
-  mode = 'signin',
-  onSuccess,
-  onError,
-  disabled = false,
-}: OAuthButtonProps) {
+export function OAuthButton({ provider, onSuccess, onError, disabled = false }: OAuthButtonProps) {
   const t = useTranslations('auth.oauth');
   const tCallback = useTranslations('auth.oauth.callback');
   const router = useRouter();
@@ -98,43 +91,103 @@ export function OAuthButton({
     }
   };
 
-  const providerColor = getProviderColor(provider);
+  const { bgColor, hoverColor, textColor, borderColor } = getProviderStyles(provider);
+  const providerName = formatProviderName(provider);
 
   return (
-    <Button
+    <button
       type="button"
-      variant="default"
-      className={`w-full ${providerColor}`}
       onClick={handleOAuthClick}
       disabled={disabled || isLoading || isFetchingUrl}
+      className={`
+        group relative inline-flex h-14 w-14 items-center justify-center rounded-full
+        transition-all duration-200 ease-in-out
+        ${bgColor} ${textColor} ${borderColor}
+        ${!disabled && !isLoading && !isFetchingUrl ? hoverColor : ''}
+        ${disabled || isLoading || isFetchingUrl ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
+        focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+        disabled:pointer-events-none
+      `}
+      aria-label={t('signInWith', { provider: providerName })}
+      title={t('signInWith', { provider: providerName })}
       data-testid={`oauth-${provider}-button`}
     >
       {isLoading || isFetchingUrl ? (
-        <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          {t('connecting', { provider: formatProviderName(provider) })}
-        </>
+        <Loader2 className="h-6 w-6 animate-spin" aria-hidden="true" />
       ) : (
-        <>
-          <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d={getOAuthProviderIconPath(provider)} />
-          </svg>
-          {t('signInWith', { provider: formatProviderName(provider) })}
-        </>
+        <svg
+          className="h-6 w-6 transition-transform duration-200 group-hover:scale-110"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path d={getOAuthProviderIconPath(provider)} />
+        </svg>
       )}
-    </Button>
+
+      {/* Tooltip on hover */}
+      <span
+        className="
+        absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap
+        rounded-md bg-gray-900 px-3 py-1.5 text-xs font-medium text-white
+        opacity-0 transition-opacity duration-200
+        group-hover:opacity-100
+        pointer-events-none z-50
+        shadow-lg
+      "
+      >
+        {providerName}
+        {/* Tooltip arrow */}
+        <span
+          className="
+          absolute -bottom-1 left-1/2 -translate-x-1/2
+          h-2 w-2 rotate-45 bg-gray-900
+        "
+        />
+      </span>
+    </button>
   );
 }
 
 /**
- * Returns the appropriate color class for a provider
+ * Returns the appropriate style classes for a provider
  */
-function getProviderColor(provider: OAuthProvider): string {
-  const colorMap: Record<OAuthProvider, string> = {
-    google: 'bg-white text-gray-900 hover:bg-gray-50 border border-gray-300',
-    github: 'bg-gray-900 text-white hover:bg-gray-800',
-    facebook: 'bg-blue-600 text-white hover:bg-blue-700',
+function getProviderStyles(provider: OAuthProvider): {
+  bgColor: string;
+  hoverColor: string;
+  textColor: string;
+  borderColor: string;
+} {
+  const styleMap: Record<
+    OAuthProvider,
+    { bgColor: string; hoverColor: string; textColor: string; borderColor: string }
+  > = {
+    google: {
+      bgColor: 'bg-white',
+      hoverColor: 'hover:bg-gray-50 hover:shadow-md',
+      textColor: 'text-gray-900',
+      borderColor: 'border-2 border-gray-300',
+    },
+    github: {
+      bgColor: 'bg-gray-900',
+      hoverColor: 'hover:bg-gray-800 hover:shadow-lg',
+      textColor: 'text-white',
+      borderColor: 'border-2 border-gray-900',
+    },
+    facebook: {
+      bgColor: 'bg-blue-600',
+      hoverColor: 'hover:bg-blue-700 hover:shadow-lg',
+      textColor: 'text-white',
+      borderColor: 'border-2 border-blue-600',
+    },
   };
 
-  return colorMap[provider] || 'bg-gray-100 text-gray-900 hover:bg-gray-200';
+  return (
+    styleMap[provider] || {
+      bgColor: 'bg-gray-100',
+      hoverColor: 'hover:bg-gray-200',
+      textColor: 'text-gray-900',
+      borderColor: 'border-2 border-gray-300',
+    }
+  );
 }

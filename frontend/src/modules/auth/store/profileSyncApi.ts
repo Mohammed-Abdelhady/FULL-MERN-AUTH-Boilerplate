@@ -44,12 +44,10 @@ export const profileSyncApi = baseApi.injectEndpoints({
         url: '/user/sync-profile',
         method: 'POST',
       }),
-      transformResponse: (response: { data: ManualSyncResponse }) =>
-        response.data,
+      transformResponse: (response: { data: ManualSyncResponse }) => response.data,
       invalidatesTags: ['ProfileSync', 'User'],
     }),
   }),
 });
 
-export const { useGetSyncStatusQuery, useInitiateProfileSyncMutation } =
-  profileSyncApi;
+export const { useGetSyncStatusQuery, useInitiateProfileSyncMutation } = profileSyncApi;
