@@ -75,13 +75,29 @@ export function LoginForm() {
   const onSubmit = useCallback(
     async (data: LoginFormData) => {
       try {
-        await login({
+        const response = await login({
           email: data.email,
           password: data.password,
         }).unwrap();
 
-        // Successful login - redirect
-        const redirectPath = getRedirectPath(searchParams.get('redirect') ?? '/');
+        // Determine redirect path based on user permissions
+        const explicitRedirect = searchParams.get('redirect');
+        let defaultPath = '/dashboard';
+
+        // Redirect to admin dashboard if user has admin-level permissions
+        if (!explicitRedirect && response.user) {
+          const hasAdminPermissions =
+            response.user.permissions.includes('*') || // Wildcard permission
+            response.user.permissions.includes('users:list:all') ||
+            response.user.permissions.includes('roles:manage:all') ||
+            response.user.permissions.includes('permissions:manage:all');
+
+          if (hasAdminPermissions) {
+            defaultPath = '/admin/dashboard';
+          }
+        }
+
+        const redirectPath = getRedirectPath(explicitRedirect ?? defaultPath);
         router.push(redirectPath);
       } catch (err) {
         // Handle API errors with translation
