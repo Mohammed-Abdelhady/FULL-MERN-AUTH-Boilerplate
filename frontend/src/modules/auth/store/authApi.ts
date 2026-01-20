@@ -45,7 +45,7 @@ export const authApi = baseApi.injectEndpoints({
         url: '/api/auth/logout',
         method: 'POST',
       }),
-      invalidatesTags: ['Auth', 'User'],
+      invalidatesTags: ['Auth', 'User', 'LinkedProviders', 'ProfileSync', 'Roles', 'Permissions'],
     }),
 
     /**
