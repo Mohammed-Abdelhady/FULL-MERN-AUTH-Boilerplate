@@ -13,33 +13,27 @@ interface RoleGuardProps {
 }
 
 /**
+ * @deprecated This component is deprecated in favor of the new permission-based system.
+ * Use `RoutePermissionGuard` from `@/modules/permissions` for route-level protection,
+ * or `PermissionGuard` for component-level protection instead.
+ *
  * RoleGuard component to protect routes based on user roles
  * Redirects unauthorized users to fallback path (default: /)
  * Should be used inside AuthGuard for authenticated routes
  *
  * @example
- * // Protect admin-only route
- * export default function AdminPage() {
- *   return (
- *     <AuthGuard>
- *       <RoleGuard allowedRoles={['admin']}>
- *         <AdminDashboard />
- *       </RoleGuard>
- *     </AuthGuard>
- *   );
- * }
+ * // OLD (deprecated):
+ * <RoleGuard allowedRoles={['admin']}>
+ *   <AdminDashboard />
+ * </RoleGuard>
  *
  * @example
- * // Multiple roles allowed
- * export default function ManagerPage() {
- *   return (
- *     <AuthGuard>
- *       <RoleGuard allowedRoles={['admin', 'manager']}>
- *         <ManagerDashboard />
- *       </RoleGuard>
- *     </AuthGuard>
- *   );
- * }
+ * // NEW (recommended):
+ * import { RoutePermissionGuard, USER_PERMISSIONS } from '@/modules/permissions';
+ *
+ * <RoutePermissionGuard permission={USER_PERMISSIONS.LIST_ALL}>
+ *   <AdminDashboard />
+ * </RoutePermissionGuard>
  */
 export function RoleGuard({
   children,
