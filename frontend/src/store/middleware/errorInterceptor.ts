@@ -50,7 +50,7 @@ const classifyError = (
   }
 
   // Network errors - longer duration for user to check connectivity
-  if (!status || status === 'FETCH_ERROR') {
+  if (!status || error.status === 'FETCH_ERROR') {
     return { type: 'error', duration: 10000 };
   }
 
@@ -97,7 +97,7 @@ const getErrorMessage = (error: FetchBaseQueryError): string => {
   }
 
   // Network errors
-  if (!status || status === 'FETCH_ERROR') {
+  if (!status || error.status === 'FETCH_ERROR') {
     return ERROR_MESSAGES.NETWORK_ERROR;
   }
 
@@ -118,19 +118,21 @@ const getErrorMessage = (error: FetchBaseQueryError): string => {
 /**
  * Extract endpoint name from RTK Query meta
  */
-const getEndpointName = (action: {
-  meta?: { arg?: { endpointName?: string } };
-}): string | undefined => {
-  return action.meta?.arg?.endpointName;
+const getEndpointName = (action: unknown): string | undefined => {
+  const typedAction = action as { meta?: { arg?: unknown } };
+  const arg = typedAction.meta?.arg as { endpointName?: string } | undefined;
+  return arg?.endpointName;
 };
 
 /**
  * Extract HTTP method from RTK Query meta
  */
-const getHttpMethod = (action: {
-  meta?: { baseQueryMeta?: { request?: { method?: string } } };
-}): string | undefined => {
-  const originalArgs = action.meta?.baseQueryMeta?.request?.method;
+const getHttpMethod = (action: unknown): string | undefined => {
+  const typedAction = action as { meta?: { baseQueryMeta?: unknown } };
+  const baseQueryMeta = typedAction.meta?.baseQueryMeta as
+    | { request?: { method?: string } }
+    | undefined;
+  const originalArgs = baseQueryMeta?.request?.method;
   return originalArgs || 'GET';
 };
 

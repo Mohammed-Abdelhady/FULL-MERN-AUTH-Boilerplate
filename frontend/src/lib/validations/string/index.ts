@@ -299,7 +299,7 @@ export function zodName(options?: {
     max?: string;
     pattern?: string;
   };
-}) {
+}): z.ZodString | z.ZodOptional<z.ZodString> {
   const min = options?.min ?? 2;
   const max = options?.max ?? 50;
 

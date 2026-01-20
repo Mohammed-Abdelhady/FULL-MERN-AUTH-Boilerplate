@@ -131,24 +131,17 @@ export function GenericFormExample() {
           {/* Text Input - Basic */}
           <FormInput
             name="name"
-            label="Full Name"
             placeholder="John Doe"
             description="Enter your full name as it appears on official documents"
             autoFocus
           />
 
           {/* Email Input - Email validation */}
-          <FormInput
-            name="email"
-            label="Email Address"
-            type="email"
-            placeholder="john@example.com"
-          />
+          <FormInput name="email" type="email" placeholder="john@example.com" />
 
           {/* URL Input - Optional field */}
           <FormInput
             name="website"
-            label="Website"
             type="url"
             placeholder="https://example.com"
             description="Your personal or company website (optional)"
@@ -157,7 +150,6 @@ export function GenericFormExample() {
           {/* Password Input - With visibility toggle */}
           <FormPassword
             name="password"
-            label="Password"
             placeholder="Enter a secure password"
             description="Minimum 8 characters required"
           />
@@ -165,7 +157,6 @@ export function GenericFormExample() {
           {/* Select - Country dropdown */}
           <FormSelect
             name="country"
-            label="Country"
             placeholder="Select your country"
             options={[
               { label: 'United States', value: 'us' },
@@ -178,7 +169,6 @@ export function GenericFormExample() {
           {/* Textarea - With character count */}
           <FormTextarea
             name="bio"
-            label="Bio"
             placeholder="Tell us about yourself..."
             maxLength={500}
             showCharCount

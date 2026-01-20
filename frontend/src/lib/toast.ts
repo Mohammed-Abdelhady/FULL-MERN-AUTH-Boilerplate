@@ -10,27 +10,9 @@ import type { ExternalToast } from 'sonner';
 import type { ToastType } from '@/types/toast.types';
 
 /**
- * Base toast options extending Sonner's ExternalToast
+ * Toast options using Sonner's ExternalToast directly
  */
-interface ToastOptions extends ExternalToast {
-  /** Optional description text */
-  description?: string;
-
-  /** Duration in milliseconds (default varies by type) */
-  duration?: number;
-
-  /** Action button configuration */
-  action?: {
-    label: string;
-    onClick: () => void;
-  };
-
-  /** Cancel button configuration */
-  cancel?: {
-    label: string;
-    onClick?: () => void;
-  };
-}
+type ToastOptions = ExternalToast;
 
 /**
  * Default durations for each toast type (in milliseconds)
@@ -115,6 +97,7 @@ export const show = (type: ToastType, message: string, options?: ToastOptions): 
 
 /**
  * Show toast for promise with loading/success/error states
+ * Returns the toast ID with unwrap method
  */
 export const promise = <T>(
   promise: Promise<T>,
@@ -123,9 +106,8 @@ export const promise = <T>(
     success: string | ((data: T) => string);
     error: string | ((error: unknown) => string);
   },
-  options?: ToastOptions,
-): Promise<T> => {
-  return sonnerToast.promise(promise, messages, options);
+) => {
+  return sonnerToast.promise(promise, messages);
 };
 
 /**

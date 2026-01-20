@@ -1,5 +1,5 @@
 import { baseApi } from '@/store/api/baseApi';
-import type { AuthProvider } from '../types/auth.types';
+import type { OAuthProvider } from '../types/auth.types';
 
 /**
  * Profile Sync Status Response
@@ -7,7 +7,7 @@ import type { AuthProvider } from '../types/auth.types';
 export interface ProfileSyncStatus {
   lastSyncedAt?: string;
   lastSyncedProvider?: string;
-  primaryProvider?: AuthProvider;
+  primaryProvider?: OAuthProvider;
   canSync: boolean;
 }
 
@@ -16,7 +16,7 @@ export interface ProfileSyncStatus {
  */
 export interface ManualSyncResponse {
   requiresOAuth: boolean;
-  provider: AuthProvider;
+  provider: OAuthProvider;
   message: string;
 }
 
@@ -30,7 +30,7 @@ export const profileSyncApi = baseApi.injectEndpoints({
      * Get profile sync status
      */
     getSyncStatus: builder.query<ProfileSyncStatus, void>({
-      query: () => '/user/sync-status',
+      query: () => '/api/user/sync-status',
       transformResponse: (response: { data: ProfileSyncStatus }) => response.data,
       providesTags: ['ProfileSync'],
     }),
@@ -41,7 +41,7 @@ export const profileSyncApi = baseApi.injectEndpoints({
      */
     initiateProfileSync: builder.mutation<ManualSyncResponse, void>({
       query: () => ({
-        url: '/user/sync-profile',
+        url: '/api/user/sync-profile',
         method: 'POST',
       }),
       transformResponse: (response: { data: ManualSyncResponse }) => response.data,
