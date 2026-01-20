@@ -8,6 +8,7 @@ import { UserDocument } from '../../user/schemas/user.schema';
 import { AuthProvider } from '../../user/enums/auth-provider.enum';
 
 import { SEED_USERS } from './user.seed';
+import { RoleSeedService } from './role.seed';
 
 /**
  * Seed Service
@@ -27,6 +28,7 @@ export class SeedService {
   constructor(
     @InjectModel('User') private readonly userModel: Model<UserDocument>,
     private readonly configService: ConfigService,
+    private readonly roleSeedService: RoleSeedService,
   ) {}
 
   /**
@@ -39,6 +41,7 @@ export class SeedService {
    * @throws Error if running in production without force flag
    */
   async seedAll(): Promise<{
+    roles: string;
     users: number;
     total: number;
   }> {
@@ -56,10 +59,14 @@ export class SeedService {
       );
     }
 
+    // Seed roles first (users depend on roles)
+    await this.roleSeedService.seed();
+
     // Seed users
     const usersCount = await this.seedUsers();
 
     const summary = {
+      roles: 'seeded',
       users: usersCount,
       total: usersCount,
     };
@@ -104,6 +111,7 @@ export class SeedService {
           password: hashedPassword,
           isVerified: true, // All seed users are verified
           authProvider: AuthProvider.EMAIL,
+          permissions: userData.permissions || [],
         });
 
         this.logger.log(

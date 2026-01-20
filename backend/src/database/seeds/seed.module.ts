@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { UserSchema } from '../../user/schemas/user.schema';
+import { RoleSchema } from '../../role/schemas/role.schema';
 import { SeedService } from './seed.service';
+import { RoleSeedService } from './role.seed';
 
 /**
  * Seed Module
@@ -14,15 +16,19 @@ import { SeedService } from './seed.service';
 @Module({
   imports: [
     ConfigModule,
-    // Import User model for seeding operations
+    // Import models for seeding operations
     MongooseModule.forFeature([
       {
         name: 'User',
         schema: UserSchema,
       },
+      {
+        name: 'Role',
+        schema: RoleSchema,
+      },
     ]),
   ],
-  providers: [SeedService],
+  providers: [SeedService, RoleSeedService],
   exports: [SeedService],
 })
 export class SeedModule {}

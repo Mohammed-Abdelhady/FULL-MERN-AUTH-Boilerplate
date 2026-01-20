@@ -1,5 +1,3 @@
-import { UserRole } from '../../user/enums/user-role.enum';
-
 /**
  * Seed User Data Interface
  *
@@ -10,7 +8,8 @@ export interface SeedUser {
   email: string;
   password: string;
   name: string;
-  role: UserRole;
+  role: string;
+  permissions: string[];
 }
 
 /**
@@ -36,25 +35,41 @@ export const SEED_USERS: SeedUser[] = [
     email: 'user@seed.local',
     password: 'User123!',
     name: 'Seed User',
-    role: UserRole.USER,
+    role: 'user',
+    permissions: ['profile:read:own', 'profile:update:own'],
   },
   {
     email: 'support@seed.local',
     password: 'Support123!',
     name: 'Seed Support',
-    role: UserRole.SUPPORT,
+    role: 'support',
+    permissions: [
+      'profile:read:own',
+      'profile:update:own',
+      'users:read:all',
+      'sessions:read:all',
+    ],
   },
   {
     email: 'manager@seed.local',
     password: 'Manager123!',
     name: 'Seed Manager',
-    role: UserRole.MANAGER,
+    role: 'manager',
+    permissions: [
+      'profile:read:own',
+      'profile:update:own',
+      'users:read:all',
+      'users:update:all',
+      'sessions:read:all',
+      'roles:read:all',
+    ],
   },
   {
     email: 'admin@seed.local',
     password: 'Admin123!',
     name: 'Seed Admin',
-    role: UserRole.ADMIN,
+    role: 'admin',
+    permissions: ['*'],
   },
 ];
 
@@ -76,22 +91,22 @@ export const SEED_CREDENTIALS = {
   user: {
     email: 'user@seed.local',
     password: 'User123!',
-    role: UserRole.USER,
+    role: 'user',
   },
   support: {
     email: 'support@seed.local',
     password: 'Support123!',
-    role: UserRole.SUPPORT,
+    role: 'support',
   },
   manager: {
     email: 'manager@seed.local',
     password: 'Manager123!',
-    role: UserRole.MANAGER,
+    role: 'manager',
   },
   admin: {
     email: 'admin@seed.local',
     password: 'Admin123!',
-    role: UserRole.ADMIN,
+    role: 'admin',
   },
 } as const;
 
