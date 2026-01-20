@@ -14,18 +14,18 @@ export const metadata: Metadata = {
  */
 export default function SettingsPage() {
   return (
-    <div className="container max-w-4xl py-10">
+    <div className="container p-10">
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Settings</h1>
           <p className="text-muted-foreground">Manage your account settings and preferences</p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="space-y-6">
+        <div className="flex gap-5 w-full">
+          <div className="w-2/3">
             <LinkedAccounts />
           </div>
-          <div className="space-y-6">
+          <div className="w-2/3">
             <ProfileSyncStatus />
           </div>
         </div>
