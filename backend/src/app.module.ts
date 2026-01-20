@@ -16,6 +16,8 @@ import { AdminModule } from './admin/admin.module';
 import { CommonModule } from './common/common.module';
 import { MailModule } from './mail/mail.module';
 import { DatabaseModule } from './database/database.module';
+import { RoleModule } from './role/role.module';
+import { MigrationModule } from './database/migrations/migration.module';
 import configuration, { EnvironmentVariables } from './config/configuration';
 import { Connection } from 'mongoose';
 
@@ -69,9 +71,11 @@ import { Connection } from 'mongoose';
     CommonModule,
     MailModule,
     DatabaseModule,
+    MigrationModule,
     UserModule,
     SessionModule,
     PermissionModule,
+    RoleModule,
     AuthModule,
     AdminModule,
   ],

@@ -277,6 +277,116 @@ export class UserService {
   }
 
   /**
+   * Get user permissions.
+   */
+  async getUserPermissions(
+    userId: string,
+  ): Promise<
+    ApiResponse<{ userId: string; permissions: string[]; role: string }>
+  > {
+    const user = await this.userModel
+      .findById(userId)
+      .select('permissions role')
+      .exec();
+
+    if (!user || user.isDeleted) {
+      throw new AppException(
+        ErrorCode.USER_NOT_FOUND,
+        'User not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return ApiResponse.success({
+      userId: user._id.toString(),
+      permissions: user.permissions || [],
+      role: user.role,
+    });
+  }
+
+  /**
+   * Add permission to user.
+   */
+  async addPermission(
+    userId: string,
+    permission: string,
+  ): Promise<ApiResponse<{ userId: string; permissions: string[] }>> {
+    const user = await this.userModel.findById(userId).exec();
+
+    if (!user || user.isDeleted) {
+      throw new AppException(
+        ErrorCode.USER_NOT_FOUND,
+        'User not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    // Check if permission already exists
+    if (user.permissions.includes(permission)) {
+      throw new AppException(
+        ErrorCode.PERMISSION_ALREADY_EXISTS,
+        'User already has this permission',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // Add permission
+    user.permissions.push(permission);
+    await user.save();
+
+    this.logger.log(`Permission ${permission} added to user: ${user.email}`);
+    return ApiResponse.success(
+      {
+        userId: user._id.toString(),
+        permissions: user.permissions,
+      },
+      'Permission added successfully',
+    );
+  }
+
+  /**
+   * Remove permission from user.
+   */
+  async removePermission(
+    userId: string,
+    permission: string,
+  ): Promise<ApiResponse<{ userId: string; permissions: string[] }>> {
+    const user = await this.userModel.findById(userId).exec();
+
+    if (!user || user.isDeleted) {
+      throw new AppException(
+        ErrorCode.USER_NOT_FOUND,
+        'User not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    // Check if permission exists
+    if (!user.permissions.includes(permission)) {
+      throw new AppException(
+        ErrorCode.PERMISSION_NOT_FOUND,
+        'User does not have this permission',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    // Remove permission
+    user.permissions = user.permissions.filter((p) => p !== permission);
+    await user.save();
+
+    this.logger.log(
+      `Permission ${permission} removed from user: ${user.email}`,
+    );
+    return ApiResponse.success(
+      {
+        userId: user._id.toString(),
+        permissions: user.permissions,
+      },
+      'Permission removed successfully',
+    );
+  }
+
+  /**
    * Map user document to profile DTO.
    */
   private mapToProfileDto(user: UserDocument): UserProfileDto {
@@ -285,6 +395,7 @@ export class UserService {
       email: user.email,
       name: user.name,
       role: user.role,
+      permissions: user.permissions || [],
       authProvider: user.authProvider,
       isVerified: user.isVerified,
       googleId: user.googleId,

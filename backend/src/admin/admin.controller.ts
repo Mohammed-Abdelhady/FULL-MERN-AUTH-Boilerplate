@@ -3,6 +3,7 @@ import {
   Get,
   Patch,
   Delete,
+  Post,
   Param,
   Query,
   Body,
@@ -20,8 +21,8 @@ import {
 } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
+import { PermissionGuard } from '../common/guards/permission.guard';
+import { RequirePermissions } from '../common/decorators/permissions.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { UserRole } from '../user/enums/user-role.enum';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
@@ -29,17 +30,26 @@ import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import { ApiResponse } from '../common/dto/api-response.dto';
 import { AdminUserDto, UserListData } from './dto/admin-user-response.dto';
+import { UserService } from '../user/user.service';
+import { AddPermissionDto } from '../user/dto/add-permission.dto';
+import {
+  USER_PERMISSIONS,
+  PERMISSION_PERMISSIONS,
+} from '../common/constants/permissions';
 
 /**
  * Admin controller for user management operations.
- * All endpoints require SUPPORT, MANAGER, or ADMIN roles.
+ * All endpoints require specific permissions based on the operation.
  */
 @ApiTags('admin')
 @ApiBearerAuth('JWT-auth')
 @Controller('admin/users')
-@UseGuards(AuthGuard, RolesGuard)
+@UseGuards(AuthGuard, PermissionGuard)
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly userService: UserService,
+  ) {}
 
   /**
    * List all users with pagination and filtering.
@@ -48,7 +58,7 @@ export class AdminController {
    * @example GET /admin/users?page=1&limit=10&search=john&role=user
    */
   @Get()
-  @Roles(UserRole.SUPPORT, UserRole.MANAGER, UserRole.ADMIN)
+  @RequirePermissions(USER_PERMISSIONS.LIST_ALL)
   @ApiOperation({
     summary: 'List all users',
     description:
@@ -106,7 +116,7 @@ export class AdminController {
    * @example GET /admin/users/:id
    */
   @Get(':id')
-  @Roles(UserRole.SUPPORT, UserRole.MANAGER, UserRole.ADMIN)
+  @RequirePermissions(USER_PERMISSIONS.READ_ALL)
   @ApiOperation({
     summary: 'Get user by ID',
     description:
@@ -133,7 +143,7 @@ export class AdminController {
    * @example PATCH /admin/users/:id/status
    */
   @Patch(':id/status')
-  @Roles(UserRole.SUPPORT, UserRole.MANAGER, UserRole.ADMIN)
+  @RequirePermissions(USER_PERMISSIONS.UPDATE_ALL)
   @ApiOperation({
     summary: 'Update user status',
     description:
@@ -166,7 +176,7 @@ export class AdminController {
    * @example PATCH /admin/users/:id/role
    */
   @Patch(':id/role')
-  @Roles(UserRole.MANAGER, UserRole.ADMIN)
+  @RequirePermissions(USER_PERMISSIONS.UPDATE_ALL)
   @ApiOperation({
     summary: 'Update user role',
     description:
@@ -197,7 +207,7 @@ export class AdminController {
    */
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Roles(UserRole.MANAGER, UserRole.ADMIN)
+  @RequirePermissions(USER_PERMISSIONS.DELETE_ALL)
   @ApiOperation({
     summary: 'Delete user',
     description:
@@ -214,5 +224,89 @@ export class AdminController {
     @CurrentUser('role') actorRole: UserRole,
   ): Promise<void> {
     return this.adminService.deleteUser(id, actorId, actorRole);
+  }
+
+  /**
+   * Get user permissions.
+   * Only ADMIN can view user permissions.
+   *
+   * @example GET /admin/users/:id/permissions
+   */
+  @Get(':id/permissions')
+  @RequirePermissions(PERMISSION_PERMISSIONS.READ_ALL)
+  @ApiOperation({
+    summary: 'Get user permissions',
+    description: 'Returns all permissions assigned to a specific user.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  async getUserPermissions(
+    @Param('id') userId: string,
+  ): Promise<
+    ApiResponse<{ userId: string; permissions: string[]; role: string }>
+  > {
+    return this.userService.getUserPermissions(userId);
+  }
+
+  /**
+   * Add permission to user.
+   * Only ADMIN can add permissions.
+   *
+   * @example POST /admin/users/:id/permissions
+   */
+  @Post(':id/permissions')
+  @HttpCode(HttpStatus.OK)
+  @RequirePermissions(PERMISSION_PERMISSIONS.GRANT_ALL)
+  @ApiOperation({
+    summary: 'Add permission to user',
+    description:
+      'Adds a specific permission to a user. The permission must follow the format: resource:action[:scope]',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiBody({ type: AddPermissionDto })
+  async addPermission(
+    @Param('id') userId: string,
+    @Body() dto: AddPermissionDto,
+  ): Promise<ApiResponse<{ userId: string; permissions: string[] }>> {
+    return this.userService.addPermission(userId, dto.permission);
+  }
+
+  /**
+   * Remove permission from user.
+   * Only ADMIN can remove permissions.
+   *
+   * @example DELETE /admin/users/:id/permissions/:permission
+   */
+  @Delete(':id/permissions/:permission')
+  @HttpCode(HttpStatus.OK)
+  @RequirePermissions(PERMISSION_PERMISSIONS.REVOKE_ALL)
+  @ApiOperation({
+    summary: 'Remove permission from user',
+    description: 'Removes a specific permission from a user.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiParam({
+    name: 'permission',
+    description: 'Permission to remove (URL encoded)',
+    example: 'users:read:all',
+  })
+  async removePermission(
+    @Param('id') userId: string,
+    @Param('permission') permission: string,
+  ): Promise<ApiResponse<{ userId: string; permissions: string[] }>> {
+    // URL decode the permission parameter
+    const decodedPermission = decodeURIComponent(permission);
+    return this.userService.removePermission(userId, decodedPermission);
   }
 }

@@ -1,10 +1,11 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
 import { User, UserSchema } from '../user/schemas/user.schema';
 import { Session, SessionSchema } from '../session/schemas/session.schema';
 import { SessionService } from '../auth/services/session.service';
+import { UserModule } from '../user/user.module';
 
 /**
  * Admin module for user management operations.
@@ -16,6 +17,7 @@ import { SessionService } from '../auth/services/session.service';
       { name: User.name, schema: UserSchema },
       { name: Session.name, schema: SessionSchema },
     ]),
+    forwardRef(() => UserModule),
   ],
   controllers: [AdminController],
   providers: [AdminService, SessionService],

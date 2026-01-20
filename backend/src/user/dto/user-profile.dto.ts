@@ -1,4 +1,3 @@
-import { UserRole } from '../enums/user-role.enum';
 import { AuthProvider } from '../enums/auth-provider.enum';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -25,11 +24,18 @@ export class UserProfileDto {
   name!: string;
 
   @ApiProperty({
-    description: 'User role (USER, SUPPORT, MANAGER, ADMIN)',
-    enum: ['USER', 'SUPPORT', 'MANAGER', 'ADMIN'],
-    example: 'USER',
+    description:
+      'User role slug (user, support, manager, admin, or custom roles)',
+    example: 'user',
   })
-  role!: UserRole;
+  role!: string;
+
+  @ApiProperty({
+    description: 'User permissions array',
+    example: ['profile:read:own', 'profile:update:own'],
+    type: [String],
+  })
+  permissions!: string[];
 
   @ApiProperty({
     description: 'Authentication provider (LOCAL, GOOGLE, FACEBOOK, GITHUB)',

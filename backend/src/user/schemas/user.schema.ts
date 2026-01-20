@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
-import { UserRole } from '../enums/user-role.enum';
 import { AuthProvider } from '../enums/auth-provider.enum';
 
 @Schema({ timestamps: true })
@@ -14,8 +13,11 @@ export class User {
   @Prop({ required: true, trim: true })
   name!: string;
 
-  @Prop({ enum: UserRole, default: UserRole.USER })
-  role!: UserRole;
+  @Prop({ type: String, default: 'user' })
+  role!: string;
+
+  @Prop({ type: [String], default: [] })
+  permissions!: string[];
 
   @Prop({ enum: AuthProvider, default: AuthProvider.EMAIL })
   authProvider!: AuthProvider;
@@ -72,3 +74,4 @@ export const UserSchema: MongooseSchema<User> =
 UserSchema.index({ createdAt: -1 });
 UserSchema.index({ isDeleted: 1 });
 UserSchema.index({ linkedProviders: 1 });
+UserSchema.index({ role: 1 });

@@ -352,6 +352,7 @@ export class AdminService {
       email: user.email,
       name: user.name,
       role: user.role,
+      permissions: user.permissions || [],
       authProvider: user.authProvider,
       isVerified: user.isVerified,
       isDeleted: user.isDeleted,
