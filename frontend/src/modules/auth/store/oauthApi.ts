@@ -45,7 +45,7 @@ export const oauthApi = baseApi.injectEndpoints({
         data: OAuthCallbackResponse;
         message: string;
       }) => response.data,
-      invalidatesTags: ['Auth', 'User'],
+      invalidatesTags: ['Auth', 'User', 'LinkedProviders', 'ProfileSync'],
     }),
 
     /**
