@@ -144,4 +144,12 @@ export enum ErrorCode {
   PROVIDER_NOT_LINKED = 'PROVIDER_NOT_LINKED',
   /** Re-authentication required for sensitive operation */
   REAUTH_REQUIRED = 'REAUTH_REQUIRED',
+
+  // Permission errors
+  /** Permission already exists for user */
+  PERMISSION_ALREADY_EXISTS = 'PERMISSION_ALREADY_EXISTS',
+  /** Permission not found for user */
+  PERMISSION_NOT_FOUND = 'PERMISSION_NOT_FOUND',
+  /** Invalid permission format */
+  INVALID_PERMISSION_FORMAT = 'INVALID_PERMISSION_FORMAT',
 }

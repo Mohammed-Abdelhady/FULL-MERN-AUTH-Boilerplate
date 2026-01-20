@@ -11,5 +11,22 @@ export { AppException } from './exceptions/app.exception';
 // Filters
 export { GlobalExceptionFilter } from './filters/global-exception.filter';
 
+// Guards
+export { PermissionGuard } from './guards/permission.guard';
+
+// Decorators
+export {
+  RequirePermissions,
+  RequireAnyPermission,
+  PERMISSIONS_KEY,
+  ANY_PERMISSIONS_KEY,
+} from './decorators/permissions.decorator';
+
 // Services
 export { HashService } from './services/hash.service';
+
+// Constants
+export * from './constants/permissions';
+
+// Utils
+export * from './utils/permission.utils';

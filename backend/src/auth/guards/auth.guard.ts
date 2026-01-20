@@ -17,6 +17,7 @@ export interface RequestWithUser extends Request {
     email: string;
     name: string;
     role: string;
+    permissions: string[];
     isVerified: boolean;
   };
   session?: SessionDocument;
@@ -56,6 +57,7 @@ export class AuthGuard implements CanActivate {
       email: user.email,
       name: user.name,
       role: user.role,
+      permissions: user.permissions || [],
       isVerified: user.isVerified,
     };
     request.session = session;
