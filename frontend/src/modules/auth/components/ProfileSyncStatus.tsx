@@ -1,15 +1,17 @@
 'use client';
 
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/lib/toast';
 import { RefreshCw, Info } from 'lucide-react';
 import { useGetSyncStatusQuery, useInitiateProfileSyncMutation } from '../store/profileSyncApi';
 import { openOAuthPopup, waitForOAuthCallback } from '../utils/oauthHelpers';
-import { useOAuthCallbackMutation } from '../store/oauthApi';
+import { useHandleCallbackMutation, oauthApi } from '../store/oauthApi';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
+import { useAppDispatch } from '@/store/hooks';
 
 /**
  * Profile Sync Status Component
@@ -17,35 +19,41 @@ import { formatDistanceToNow } from 'date-fns';
  */
 export function ProfileSyncStatus() {
   const t = useTranslations('settings.profileSync');
-  const { toast } = useToast();
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const { data: syncStatus, isLoading } = useGetSyncStatusQuery();
   const [initiateSync, { isLoading: isSyncInitiating }] = useInitiateProfileSyncMutation();
-  const [handleOAuthCallback] = useOAuthCallbackMutation();
+  const [handleOAuthCallback] = useHandleCallbackMutation();
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const handleManualSync = async () => {
+    setIsSyncing(true);
     try {
       // Initiate sync - returns instructions to re-auth with OAuth
       const response = await initiateSync().unwrap();
 
       if (!response.requiresOAuth) {
-        toast({
-          title: t('syncError'),
+        toast.error(t('syncError'), {
           description: response.message,
-          variant: 'destructive',
         });
+        setIsSyncing(false);
         return;
       }
 
       // Open OAuth flow for the primary provider
       const provider = response.provider.toLowerCase() as 'google' | 'facebook' | 'github';
 
-      // Get authorization URL
-      const authUrlResponse = await fetch(`/api/auth/oauth/authorize?provider=${provider}`);
-      const { data } = await authUrlResponse.json();
+      // Get authorization URL using RTK Query
+      const authUrlResult = await dispatch(
+        oauthApi.endpoints.getAuthorizationUrl.initiate(provider),
+      ).unwrap();
+
+      if (!authUrlResult?.url) {
+        throw new Error('Failed to get authorization URL');
+      }
 
       // Open OAuth popup
-      const popup = openOAuthPopup(data.url);
+      const popup = openOAuthPopup(authUrlResult.url);
       if (!popup) {
         throw new Error('Failed to open OAuth popup');
       }
@@ -60,8 +68,7 @@ export function ProfileSyncStatus() {
         state: state || '',
       }).unwrap();
 
-      toast({
-        title: t('syncSuccess'),
+      toast.success(t('syncSuccess'), {
         description: t('syncSuccessDescription'),
       });
 
@@ -69,11 +76,11 @@ export function ProfileSyncStatus() {
       router.refresh();
     } catch (error) {
       console.error('Manual sync failed:', error);
-      toast({
-        title: t('syncError'),
+      toast.error(t('syncError'), {
         description: error instanceof Error ? error.message : t('syncErrorDescription'),
-        variant: 'destructive',
       });
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -136,7 +143,7 @@ export function ProfileSyncStatus() {
         {/* Info message if can't sync */}
         {!canSync && (
           <div className="flex items-start gap-2 rounded-lg bg-muted p-3 text-sm">
-            <Info className="h-4 w-4 mt-0.5 text-muted-foreground" />
+            <Info className="mt-0.5 h-4 w-4 text-muted-foreground" />
             <p className="text-muted-foreground">{t('cannotSyncInfo')}</p>
           </div>
         )}
@@ -144,18 +151,18 @@ export function ProfileSyncStatus() {
         {/* Manual Sync Button */}
         <Button
           onClick={handleManualSync}
-          disabled={!canSync || isSyncInitiating}
-          className="w-full"
+          disabled={!canSync || isSyncInitiating || isSyncing}
+          className="w-full whitespace-normal"
         >
-          {isSyncInitiating ? (
+          {isSyncInitiating || isSyncing ? (
             <>
-              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-              {t('syncing')}
+              <RefreshCw className="h-4 w-4 shrink-0 animate-spin" />
+              <span>{t('syncing')}</span>
             </>
           ) : (
             <>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              {t('syncNow')}
+              <RefreshCw className="h-4 w-4 shrink-0" />
+              <span>{t('syncNow')}</span>
             </>
           )}
         </Button>

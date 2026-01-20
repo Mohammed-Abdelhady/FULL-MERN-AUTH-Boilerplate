@@ -88,19 +88,21 @@ export function LinkProviderButton({
       variant="outline"
       onClick={handleLinkClick}
       disabled={disabled || isLinking || isFetchingUrl}
-      className="w-full justify-start"
+      className="w-fit justify-start "
     >
       {isLinking || isFetchingUrl ? (
         <>
-          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-          {t('connecting', { provider: formatProviderName(provider) })}
+          <Loader2 className="h-5 w-5 shrink-0 animate-spin" />
+          <span className="ml-2">
+            {t('connecting', { provider: formatProviderName(provider) })}
+          </span>
         </>
       ) : (
         <>
-          <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+          <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
             <path d={getOAuthProviderIconPath(provider)} />
           </svg>
-          {t('linkWith', { provider: formatProviderName(provider) })}
+          <span className="ml-2">{t('linkWith', { provider: formatProviderName(provider) })}</span>
         </>
       )}
     </Button>

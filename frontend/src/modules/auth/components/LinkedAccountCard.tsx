@@ -49,7 +49,7 @@ export function LinkedAccountCard({
 
   const handleUnlink = async () => {
     try {
-      await unlinkProvider(provider.toUpperCase() as OAuthProvider).unwrap();
+      await unlinkProvider(provider.toLowerCase() as OAuthProvider).unwrap();
       toast.success(t('unlinkSuccess', { provider: formatProviderName(provider) }));
       onLinkSuccess?.();
       setShowUnlinkDialog(false);
@@ -64,7 +64,7 @@ export function LinkedAccountCard({
   const handleSetPrimary = async () => {
     try {
       await setPrimaryProvider({
-        provider: provider.toUpperCase() as OAuthProvider,
+        provider: provider.toLowerCase() as OAuthProvider,
       }).unwrap();
       toast.success(t('setPrimarySuccess', { provider: formatProviderName(provider) }));
       onLinkSuccess?.();
@@ -80,18 +80,18 @@ export function LinkedAccountCard({
     <>
       <Card className="overflow-hidden">
         <CardContent className="p-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between flex-wrap">
             <div className="flex items-center gap-3">
               {/* Provider Icon */}
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted">
                 <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                   <path d={getOAuthProviderIconPath(provider.toLowerCase())} />
                 </svg>
               </div>
 
               {/* Provider Info */}
-              <div>
-                <div className="flex items-center gap-2">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
                   <h3 className="font-medium">{formatProviderName(provider)}</h3>
                   {isPrimary && (
                     <Badge variant="default" className="text-xs">
@@ -107,20 +107,21 @@ export function LinkedAccountCard({
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex w-full flex-col gap-2 lg:w-auto lg:flex-row lg:shrink-0">
               {!isPrimary && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleSetPrimary}
                   disabled={isSettingPrimary || isUnlinking}
+                  className="w-full whitespace-nowrap lg:w-auto"
                 >
                   {isSettingPrimary ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
                   ) : (
                     <>
-                      <LinkIcon className="mr-2 h-4 w-4" />
-                      {t('setPrimary')}
+                      <LinkIcon className="h-4 w-4 shrink-0" />
+                      <span>{t('setPrimary')}</span>
                     </>
                   )}
                 </Button>
@@ -132,13 +133,14 @@ export function LinkedAccountCard({
                   size="sm"
                   onClick={() => setShowUnlinkDialog(true)}
                   disabled={isUnlinking || isSettingPrimary}
+                  className="w-full whitespace-nowrap lg:w-auto"
                 >
                   {isUnlinking ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
                   ) : (
                     <>
-                      <Unlink className="mr-2 h-4 w-4" />
-                      {t('unlink')}
+                      <Unlink className="h-4 w-4 shrink-0" />
+                      <span>{t('unlink')}</span>
                     </>
                   )}
                 </Button>

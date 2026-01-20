@@ -93,7 +93,7 @@ export function LinkedAccounts() {
         {availableProviders.length > 0 && (
           <div className="space-y-4">
             <h3 className="text-sm font-medium">{t('availableProvidersLabel')}</h3>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="flex items-center gap-2 flex-wrap">
               {availableProviders.map((provider) => (
                 <LinkProviderButton
                   key={provider}

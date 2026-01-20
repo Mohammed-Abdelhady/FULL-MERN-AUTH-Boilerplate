@@ -40,7 +40,7 @@ export function OAuthButtons({
 
   return (
     <div
-      className="flex items-center justify-center gap-4"
+      className="flex flex-wrap items-center justify-center gap-4"
       data-testid="oauth-buttons"
       role="group"
       aria-label="OAuth authentication options"
