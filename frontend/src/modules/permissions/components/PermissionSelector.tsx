@@ -1,7 +1,9 @@
 'use client';
 
+import { useState, useMemo, useCallback, memo } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   PROFILE_PERMISSIONS,
   USER_PERMISSIONS,
@@ -64,27 +66,31 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
  * />
  * ```
  */
-export function PermissionSelector({
+export const PermissionSelector = memo(function PermissionSelector({
   selectedPermissions,
   onChange,
   disabled = false,
   showWildcard = true,
 }: PermissionSelectorProps) {
-  const handleTogglePermission = (permission: string) => {
-    if (disabled) return;
+  const [activeTab, setActiveTab] = useState('all');
+  const handleTogglePermission = useCallback(
+    (permission: string) => {
+      if (disabled) return;
 
-    const isSelected = selectedPermissions.includes(permission);
+      const isSelected = selectedPermissions.includes(permission);
 
-    if (isSelected) {
-      // Remove permission
-      onChange(selectedPermissions.filter((p) => p !== permission));
-    } else {
-      // Add permission
-      onChange([...selectedPermissions, permission]);
-    }
-  };
+      if (isSelected) {
+        // Remove permission
+        onChange(selectedPermissions.filter((p) => p !== permission));
+      } else {
+        // Add permission
+        onChange([...selectedPermissions, permission]);
+      }
+    },
+    [disabled, selectedPermissions, onChange],
+  );
 
-  const handleToggleWildcard = () => {
+  const handleToggleWildcard = useCallback(() => {
     if (disabled) return;
 
     const hasWildcard = selectedPermissions.includes(WILDCARD_PERMISSION);
@@ -96,28 +102,31 @@ export function PermissionSelector({
       // Add wildcard and remove all other permissions
       onChange([WILDCARD_PERMISSION]);
     }
-  };
+  }, [disabled, selectedPermissions, onChange]);
 
-  const handleSelectAll = (groupPermissions: Record<string, string>) => {
-    if (disabled) return;
+  const handleSelectAll = useCallback(
+    (groupPermissions: Record<string, string>) => {
+      if (disabled) return;
 
-    const groupPerms = Object.values(groupPermissions);
-    const allSelected = groupPerms.every((p) => selectedPermissions.includes(p));
+      const groupPerms = Object.values(groupPermissions);
+      const allSelected = groupPerms.every((p) => selectedPermissions.includes(p));
 
-    if (allSelected) {
-      // Deselect all from this group
-      onChange(selectedPermissions.filter((p) => !groupPerms.includes(p)));
-    } else {
-      // Select all from this group
-      const newPermissions = [...selectedPermissions];
-      groupPerms.forEach((p) => {
-        if (!newPermissions.includes(p)) {
-          newPermissions.push(p);
-        }
-      });
-      onChange(newPermissions);
-    }
-  };
+      if (allSelected) {
+        // Deselect all from this group
+        onChange(selectedPermissions.filter((p) => !groupPerms.includes(p)));
+      } else {
+        // Select all from this group
+        const newPermissions = [...selectedPermissions];
+        groupPerms.forEach((p) => {
+          if (!newPermissions.includes(p)) {
+            newPermissions.push(p);
+          }
+        });
+        onChange(newPermissions);
+      }
+    },
+    [disabled, selectedPermissions, onChange],
+  );
 
   const formatPermissionLabel = (permission: string): string => {
     const parsed = parsePermission(permission);
@@ -131,6 +140,16 @@ export function PermissionSelector({
   };
 
   const hasWildcard = selectedPermissions.includes(WILDCARD_PERMISSION);
+
+  // Calculate selected count per group for tab badges
+  const groupStats = useMemo(() => {
+    const stats: Record<string, number> = {};
+    PERMISSION_GROUPS.forEach((group) => {
+      const groupPerms = Object.values(group.permissions);
+      stats[group.name] = groupPerms.filter((p) => selectedPermissions.includes(p)).length;
+    });
+    return stats;
+  }, [selectedPermissions]);
 
   return (
     <div className="space-y-4">
@@ -160,32 +179,109 @@ export function PermissionSelector({
         </div>
       )}
 
-      {/* Permission Groups */}
+      {/* Tabbed Permission Groups */}
       {!hasWildcard && (
-        <div className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-7">
+            <TabsTrigger value="all" className="text-xs">
+              All
+              {selectedPermissions.length > 0 && (
+                <span className="ml-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px]">
+                  {selectedPermissions.length}
+                </span>
+              )}
+            </TabsTrigger>
+            {PERMISSION_GROUPS.map((group) => (
+              <TabsTrigger key={group.name} value={group.name.toLowerCase()} className="text-xs">
+                {group.name}
+                {groupStats[group.name] > 0 && (
+                  <span className="ml-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px]">
+                    {groupStats[group.name]}
+                  </span>
+                )}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          {/* All Permissions Tab */}
+          <TabsContent value="all" className="mt-4 space-y-6">
+            {PERMISSION_GROUPS.map((group) => {
+              const groupPerms = Object.values(group.permissions);
+              const allSelected = groupPerms.every((p) => selectedPermissions.includes(p));
+
+              return (
+                <div key={group.name} className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold tracking-tight">{group.name}</h3>
+                    <button
+                      type="button"
+                      onClick={() => handleSelectAll(group.permissions)}
+                      disabled={disabled}
+                      className="text-xs text-blue-600 hover:text-blue-800 disabled:opacity-50 dark:text-blue-400 dark:hover:text-blue-300"
+                    >
+                      {allSelected ? 'Deselect All' : 'Select All'}
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 rounded-lg border border-border-subtle bg-surface-secondary p-4">
+                    {Object.entries(group.permissions).map(([, permission]) => (
+                      <div key={permission} className="flex items-start space-x-3">
+                        <Checkbox
+                          id={`permission-${permission}`}
+                          checked={selectedPermissions.includes(permission)}
+                          onCheckedChange={() => handleTogglePermission(permission)}
+                          disabled={disabled}
+                          data-testid={`permission-checkbox-${permission}`}
+                        />
+                        <div className="flex-1">
+                          <Label
+                            htmlFor={`permission-${permission}`}
+                            className="cursor-pointer text-sm leading-tight"
+                          >
+                            {formatPermissionLabel(permission)}
+                          </Label>
+                          <p className="mt-0.5 text-xs text-muted-foreground/60 font-mono">
+                            {permission}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </TabsContent>
+
+          {/* Individual Category Tabs */}
           {PERMISSION_GROUPS.map((group) => {
             const groupPerms = Object.values(group.permissions);
             const allSelected = groupPerms.every((p) => selectedPermissions.includes(p));
 
             return (
-              <div key={group.name} className="space-y-3">
+              <TabsContent
+                key={group.name}
+                value={group.name.toLowerCase()}
+                className="mt-4 space-y-4"
+              >
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">{group.name}</h3>
+                  <p className="text-sm text-muted-foreground/60">
+                    {groupPerms.length} permission{groupPerms.length !== 1 ? 's' : ''} available
+                  </p>
                   <button
                     type="button"
                     onClick={() => handleSelectAll(group.permissions)}
                     disabled={disabled}
-                    className="text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50 dark:text-blue-400 dark:hover:text-blue-300"
+                    className="text-xs text-blue-600 hover:text-blue-800 disabled:opacity-50 dark:text-blue-400 dark:hover:text-blue-300"
                   >
                     {allSelected ? 'Deselect All' : 'Select All'}
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800 sm:grid-cols-2">
+                <div className="grid grid-cols-2 gap-3 rounded-lg border border-border-subtle bg-surface-secondary p-4">
                   {Object.entries(group.permissions).map(([, permission]) => (
                     <div key={permission} className="flex items-start space-x-3">
                       <Checkbox
-                        id={`permission-${permission}`}
+                        id={`permission-${permission}-${group.name}`}
                         checked={selectedPermissions.includes(permission)}
                         onCheckedChange={() => handleTogglePermission(permission)}
                         disabled={disabled}
@@ -193,35 +289,35 @@ export function PermissionSelector({
                       />
                       <div className="flex-1">
                         <Label
-                          htmlFor={`permission-${permission}`}
-                          className="cursor-pointer text-sm"
+                          htmlFor={`permission-${permission}-${group.name}`}
+                          className="cursor-pointer text-sm leading-tight"
                         >
                           {formatPermissionLabel(permission)}
                         </Label>
-                        <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                        <p className="mt-0.5 text-xs text-muted-foreground/60 font-mono">
                           {permission}
                         </p>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
+              </TabsContent>
             );
           })}
-        </div>
+        </Tabs>
       )}
 
       {/* Wildcard Notice */}
       {hasWildcard && (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-center dark:border-gray-700 dark:bg-gray-800">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+        <div className="rounded-lg border border-border-subtle bg-surface-secondary p-4 text-center">
+          <p className="text-sm text-muted-foreground/60">
             Wildcard permission selected. All other permissions are implicitly granted.
           </p>
         </div>
       )}
 
       {/* Permission Count */}
-      <div className="text-sm text-gray-600 dark:text-gray-400">
+      <div className="text-sm text-muted-foreground/60">
         {hasWildcard ? (
           <span>All permissions granted via wildcard (*)</span>
         ) : (
@@ -233,4 +329,4 @@ export function PermissionSelector({
       </div>
     </div>
   );
-}
+});
