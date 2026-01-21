@@ -14,6 +14,7 @@ import {
 } from './schemas/pending-password-reset.schema';
 import { User, UserSchema } from '../user/schemas/user.schema';
 import { Session, SessionSchema } from '../session/schemas/session.schema';
+import { Role, RoleSchema } from '../role/schemas/role.schema';
 import { SessionService } from './services/session.service';
 import { OAuthService } from './services/oauth.service';
 import { GoogleOAuthStrategy } from './strategies/google-oauth.strategy';
@@ -34,6 +35,7 @@ import { VerifiedGuard } from './guards/verified.guard';
       { name: PendingPasswordReset.name, schema: PendingPasswordResetSchema },
       { name: User.name, schema: UserSchema },
       { name: Session.name, schema: SessionSchema },
+      { name: Role.name, schema: RoleSchema },
     ]),
     // ThrottlerModule is already configured globally in AppModule
     CommonModule,

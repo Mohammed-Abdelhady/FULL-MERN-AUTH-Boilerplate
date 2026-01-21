@@ -9,6 +9,7 @@ export class LoginResponseDto {
     role: string;
     authProvider: AuthProvider;
     isVerified: boolean;
+    permissions: string[];
   };
 
   static success(user: {
@@ -18,6 +19,7 @@ export class LoginResponseDto {
     role: string;
     authProvider: AuthProvider;
     isVerified: boolean;
+    permissions: string[];
   }): ApiResponse<LoginResponseDto> {
     const dto = new LoginResponseDto();
     dto.user = user;

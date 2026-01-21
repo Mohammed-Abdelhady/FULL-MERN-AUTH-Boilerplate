@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { MigrationController } from './migration.controller';
 import { AddPermissionsToUsersMigration } from './add-permissions-to-users.migration';
 import { User, UserSchema } from '../../user/schemas/user.schema';
+import { Role, RoleSchema } from '../../role/schemas/role.schema';
 import { AuthModule } from '../../auth/auth.module';
 import { CommonModule } from '../../common/common.module';
 
@@ -12,7 +13,10 @@ import { CommonModule } from '../../common/common.module';
  */
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: Role.name, schema: RoleSchema },
+    ]),
     AuthModule,
     CommonModule,
   ],

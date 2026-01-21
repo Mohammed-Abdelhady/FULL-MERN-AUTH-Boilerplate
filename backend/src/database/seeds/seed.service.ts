@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 
@@ -105,8 +105,9 @@ export class SeedService {
           this.configService.get<number>('bcrypt.rounds', 10),
         );
 
-        // Create user
+        // Create user with explicit MongoDB ObjectId
         await this.userModel.create({
+          _id: new Types.ObjectId(), // Explicitly generate MongoDB ObjectId
           ...userData,
           password: hashedPassword,
           isVerified: true, // All seed users are verified

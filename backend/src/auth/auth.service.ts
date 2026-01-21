@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { Response } from 'express';
 import * as crypto from 'crypto';
 import { User, UserDocument } from '../user/schemas/user.schema';
+import { Role, RoleDocument } from '../role/schemas/role.schema';
 import {
   PendingRegistration,
   PendingRegistrationDocument,
@@ -40,6 +41,7 @@ export class AuthService {
 
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Role.name) private roleModel: Model<RoleDocument>,
     @InjectModel(PendingRegistration.name)
     private pendingRegistrationModel: Model<PendingRegistrationDocument>,
     @InjectModel(PendingPasswordReset.name)
@@ -358,6 +360,9 @@ export class AuthService {
       path: '/',
     });
 
+    // Compute effective permissions (role + direct)
+    const effectivePermissions = await this.getEffectivePermissions(user);
+
     return LoginResponseDto.success({
       id: user._id.toString(),
       email: user.email,
@@ -365,7 +370,32 @@ export class AuthService {
       role: user.role,
       authProvider: user.authProvider,
       isVerified: user.isVerified,
+      permissions: effectivePermissions,
     });
+  }
+
+  /**
+   * Get effective permissions for a user (role permissions + direct permissions).
+   * @param user - User document
+   * @returns Array of effective permissions (deduplicated)
+   */
+  private async getEffectivePermissions(user: UserDocument): Promise<string[]> {
+    const rolePermissions: string[] = [];
+
+    // Fetch role permissions
+    if (user.role) {
+      const role = await this.roleModel.findOne({ slug: user.role }).exec();
+      if (role && role.permissions) {
+        rolePermissions.push(...role.permissions);
+      }
+    }
+
+    // Combine role permissions with direct user permissions
+    const directPermissions = user.permissions || [];
+    const allPermissions = [...rolePermissions, ...directPermissions];
+
+    // Deduplicate permissions
+    return [...new Set(allPermissions)];
   }
 
   /**

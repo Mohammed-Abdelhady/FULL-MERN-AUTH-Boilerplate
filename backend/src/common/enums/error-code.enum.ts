@@ -42,6 +42,8 @@ export enum ErrorCode {
   // Validation errors
   /** Request validation failed */
   VALIDATION_ERROR = 'VALIDATION_ERROR',
+  /** Invalid input provided */
+  INVALID_INPUT = 'INVALID_INPUT',
 
   // Rate limiting errors
   /** Rate limit exceeded */
