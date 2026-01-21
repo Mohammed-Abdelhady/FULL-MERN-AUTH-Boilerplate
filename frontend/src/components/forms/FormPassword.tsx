@@ -13,12 +13,14 @@ export interface FormPasswordProps<TFieldValues extends FieldValues = FieldValue
   'name' | 'type'
 > {
   name: FieldPath<TFieldValues>;
+  label?: string;
   description?: string;
   showToggle?: boolean;
 }
 
 export const FormPassword = <TFieldValues extends FieldValues = FieldValues>({
   name,
+  label,
   description,
   className,
   showToggle = true,
@@ -29,6 +31,7 @@ export const FormPassword = <TFieldValues extends FieldValues = FieldValues>({
   return (
     <BaseFormField
       name={name}
+      label={label}
       description={description}
       render={(field) => (
         <div className="relative">

@@ -5,6 +5,8 @@ export {
   useLogoutMutation,
   useRefreshTokenMutation,
   useGetCurrentUserQuery,
+  useChangePasswordMutation,
+  useUpdateProfileMutation,
 } from './authApi';
 
 // OAuth API exports

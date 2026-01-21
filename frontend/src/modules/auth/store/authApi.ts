@@ -135,6 +135,39 @@ export const authApi = baseApi.injectEndpoints({
         body: data,
       }),
     }),
+
+    /**
+     * Change password mutation
+     * Changes password for authenticated user
+     * Invalidates all other sessions on success
+     */
+    changePassword: builder.mutation<
+      { message: string },
+      { currentPassword: string; newPassword: string }
+    >({
+      query: (data) => ({
+        url: '/api/user/password',
+        method: 'POST',
+        body: data,
+      }),
+      transformResponse: (response: { success: boolean; data: { message: string } }) =>
+        response.data,
+      invalidatesTags: ['Sessions'],
+    }),
+
+    /**
+     * Update profile mutation
+     * Updates user profile information (name)
+     */
+    updateProfile: builder.mutation<User, { name: string }>({
+      query: (data) => ({
+        url: '/api/user/profile',
+        method: 'PATCH',
+        body: data,
+      }),
+      transformResponse: (response: { success: boolean; data: User }) => response.data,
+      invalidatesTags: ['User'],
+    }),
   }),
 });
 
@@ -149,4 +182,6 @@ export const {
   useResendActivationMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,
+  useChangePasswordMutation,
+  useUpdateProfileMutation,
 } = authApi;

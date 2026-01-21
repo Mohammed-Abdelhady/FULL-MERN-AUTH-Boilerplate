@@ -29,3 +29,6 @@ export * from './object';
 export * from './special';
 export * from './file';
 export * from './composed';
+
+// Export form schemas
+export * from './changePassword';
