@@ -1,0 +1,60 @@
+'use client';
+
+import { Loader2 } from 'lucide-react';
+import { useGetEnabledProvidersQuery } from '../api';
+import { OAuthButton } from './OAuthButton';
+import type { OAuthProvider } from '../types';
+
+interface OAuthButtonsProps {
+  mode?: 'signin' | 'link';
+  onSuccess?: () => void;
+  onError?: (error: string) => void;
+  disabled?: boolean;
+}
+
+/**
+ * OAuthButtons Component
+ * Container component that renders OAuth buttons for all enabled providers
+ */
+export function OAuthButtons({
+  mode = 'signin',
+  onSuccess,
+  onError,
+  disabled = false,
+}: OAuthButtonsProps) {
+  const { data: providersData, isLoading: isLoadingProviders } = useGetEnabledProvidersQuery();
+
+  if (isLoadingProviders) {
+    return (
+      <div className="flex items-center justify-center py-4" data-testid="oauth-loading">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  const enabledProviders = providersData?.providers || [];
+
+  if (enabledProviders.length === 0) {
+    return null;
+  }
+
+  return (
+    <div
+      className="flex flex-wrap items-center justify-center gap-4"
+      data-testid="oauth-buttons"
+      role="group"
+      aria-label="OAuth authentication options"
+    >
+      {enabledProviders.map((provider) => (
+        <OAuthButton
+          key={provider}
+          provider={provider as OAuthProvider}
+          mode={mode}
+          onSuccess={onSuccess}
+          onError={onError}
+          disabled={disabled}
+        />
+      ))}
+    </div>
+  );
+}
