@@ -1,6 +1,7 @@
 'use client';
 
 import { Activity } from 'react';
+import { useTranslations } from 'next-intl';
 import { Loader2, RefreshCw, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -15,6 +16,8 @@ import { useGetSessionsQuery } from '@/modules/sessions';
  * Accessible at /[locale]/sessions
  */
 export default function SessionsPage() {
+  const t = useTranslations('sessions');
+  const tCommon = useTranslations('common');
   const {
     data: sessions,
     isLoading,
@@ -34,9 +37,9 @@ export default function SessionsPage() {
       <div className="my-8 ">
         <div className="flex items-center justify-between flex-wrap gap-4 mb-2">
           <div>
-            <h1 className="text-4xl font-light tracking-tight">Active Sessions</h1>
+            <h1 className="text-4xl font-light tracking-tight">{t('title')}</h1>
             <p className="text-sm text-muted-foreground/60 mt-1 leading-relaxed">
-              Manage devices where you&apos;re currently logged in
+              {t('description')}
             </p>
           </div>
           <div className="flex gap-2">
@@ -48,7 +51,7 @@ export default function SessionsPage() {
               data-testid="refresh-sessions-button"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh
+              {t('refresh')}
             </Button>
             <RevokeAllSessionsButton otherSessionsCount={otherSessionsCount} />
           </div>
@@ -57,7 +60,7 @@ export default function SessionsPage() {
         <Alert className="mt-4 border-status-warning/20 bg-status-warning/5">
           <Shield className="h-4 w-4 text-status-warning" />
           <AlertDescription className="text-status-warning">
-            If you see any unfamiliar devices, logout them immediately and change your password.
+            {t('securityWarning')}
           </AlertDescription>
         </Alert>
       </div>
@@ -67,7 +70,7 @@ export default function SessionsPage() {
         <div className="flex items-center justify-center py-12" data-testid="loading-skeleton">
           <div className="text-center space-y-4">
             <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">Loading your sessions...</p>
+            <p className="text-sm text-muted-foreground">{t('loading')}</p>
           </div>
         </div>
       </Activity>
@@ -77,17 +80,17 @@ export default function SessionsPage() {
         <Alert variant="destructive" data-testid="error-state">
           <AlertDescription className="flex items-center justify-between">
             <span>
-              Failed to load sessions.{' '}
+              {t('loadError')}{' '}
               {error &&
               'data' in error &&
               typeof error.data === 'object' &&
               error.data &&
               'message' in error.data
                 ? String(error.data.message)
-                : 'Please try again.'}
+                : t('tryAgain')}
             </span>
             <Button variant="outline" size="sm" onClick={() => refetch()}>
-              Retry
+              {tCommon('retry')}
             </Button>
           </AlertDescription>
         </Alert>
@@ -101,10 +104,8 @@ export default function SessionsPage() {
         >
           <div className="space-y-3">
             <Shield className="h-12 w-12 mx-auto text-muted-foreground" />
-            <h3 className="text-lg font-semibold">No Active Sessions</h3>
-            <p className="text-sm text-muted-foreground max-w-sm">
-              You don&apos;t have any active sessions at the moment.
-            </p>
+            <h3 className="text-lg font-semibold">{t('noSessions')}</h3>
+            <p className="text-sm text-muted-foreground max-w-sm">{t('noSessionsDescription')}</p>
           </div>
         </div>
       </Activity>

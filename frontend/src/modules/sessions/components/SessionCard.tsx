@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Loader2, LogOut } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -21,18 +22,25 @@ import { parseUserAgent, getDeviceLabel } from '@/lib/parseUserAgent';
 import type { Session } from '../types/session.types';
 import { useToast } from '@/hooks/use-toast';
 
+interface TimeAgoTranslations {
+  justNow: string;
+  minutesAgo: (count: number) => string;
+  hoursAgo: (count: number) => string;
+  daysAgo: (count: number) => string;
+}
+
 /**
- * Format time ago from date string
+ * Format time ago from date string with translations
  */
-function formatTimeAgo(dateString: string): string {
+function formatTimeAgo(dateString: string, translations: TimeAgoTranslations): string {
   const date = new Date(dateString);
   const now = new Date();
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-  if (seconds < 60) return 'just now';
-  if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
-  if (seconds < 2592000) return `${Math.floor(seconds / 86400)} days ago`;
+  if (seconds < 60) return translations.justNow;
+  if (seconds < 3600) return translations.minutesAgo(Math.floor(seconds / 60));
+  if (seconds < 86400) return translations.hoursAgo(Math.floor(seconds / 3600));
+  if (seconds < 2592000) return translations.daysAgo(Math.floor(seconds / 86400));
   return date.toLocaleDateString();
 }
 
@@ -47,21 +55,30 @@ export function SessionCard({ session }: SessionCardProps) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleteSession, { isLoading }] = useDeleteSessionMutation();
   const { toast } = useToast();
+  const t = useTranslations('sessions');
+  const tCommon = useTranslations('common');
 
   const { device, browser, os } = parseUserAgent(session.userAgent);
   const deviceLabel = getDeviceLabel(session.userAgent);
 
+  const timeAgoTranslations: TimeAgoTranslations = {
+    justNow: t('timeAgo.justNow'),
+    minutesAgo: (count: number) => t('timeAgo.minutesAgo', { count }),
+    hoursAgo: (count: number) => t('timeAgo.hoursAgo', { count }),
+    daysAgo: (count: number) => t('timeAgo.daysAgo', { count }),
+  };
+
   const handleLogout = async () => {
     try {
       await deleteSession(session.id).unwrap();
-      toast.success('Session terminated successfully');
+      toast.success(t('logoutSuccess'));
       setShowConfirm(false);
     } catch {
-      toast.error('Failed to terminate session. Please try again.');
+      toast.error(t('logoutError'));
     }
   };
 
-  const lastActivity = formatTimeAgo(session.lastUsedAt || session.createdAt);
+  const lastActivity = formatTimeAgo(session.lastUsedAt || session.createdAt, timeAgoTranslations);
 
   return (
     <>
@@ -88,7 +105,7 @@ export function SessionCard({ session }: SessionCardProps) {
 
             {session.isCurrent && (
               <Badge variant="secondary" data-testid="current-session-badge">
-                Current Session
+                {t('currentSession')}
               </Badge>
             )}
           </div>
@@ -97,23 +114,23 @@ export function SessionCard({ session }: SessionCardProps) {
         <CardContent className="space-y-3">
           <div className="flex flex-col gap-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">IP Address</span>
+              <span className="text-muted-foreground">{t('ipAddress')}</span>
               <span className="font-medium" data-testid="session-ip">
                 {session.ip}
               </span>
             </div>
 
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Last Activity</span>
+              <span className="text-muted-foreground">{t('lastActivity')}</span>
               <span className="font-medium" data-testid="session-last-activity">
                 {lastActivity}
               </span>
             </div>
 
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Logged In</span>
+              <span className="text-muted-foreground">{t('loggedIn')}</span>
               <span className="font-medium" data-testid="session-created-at">
-                {formatTimeAgo(session.createdAt)}
+                {formatTimeAgo(session.createdAt, timeAgoTranslations)}
               </span>
             </div>
           </div>
@@ -130,12 +147,12 @@ export function SessionCard({ session }: SessionCardProps) {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Logging out...
+                  {t('loggingOut')}
                 </>
               ) : (
                 <>
                   <LogOut className="mr-2 h-4 w-4" />
-                  Logout This Device
+                  {t('logoutThisDevice')}
                 </>
               )}
             </Button>
@@ -146,21 +163,25 @@ export function SessionCard({ session }: SessionCardProps) {
       <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
         <AlertDialogContent data-testid="logout-session-confirm-dialog">
           <AlertDialogHeader>
-            <AlertDialogTitle>Logout this device?</AlertDialogTitle>
+            <AlertDialogTitle>{t('logoutConfirmTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will end the session on <strong>{deviceLabel}</strong>. The device will need to
-              log in again to access your account.
+              {t.rich('logoutConfirmDescription', {
+                device: deviceLabel,
+                strong: (chunks) => <strong>{chunks}</strong>,
+              })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel data-testid="cancel-logout-button">Cancel</AlertDialogCancel>
+            <AlertDialogCancel data-testid="cancel-logout-button">
+              {tCommon('cancel')}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleLogout}
               disabled={isLoading}
               data-testid="confirm-logout-button"
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {isLoading ? 'Logging out...' : 'Logout'}
+              {isLoading ? t('loggingOut') : t('logout')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

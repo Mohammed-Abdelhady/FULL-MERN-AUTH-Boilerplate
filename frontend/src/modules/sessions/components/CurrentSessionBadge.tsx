@@ -1,4 +1,7 @@
+'use client';
+
 import { forwardRef, HTMLAttributes } from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 export interface CurrentSessionBadgeProps extends HTMLAttributes<HTMLSpanElement> {
@@ -24,6 +27,8 @@ export interface CurrentSessionBadgeProps extends HTMLAttributes<HTMLSpanElement
  */
 export const CurrentSessionBadge = forwardRef<HTMLSpanElement, CurrentSessionBadgeProps>(
   ({ pulse = true, className, ...props }, ref) => {
+    const t = useTranslations('sessions');
+
     return (
       <span
         ref={ref}
@@ -38,7 +43,7 @@ export const CurrentSessionBadge = forwardRef<HTMLSpanElement, CurrentSessionBad
           className={cn('h-2 w-2 rounded-full bg-status-success', pulse && 'animate-pulse')}
           data-testid="pulse-dot"
         />
-        <span>Active now</span>
+        <span>{t('activeNow')}</span>
       </span>
     );
   },

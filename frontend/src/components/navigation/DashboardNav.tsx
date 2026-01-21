@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import {
   PermissionGuard,
@@ -23,7 +24,7 @@ import {
 } from 'lucide-react';
 
 interface NavItem {
-  label: string;
+  labelKey: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   permission?: string;
@@ -32,7 +33,7 @@ interface NavItem {
 }
 
 interface NavSection {
-  title: string;
+  titleKey: string;
   items: NavItem[];
   icon: React.ComponentType<{ className?: string }>;
   permission?: string;
@@ -43,19 +44,19 @@ interface NavSection {
 const NAV_SECTIONS: (NavItem | NavSection)[] = [
   // Top-level items (always visible)
   {
-    label: 'Dashboard',
+    labelKey: 'dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
   },
   {
-    label: 'Settings',
+    labelKey: 'settings',
     href: '/settings',
     icon: Settings,
   },
 
   // Admin Section
   {
-    title: 'Admin',
+    titleKey: 'admin',
     icon: Shield,
     anyPermissions: [
       USER_PERMISSIONS.LIST_ALL,
@@ -64,19 +65,19 @@ const NAV_SECTIONS: (NavItem | NavSection)[] = [
     ],
     items: [
       {
-        label: 'Users',
+        labelKey: 'users',
         href: '/admin/users',
         icon: Users,
         permission: USER_PERMISSIONS.LIST_ALL,
       },
       {
-        label: 'Roles',
+        labelKey: 'roles',
         href: '/admin/roles',
         icon: Shield,
         permission: ROLE_PERMISSIONS.LIST_ALL,
       },
       {
-        label: 'Permissions Demo',
+        labelKey: 'permissionsDemo',
         href: '/admin/permissions-demo',
         icon: Code,
         permission: PERMISSION_PERMISSIONS.MANAGE_ALL,
@@ -86,12 +87,12 @@ const NAV_SECTIONS: (NavItem | NavSection)[] = [
 
   // Activity Section
   {
-    title: 'Activity',
+    titleKey: 'activity',
     icon: Activity,
     anyPermissions: [SESSION_PERMISSIONS.READ_ALL, SESSION_PERMISSIONS.READ_OWN],
     items: [
       {
-        label: 'Sessions',
+        labelKey: 'sessions',
         href: '/sessions',
         icon: Activity,
         anyPermissions: [SESSION_PERMISSIONS.READ_ALL, SESSION_PERMISSIONS.READ_OWN],
@@ -119,11 +120,12 @@ interface DashboardNavProps {
  * ```
  */
 function isNavSection(item: NavItem | NavSection): item is NavSection {
-  return 'title' in item && 'items' in item;
+  return 'titleKey' in item && 'items' in item;
 }
 
 export function DashboardNav({ onNavigate }: DashboardNavProps = {}) {
   const pathname = usePathname();
+  const t = useTranslations('dashboard.nav');
 
   // Manage collapsed state for sections in localStorage
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>(() => {
@@ -142,9 +144,9 @@ export function DashboardNav({ onNavigate }: DashboardNavProps = {}) {
     return {};
   });
 
-  const toggleSection = (sectionTitle: string) => {
+  const toggleSection = (sectionKey: string) => {
     setCollapsedSections((prev) => {
-      const newState = { ...prev, [sectionTitle]: !prev[sectionTitle] };
+      const newState = { ...prev, [sectionKey]: !prev[sectionKey] };
       localStorage.setItem('sidebar-collapsed-sections', JSON.stringify(newState));
       return newState;
     });
@@ -153,6 +155,7 @@ export function DashboardNav({ onNavigate }: DashboardNavProps = {}) {
   const renderNavItem = (item: NavItem) => {
     const Icon = item.icon;
     const isActive = pathname?.startsWith(item.href);
+    const label = t(item.labelKey);
 
     const navLink = (
       <Link
@@ -164,10 +167,10 @@ export function DashboardNav({ onNavigate }: DashboardNavProps = {}) {
             ? 'bg-primary text-primary-foreground'
             : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
         )}
-        data-testid={`nav-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+        data-testid={`nav-link-${item.labelKey}`}
       >
         <Icon className="h-4 w-4" />
-        {item.label}
+        {label}
       </Link>
     );
 
@@ -194,12 +197,13 @@ export function DashboardNav({ onNavigate }: DashboardNavProps = {}) {
       {NAV_SECTIONS.map((item) => {
         if (isNavSection(item)) {
           // Collapsible Section
-          const isCollapsed = collapsedSections[item.title] ?? false;
+          const isCollapsed = collapsedSections[item.titleKey] ?? false;
           const SectionIcon = item.icon;
+          const sectionTitle = t(item.titleKey);
 
           return (
             <PermissionGuard
-              key={item.title}
+              key={item.titleKey}
               permission={item.permission}
               permissions={item.permissions}
               anyPermissions={item.anyPermissions}
@@ -207,13 +211,13 @@ export function DashboardNav({ onNavigate }: DashboardNavProps = {}) {
               <div className="space-y-1">
                 {/* Section Header */}
                 <button
-                  onClick={() => toggleSection(item.title)}
+                  onClick={() => toggleSection(item.titleKey)}
                   className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                  data-testid={`nav-section-${item.title.toLowerCase()}`}
+                  data-testid={`nav-section-${item.titleKey}`}
                 >
                   <div className="flex items-center gap-3">
                     <SectionIcon className="h-4 w-4" />
-                    <span>{item.title}</span>
+                    <span>{sectionTitle}</span>
                   </div>
                   {isCollapsed ? (
                     <ChevronRight className="h-4 w-4" />

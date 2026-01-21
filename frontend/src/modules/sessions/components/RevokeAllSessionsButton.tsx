@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { LogOut, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -51,15 +52,17 @@ export function RevokeAllSessionsButton({
   const [open, setOpen] = useState(false);
   const [revokeAllOtherSessions, { isLoading }] = useRevokeAllOtherSessionsMutation();
   const { toast } = useToast();
+  const t = useTranslations('sessions');
+  const tCommon = useTranslations('common');
 
   const handleRevoke = async () => {
     try {
       const result = await revokeAllOtherSessions().unwrap();
-      toast.success(`${result.revokedCount} session(s) have been terminated`);
+      toast.success(t('logoutAllSuccess', { count: result.revokedCount }));
       setOpen(false);
       onSuccess?.(result.revokedCount);
     } catch {
-      toast.error('Failed to logout all sessions. Please try again.');
+      toast.error(t('logoutAllError'));
     }
   };
 
@@ -79,21 +82,22 @@ export function RevokeAllSessionsButton({
         data-testid="logout-all-sessions-button"
       >
         <LogOut className="h-4 w-4 mr-2" />
-        Logout All Other Devices
+        {t('logoutAllOther')}
       </Button>
 
       {/* Co-located confirmation dialog */}
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogContent data-testid="revoke-all-confirm-dialog">
           <AlertDialogHeader>
-            <AlertDialogTitle>Logout all other devices?</AlertDialogTitle>
+            <AlertDialogTitle>{t('logoutAllConfirmTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will end all sessions except your current one. All other devices (
-              {otherSessionsCount}) will need to log in again.
+              {t('logoutAllConfirmDescription', { count: otherSessionsCount })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel data-testid="cancel-logout-all">Cancel</AlertDialogCancel>
+            <AlertDialogCancel data-testid="cancel-logout-all">
+              {tCommon('cancel')}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleRevoke}
               disabled={isLoading}
@@ -103,10 +107,10 @@ export function RevokeAllSessionsButton({
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Logging out...
+                  {t('loggingOut')}
                 </>
               ) : (
-                'Logout All'
+                t('logoutAll')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>
