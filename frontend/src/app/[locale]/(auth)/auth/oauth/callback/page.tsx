@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useHandleCallbackMutation } from '@/modules/auth/store/oauthApi';
+import { useHandleCallbackMutation } from '@/modules/oauth';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 

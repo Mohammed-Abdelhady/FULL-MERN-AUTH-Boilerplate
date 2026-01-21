@@ -14,8 +14,7 @@ import { UserPlus, LogIn } from 'lucide-react';
 import { IconLinkButton } from '@/components/ui/icon-link-button';
 import { Button } from '@/components/ui/button';
 import { useCallback, useMemo } from 'react';
-import { OAuthButtons } from './OAuthButtons';
-import { OAuthDivider } from './OAuthDivider';
+import { OAuthButtons, OAuthDivider } from '@/modules/oauth';
 
 /**
  * Login form validation schema using centralized validators

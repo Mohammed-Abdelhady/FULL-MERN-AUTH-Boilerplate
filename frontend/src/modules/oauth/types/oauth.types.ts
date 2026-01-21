@@ -1,3 +1,5 @@
+import type { User } from '@/modules/auth/types/auth.types';
+
 /**
  * OAuth provider type
  */
@@ -25,13 +27,7 @@ export interface OAuthCallbackRequest {
  * Uses httpOnly cookies for session management (no token in response)
  */
 export interface OAuthCallbackResponse {
-  user: {
-    id: string;
-    email: string;
-    name: string;
-    role: string;
-    permissions: string[];
-  };
+  user: User;
   message?: string;
 }
 

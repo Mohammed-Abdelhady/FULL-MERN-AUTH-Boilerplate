@@ -13,8 +13,7 @@ import { IconLinkButton } from '@/components/ui/icon-link-button';
 import { Button } from '@/components/ui/button';
 import { useCallback, useMemo } from 'react';
 import { toast } from '@/lib/toast';
-import { OAuthButtons } from './OAuthButtons';
-import { OAuthDivider } from './OAuthDivider';
+import { OAuthButtons, OAuthDivider } from '@/modules/oauth';
 
 /**
  * Registration form validation schema using centralized validators

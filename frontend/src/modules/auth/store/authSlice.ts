@@ -2,7 +2,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from '@/store/store';
 import type { AuthState, User } from '../types/auth.types';
 import { authApi } from './authApi';
-import { oauthApi } from './oauthApi';
+import { oauthApi } from '@/modules/oauth/api/oauthApi';
 
 /**
  * Initial authentication state

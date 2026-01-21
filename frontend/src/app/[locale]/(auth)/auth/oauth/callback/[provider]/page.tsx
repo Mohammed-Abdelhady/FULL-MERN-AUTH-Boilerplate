@@ -3,10 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter, useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useHandleCallbackMutation } from '@/modules/auth/store/oauthApi';
+import { useHandleCallbackMutation, OAuthProvider } from '@/modules/oauth';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { OAuthProvider } from '@/modules/auth/types/auth.types';
 
 /**
  * OAuth Callback Page with Dynamic Provider
