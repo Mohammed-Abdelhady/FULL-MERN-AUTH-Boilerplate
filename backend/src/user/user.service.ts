@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { User, UserDocument } from './schemas/user.schema';
+import { Role, RoleDocument } from '../role/schemas/role.schema';
 import { SessionService } from '../auth/services/session.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -26,6 +27,7 @@ export class UserService {
 
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Role.name) private roleModel: Model<RoleDocument>,
     private readonly sessionService: SessionService,
   ) {}
 
@@ -33,6 +35,15 @@ export class UserService {
    * Get current user profile.
    */
   async getProfile(userId: string): Promise<ApiResponse<UserProfileDto>> {
+    // Validate ObjectId format
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new AppException(
+        ErrorCode.INVALID_INPUT,
+        'Invalid user ID format',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const user = await this.userModel
       .findById(userId)
       .select(
@@ -49,7 +60,8 @@ export class UserService {
     }
 
     this.logger.log(`Profile retrieved for user: ${user.email}`);
-    return ApiResponse.success(this.mapToProfileDto(user));
+    const profileDto = await this.mapToProfileDto(user);
+    return ApiResponse.success(profileDto);
   }
 
   /**
@@ -59,6 +71,15 @@ export class UserService {
     userId: string,
     dto: UpdateProfileDto,
   ): Promise<ApiResponse<UserProfileDto>> {
+    // Validate ObjectId format
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new AppException(
+        ErrorCode.INVALID_INPUT,
+        'Invalid user ID format',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const user = await this.userModel.findById(userId).exec();
 
     if (!user || user.isDeleted) {
@@ -77,10 +98,8 @@ export class UserService {
     await user.save();
 
     this.logger.log(`Profile updated for user: ${user.email}`);
-    return ApiResponse.success(
-      this.mapToProfileDto(user),
-      'Profile updated successfully',
-    );
+    const profileDto = await this.mapToProfileDto(user);
+    return ApiResponse.success(profileDto, 'Profile updated successfully');
   }
 
   /**
@@ -91,6 +110,15 @@ export class UserService {
     dto: ChangePasswordDto,
     currentSessionToken: string,
   ): Promise<ApiResponse<{ message: string }>> {
+    // Validate ObjectId format
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new AppException(
+        ErrorCode.INVALID_INPUT,
+        'Invalid user ID format',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const user = await this.userModel
       .findById(userId)
       .select('+password')
@@ -162,6 +190,15 @@ export class UserService {
     userId: string,
     currentSessionToken: string,
   ): Promise<ApiResponse<SessionListData>> {
+    // Validate ObjectId format
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new AppException(
+        ErrorCode.INVALID_INPUT,
+        'Invalid user ID format',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const sessions = await this.sessionService.getUserSessions(
       new Types.ObjectId(userId),
     );
@@ -176,7 +213,7 @@ export class UserService {
       userAgent: session.userAgent,
       ip: session.ip,
       deviceName: session.deviceName,
-      createdAt: (session as unknown as { createdAt: Date }).createdAt,
+      createdAt: session.createdAt,
       lastUsedAt: session.lastUsedAt,
       isCurrent: session._id.toString() === currentSessionId,
     }));
@@ -198,6 +235,22 @@ export class UserService {
     sessionId: string,
     currentSessionToken: string,
   ): Promise<ApiResponse<{ message: string }>> {
+    // Validate ObjectId formats
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new AppException(
+        ErrorCode.INVALID_INPUT,
+        'Invalid user ID format',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (!Types.ObjectId.isValid(sessionId)) {
+      throw new AppException(
+        ErrorCode.INVALID_INPUT,
+        'Invalid session ID format',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     // Check if trying to revoke current session
     const currentSession =
       await this.sessionService.getSessionByToken(currentSessionToken);
@@ -235,6 +288,15 @@ export class UserService {
     userId: string,
     currentSessionToken: string,
   ): Promise<ApiResponse<{ revokedCount: number }>> {
+    // Validate ObjectId format
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new AppException(
+        ErrorCode.INVALID_INPUT,
+        'Invalid user ID format',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const revokedCount = await this.sessionService.invalidateAllSessionsExcept(
       new Types.ObjectId(userId),
       currentSessionToken,
@@ -284,6 +346,15 @@ export class UserService {
   ): Promise<
     ApiResponse<{ userId: string; permissions: string[]; role: string }>
   > {
+    // Validate ObjectId format
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new AppException(
+        ErrorCode.INVALID_INPUT,
+        'Invalid user ID format',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const user = await this.userModel
       .findById(userId)
       .select('permissions role')
@@ -311,6 +382,15 @@ export class UserService {
     userId: string,
     permission: string,
   ): Promise<ApiResponse<{ userId: string; permissions: string[] }>> {
+    // Validate ObjectId format
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new AppException(
+        ErrorCode.INVALID_INPUT,
+        'Invalid user ID format',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const user = await this.userModel.findById(userId).exec();
 
     if (!user || user.isDeleted) {
@@ -351,6 +431,15 @@ export class UserService {
     userId: string,
     permission: string,
   ): Promise<ApiResponse<{ userId: string; permissions: string[] }>> {
+    // Validate ObjectId format
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new AppException(
+        ErrorCode.INVALID_INPUT,
+        'Invalid user ID format',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const user = await this.userModel.findById(userId).exec();
 
     if (!user || user.isDeleted) {
@@ -387,15 +476,44 @@ export class UserService {
   }
 
   /**
+   * Get effective permissions for a user (role permissions + direct permissions).
+   * @param userId - User ID or user document
+   * @returns Array of effective permissions (deduplicated)
+   */
+  async getEffectivePermissions(
+    user: UserDocument | { role: string; permissions: string[] },
+  ): Promise<string[]> {
+    const rolePermissions: string[] = [];
+
+    // Fetch role permissions
+    if (user.role) {
+      const role = await this.roleModel.findOne({ slug: user.role }).exec();
+      if (role && role.permissions) {
+        rolePermissions.push(...role.permissions);
+      }
+    }
+
+    // Combine role permissions with direct user permissions
+    const directPermissions = user.permissions || [];
+    const allPermissions = [...rolePermissions, ...directPermissions];
+
+    // Deduplicate permissions
+    return [...new Set(allPermissions)];
+  }
+
+  /**
    * Map user document to profile DTO.
    */
-  private mapToProfileDto(user: UserDocument): UserProfileDto {
+  private async mapToProfileDto(user: UserDocument): Promise<UserProfileDto> {
+    // Compute effective permissions (role + direct)
+    const effectivePermissions = await this.getEffectivePermissions(user);
+
     return {
       id: user._id.toString(),
       email: user.email,
       name: user.name,
       role: user.role,
-      permissions: user.permissions || [],
+      permissions: effectivePermissions,
       authProvider: user.authProvider,
       isVerified: user.isVerified,
       googleId: user.googleId,
@@ -404,8 +522,8 @@ export class UserService {
       linkedProviders: user.linkedProviders,
       primaryProvider: user.primaryProvider,
       profileSyncedAt: user.profileSyncedAt,
-      createdAt: (user as unknown as Record<string, unknown>).createdAt as Date,
-      updatedAt: (user as unknown as Record<string, unknown>).updatedAt as Date,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     };
   }
 }

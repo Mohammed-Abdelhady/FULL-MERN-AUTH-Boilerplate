@@ -1,6 +1,7 @@
 import { Injectable, Logger, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import * as bcrypt from 'bcrypt';
 import { User, UserDocument } from '../user/schemas/user.schema';
 import { UserRole } from '../user/enums/user-role.enum';
 import { SessionService } from '../auth/services/session.service';
@@ -8,6 +9,8 @@ import { ListUsersQueryDto } from './dto/list-users-query.dto';
 import { AdminUserDto, UserListData } from './dto/admin-user-response.dto';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import { AppException } from '../common/exceptions/app.exception';
 import { ErrorCode } from '../common/enums/error-code.enum';
 import {
@@ -25,11 +28,76 @@ import { ApiResponse } from '../common/dto/api-response.dto';
 @Injectable()
 export class AdminService {
   private readonly logger = new Logger(AdminService.name);
+  private readonly SALT_ROUNDS = 12;
 
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private readonly sessionService: SessionService,
   ) {}
+
+  /**
+   * Create a new user.
+   * Cannot create users with ADMIN role via API.
+   */
+  async createUser(
+    dto: CreateUserDto,
+    actorRole: UserRole,
+  ): Promise<ApiResponse<AdminUserDto>> {
+    const { email, name, password, role } = dto;
+
+    // Check if email already exists
+    const existingUser = await this.userModel.findOne({ email }).exec();
+    if (existingUser) {
+      throw new AppException(
+        ErrorCode.EMAIL_ALREADY_EXISTS,
+        'Email already in use',
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    // Validate role assignment (no ADMIN via API)
+    if (!isValidRoleAssignment(role)) {
+      throw new AppException(
+        ErrorCode.INVALID_ROLE_ASSIGNMENT,
+        'Cannot assign ADMIN role via API',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // Check if actor can manage this role
+    if (!canManageUser(actorRole, role)) {
+      throw new AppException(
+        ErrorCode.CANNOT_MODIFY_HIGHER_ROLE,
+        'Cannot create user with higher or equal role',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, this.SALT_ROUNDS);
+
+    // Create user
+    const newUser = new this.userModel({
+      email,
+      name,
+      password: hashedPassword,
+      role,
+      isVerified: true, // Admin-created users are auto-verified
+      permissions: [],
+      authProvider: 'email',
+    });
+
+    await newUser.save();
+
+    this.logger.log(
+      `User created by admin: ${newUser.email} with role ${role}`,
+    );
+
+    return ApiResponse.success(
+      this.mapToAdminUserDto(newUser),
+      'User created successfully',
+    );
+  }
 
   /**
    * List users with pagination and filtering.
@@ -163,6 +231,73 @@ export class AdminService {
 
     this.logger.log(`Retrieved user: ${user.email}`);
     return ApiResponse.success(this.mapToAdminUserDto(user));
+  }
+
+  /**
+   * Update user basic information (name, email).
+   */
+  async updateUser(
+    id: string,
+    dto: UpdateUserDto,
+    actorId: string,
+    actorRole: UserRole,
+  ): Promise<ApiResponse<AdminUserDto>> {
+    const { name, email } = dto;
+
+    // Find target user
+    const targetUser = await this.userModel.findById(id).exec();
+    if (!targetUser || targetUser.isDeleted) {
+      throw new AppException(
+        ErrorCode.USER_NOT_FOUND,
+        'User not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    // Check if trying to modify self
+    if (id === actorId) {
+      throw new AppException(
+        ErrorCode.CANNOT_MODIFY_SELF,
+        'Cannot modify your own account through admin panel',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    // Check if actor can manage target
+    if (!canManageUser(actorRole, targetUser.role)) {
+      throw new AppException(
+        ErrorCode.CANNOT_MODIFY_HIGHER_ROLE,
+        'Cannot modify user with higher or equal role',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    // Check if email already exists (if changing email)
+    if (email && email !== targetUser.email) {
+      const existingUser = await this.userModel.findOne({ email }).exec();
+      if (existingUser) {
+        throw new AppException(
+          ErrorCode.EMAIL_ALREADY_EXISTS,
+          'Email already in use',
+          HttpStatus.CONFLICT,
+        );
+      }
+      targetUser.email = email;
+    }
+
+    // Update name if provided
+    if (name !== undefined) {
+      targetUser.name = name;
+    }
+
+    await targetUser.save();
+
+    this.logger.log(`User ${id} updated by ${actorId}`);
+
+    return ApiResponse.success(
+      this.mapToAdminUserDto(targetUser),
+      'User updated successfully',
+    );
   }
 
   /**
@@ -358,6 +493,8 @@ export class AdminService {
       isDeleted: user.isDeleted,
       googleId: user.googleId,
       facebookId: user.facebookId,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     };
   }
 }

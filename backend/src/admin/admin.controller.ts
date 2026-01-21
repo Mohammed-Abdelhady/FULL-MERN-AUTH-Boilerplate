@@ -28,6 +28,8 @@ import { UserRole } from '../user/enums/user-role.enum';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import { ApiResponse } from '../common/dto/api-response.dto';
 import { AdminUserDto, UserListData } from './dto/admin-user-response.dto';
 import { UserService } from '../user/user.service';
@@ -50,6 +52,29 @@ export class AdminController {
     private readonly adminService: AdminService,
     private readonly userService: UserService,
   ) {}
+
+  /**
+   * Create a new user.
+   * Cannot create users with ADMIN role via API.
+   *
+   * @example POST /admin/users
+   */
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @RequirePermissions(USER_PERMISSIONS.CREATE_ALL)
+  @ApiOperation({
+    summary: 'Create a new user',
+    description:
+      'Creates a new user account. Cannot assign ADMIN role via API. ' +
+      "Cannot create users with higher or equal role than actor's role.",
+  })
+  @ApiBody({ type: CreateUserDto })
+  async createUser(
+    @Body() dto: CreateUserDto,
+    @CurrentUser('role') actorRole: UserRole,
+  ): Promise<ApiResponse<AdminUserDto>> {
+    return this.adminService.createUser(dto, actorRole);
+  }
 
   /**
    * List all users with pagination and filtering.
@@ -133,6 +158,35 @@ export class AdminController {
     @CurrentUser('role') actorRole: UserRole,
   ): Promise<ApiResponse<AdminUserDto>> {
     return this.adminService.getUserById(id, actorRole);
+  }
+
+  /**
+   * Update user basic information (name, email).
+   * Cannot modify users with higher or equal role.
+   * Cannot modify own account.
+   *
+   * @example PATCH /admin/users/:id
+   */
+  @Patch(':id')
+  @RequirePermissions(USER_PERMISSIONS.UPDATE_ALL)
+  @ApiOperation({
+    summary: 'Update user information',
+    description:
+      'Updates user name and/or email. Cannot modify users with higher or equal role. Cannot modify own account.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID',
+    example: '507f1f77bcf86cd799439011',
+  })
+  @ApiBody({ type: UpdateUserDto })
+  async updateUser(
+    @Param('id') id: string,
+    @Body() dto: UpdateUserDto,
+    @CurrentUser('id') actorId: string,
+    @CurrentUser('role') actorRole: UserRole,
+  ): Promise<ApiResponse<AdminUserDto>> {
+    return this.adminService.updateUser(id, dto, actorId, actorRole);
   }
 
   /**
