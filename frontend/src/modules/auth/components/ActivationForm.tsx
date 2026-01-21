@@ -14,7 +14,7 @@ import { useCallback, useMemo, useEffect, useState } from 'react';
 import { toast } from '@/lib/toast';
 import { useAppDispatch } from '@/store/hooks';
 import { setUser } from '@/modules/auth/store/authSlice';
-import { WelcomeModal } from '@/components/welcome/WelcomeModal';
+import { WelcomeModal } from './WelcomeModal';
 
 /**
  * Activation form validation schema
