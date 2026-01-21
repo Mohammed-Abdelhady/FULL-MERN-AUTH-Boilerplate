@@ -1,5 +1,7 @@
 import { LinkedAccounts } from '@/modules/auth/components/LinkedAccounts';
 import { ProfileSyncStatus } from '@/modules/auth/components/ProfileSyncStatus';
+import { ChangePasswordCard } from '@/modules/auth/components/ChangePasswordCard';
+import { UpdateProfileCard } from '@/modules/auth/components/UpdateProfileCard';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -21,13 +23,11 @@ export default function SettingsPage() {
           <p className="text-muted-foreground">Manage your account settings and preferences</p>
         </div>
 
-        <div className="flex gap-5 w-full">
-          <div className="w-2/3">
-            <LinkedAccounts />
-          </div>
-          <div className="w-2/3">
-            <ProfileSyncStatus />
-          </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          <UpdateProfileCard />
+          <ChangePasswordCard />
+          <LinkedAccounts />
+          <ProfileSyncStatus />
         </div>
       </div>
     </div>

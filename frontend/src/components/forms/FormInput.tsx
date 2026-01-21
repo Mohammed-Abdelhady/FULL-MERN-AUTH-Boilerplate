@@ -12,11 +12,13 @@ export interface FormInputProps<TFieldValues extends FieldValues = FieldValues> 
   'name'
 > {
   name: FieldPath<TFieldValues>;
+  label?: string;
   description?: string;
 }
 
 export const FormInput = <TFieldValues extends FieldValues = FieldValues>({
   name,
+  label,
   description,
   className,
   ...inputProps
@@ -24,6 +26,7 @@ export const FormInput = <TFieldValues extends FieldValues = FieldValues>({
   return (
     <BaseFormField
       name={name}
+      label={label}
       description={description}
       render={(field) => (
         <Input {...inputProps} {...field} className={cn(getInputClassName(), className)} />

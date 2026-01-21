@@ -264,6 +264,24 @@
       "syncSuccessDescription": "Your profile has been updated from your primary provider",
       "syncError": "Profile sync failed",
       "syncErrorDescription": "Failed to sync profile. Please try again later"
+    },
+    "password": {
+      "title": "Change Password",
+      "description": "Update your account password. You'll be logged out of other sessions.",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "submit": "Update Password",
+      "success": "Password updated successfully"
+    },
+    "profile": {
+      "title": "Profile Information",
+      "description": "Update your personal information.",
+      "name": "Full Name",
+      "email": "Email Address",
+      "emailHint": "Email cannot be changed",
+      "submit": "Save Changes",
+      "success": "Profile updated successfully"
     }
   },
   "errors": {
