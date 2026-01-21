@@ -134,9 +134,28 @@ function detectOS(ua: string): string {
 }
 
 /**
- * Parses a user agent string and returns device, browser, and OS information
- * @param userAgent - The user agent string to parse
+ * Parses a user agent string and extracts device, browser, and OS information
+ *
+ * This is a lightweight alternative to external libraries like ua-parser-js,
+ * providing accurate detection for modern browsers and devices without
+ * additional dependencies.
+ *
+ * Supports detection of:
+ * - Device types: Desktop, Mobile, Tablet
+ * - Browsers: Chrome, Firefox, Safari, Edge, Opera, Brave, Samsung Internet
+ * - Operating Systems: Windows, macOS, iOS, iPadOS, Android, Linux variants
+ *
+ * @param userAgent - The user agent string to parse (from request headers)
  * @returns ParsedUserAgent object with device, browser, and os fields
+ *
+ * @example
+ * ```ts
+ * const ua = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36...';
+ * const parsed = parseUserAgent(ua);
+ * // { device: 'Desktop', browser: 'Chrome 120', os: 'macOS' }
+ * ```
+ *
+ * @see getDeviceLabel - For generating human-readable device descriptions
  */
 export function parseUserAgent(userAgent: string): ParsedUserAgent {
   if (!userAgent || typeof userAgent !== 'string') {
