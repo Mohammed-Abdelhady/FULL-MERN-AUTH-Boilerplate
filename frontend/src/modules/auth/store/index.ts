@@ -9,23 +9,6 @@ export {
   useUpdateProfileMutation,
 } from './authApi';
 
-// OAuth API exports
-export {
-  oauthApi,
-  useGetAuthorizationUrlQuery,
-  useHandleCallbackMutation,
-  useGetEnabledProvidersQuery,
-} from './oauthApi';
-
-// Account Linking API exports
-export {
-  accountLinkingApi,
-  useGetLinkedProvidersQuery,
-  useLinkProviderMutation,
-  useUnlinkProviderMutation,
-  useSetPrimaryProviderMutation,
-} from './accountLinkingApi';
-
 // Auth slice exports
 export {
   authSlice,
