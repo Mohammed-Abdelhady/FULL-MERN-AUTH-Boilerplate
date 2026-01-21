@@ -11,7 +11,7 @@
   "scripts": {
     "init": "node scripts/init.js",
     "setup:prod": "node scripts/setup-production.js",
-    "prepare": "husky",
+    "prepare": "husky || true",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
