@@ -14,6 +14,10 @@ export class PendingPasswordReset {
 
   @Prop({ required: true, index: { expireAfterSeconds: 0 } })
   expiresAt!: Date;
+
+  // Timestamp fields (automatically managed by Mongoose with timestamps: true)
+  createdAt!: Date;
+  updatedAt!: Date;
 }
 
 export type PendingPasswordResetDocument =

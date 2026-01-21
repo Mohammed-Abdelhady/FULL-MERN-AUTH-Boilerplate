@@ -25,6 +25,7 @@ export class Role {
   @Prop({ type: [String], default: [] })
   permissions!: string[];
 
+  // Timestamp fields (automatically managed by Mongoose with timestamps: true)
   createdAt!: Date;
   updatedAt!: Date;
 }

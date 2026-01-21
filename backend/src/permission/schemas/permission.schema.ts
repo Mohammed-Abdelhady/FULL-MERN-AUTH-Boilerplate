@@ -20,6 +20,10 @@ export class Permission {
 
   @Prop()
   expiresAt?: Date;
+
+  // Timestamp fields (automatically managed by Mongoose with timestamps: true)
+  createdAt!: Date;
+  updatedAt!: Date;
 }
 
 export type PermissionDocument = HydratedDocument<Permission>;

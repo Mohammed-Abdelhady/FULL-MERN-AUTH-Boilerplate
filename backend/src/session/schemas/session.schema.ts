@@ -1,6 +1,30 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema, Types } from 'mongoose';
 
+/**
+ * Parsed device information from user agent
+ */
+export class DeviceInfo {
+  @Prop({
+    type: String,
+    enum: ['mobile', 'tablet', 'desktop', 'unknown'],
+    default: 'unknown',
+  })
+  type!: 'mobile' | 'tablet' | 'desktop' | 'unknown';
+
+  @Prop()
+  browser?: string; // e.g., "Chrome 120.0"
+
+  @Prop()
+  os?: string; // e.g., "Windows 10"
+
+  @Prop()
+  name?: string; // Human-readable: "Chrome on Windows"
+}
+
+/**
+ * Session schema for managing user authentication sessions
+ */
 @Schema({ timestamps: true })
 export class Session {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
@@ -12,11 +36,14 @@ export class Session {
   @Prop({ required: true })
   userAgent!: string;
 
+  @Prop({ type: DeviceInfo })
+  device?: DeviceInfo;
+
   @Prop({ required: true })
   ip!: string;
 
   @Prop()
-  deviceName?: string;
+  deviceName?: string; // Optional custom device name
 
   @Prop({ default: true })
   isValid!: boolean;
@@ -26,6 +53,10 @@ export class Session {
 
   @Prop({ required: true })
   expiresAt!: Date;
+
+  // Timestamp fields (automatically managed by Mongoose with timestamps: true)
+  createdAt!: Date;
+  updatedAt!: Date;
 }
 
 export type SessionDocument = HydratedDocument<Session>;

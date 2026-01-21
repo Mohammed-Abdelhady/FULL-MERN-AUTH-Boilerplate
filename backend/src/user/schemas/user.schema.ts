@@ -63,6 +63,10 @@ export class User {
 
   @Prop()
   lastSyncedProvider?: string;
+
+  // Timestamp fields (automatically managed by Mongoose with timestamps: true)
+  createdAt!: Date;
+  updatedAt!: Date;
 }
 
 export type UserDocument = HydratedDocument<User>;
