@@ -88,6 +88,8 @@ export function getRedirectPath(pathname: string): string {
  * getErrorMessage(new Error('Network error')) // 'Network error'
  * getErrorMessage({ message: 'Invalid credentials' }) // 'Invalid credentials'
  * getErrorMessage('Something went wrong') // 'Something went wrong'
+ *
+ * @deprecated Use parseApiError from '@/lib/apiError' for better error handling with i18n support
  */
 export function getErrorMessage(error: unknown): string {
   if (typeof error === 'string') return error;

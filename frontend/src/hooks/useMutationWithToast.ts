@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { getErrorMessage } from '@/modules/auth/utils/authHelpers';
+import { parseApiError } from '@/lib/apiError';
 
 /**
  * Standard RTK Query mutation trigger type.
@@ -106,6 +107,41 @@ export function useMutationWithToast<TArg, TResult>(
     showErrorToast = true,
   } = options;
 
+  // Use translations for error codes
+  const tErrorCodes = useTranslations('errors.codes');
+  const tGeneric = useTranslations();
+
+  /**
+   * Get translated error message from error
+   */
+  const getTranslatedError = useCallback(
+    (error: unknown): string => {
+      const parsed = parseApiError(error);
+
+      try {
+        // For network/timeout errors, use generic toast translations
+        if (parsed.translationKey.startsWith('toast.')) {
+          const translated = tGeneric(parsed.translationKey);
+          if (translated !== parsed.translationKey) {
+            return translated;
+          }
+        }
+
+        // For error codes, use the error codes namespace
+        const translated = tErrorCodes(parsed.code);
+        if (translated !== parsed.code) {
+          return translated;
+        }
+      } catch {
+        // Translation not found
+      }
+
+      // Fallback to original message
+      return parsed.message;
+    },
+    [tErrorCodes, tGeneric],
+  );
+
   const wrappedMutation = useCallback(
     async (arg: TArg): Promise<TResult | null> => {
       try {
@@ -129,7 +165,7 @@ export function useMutationWithToast<TArg, TResult>(
             ? typeof errorMessage === 'function'
               ? errorMessage(error)
               : errorMessage
-            : getErrorMessage(error);
+            : getTranslatedError(error);
           toast.error(message);
         }
 
@@ -147,6 +183,7 @@ export function useMutationWithToast<TArg, TResult>(
       onError,
       showSuccessToast,
       showErrorToast,
+      getTranslatedError,
     ],
   );
 
