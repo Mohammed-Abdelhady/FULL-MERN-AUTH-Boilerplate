@@ -92,6 +92,59 @@ cd frontend && npm install && npm run dev
 - Backend API: http://localhost:5000
 - API Docs: http://localhost:5000/api/docs (set `SWAGGER_ENABLED=true`)
 
+## Project Initialization
+
+Use the interactive CLI to configure the boilerplate for your project:
+
+```bash
+npm run init
+```
+
+The script will prompt you for:
+
+| Configuration     | Description                                        |
+| ----------------- | -------------------------------------------------- |
+| App name          | Your project name (generates slug & database name) |
+| Description       | Project description for package.json & README      |
+| Author            | Author name for package.json                       |
+| Ports             | Frontend (3000) and backend (5001) ports           |
+| MongoDB URI       | Database connection string                         |
+| SMTP settings     | Email configuration (optional)                     |
+| OAuth credentials | Google, Facebook, GitHub (optional)                |
+
+**Files updated automatically:**
+
+- `package.json` (root, backend, frontend)
+- `backend/.env` and `frontend/.env.local`
+- `docker-compose.yml` and `docker-compose.prod.yml`
+- `README.md` files
+
+## Production Deployment
+
+Configure your application for production with domains, SSL, and Docker:
+
+```bash
+npm run setup:prod
+```
+
+The production setup wizard will configure:
+
+| Configuration    | Description                              |
+| ---------------- | ---------------------------------------- |
+| Domain names     | Main, frontend, and API domains          |
+| SSL certificates | Let's Encrypt or self-signed             |
+| MongoDB          | Production database credentials          |
+| Nginx ports      | HTTP (80) and HTTPS (443) ports          |
+| Docker Compose   | Production-ready container configuration |
+
+**What it does:**
+
+- Creates production `.env` file with all settings
+- Updates `docker-compose.prod.yml` with your domains
+- Configures Nginx for reverse proxy and SSL
+- Generates SSL certificates (self-signed or Let's Encrypt ready)
+- Backs up existing configuration files
+
 ## Documentation
 
 | Guide                                   | Description                         |

@@ -3,11 +3,14 @@
   "version": "1.0.0",
   "description": "Full-stack MERN authentication boilerplate with NestJS backend and Next.js frontend",
   "private": true,
+  "type": "module",
   "workspaces": [
     "backend",
     "frontend"
   ],
   "scripts": {
+    "init": "node scripts/init.js",
+    "setup:prod": "node scripts/setup-production.js",
     "prepare": "husky",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
