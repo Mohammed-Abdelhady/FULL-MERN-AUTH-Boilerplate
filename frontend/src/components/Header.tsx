@@ -5,9 +5,6 @@ import { ThemeSwitcher } from './ThemeSwitcher';
 import { LogoutButton } from '@/modules/auth/components/LogoutButton';
 import { useAppSelector } from '@/store/hooks';
 import { selectUser } from '@/modules/auth/store/authSlice';
-import { UserCog } from 'lucide-react';
-import Link from 'next/link';
-import { PermissionGuard, PERMISSION_PERMISSIONS } from '@/modules/permissions';
 
 export function Header() {
   const user = useAppSelector(selectUser);

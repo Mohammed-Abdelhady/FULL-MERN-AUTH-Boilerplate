@@ -10,7 +10,6 @@ import {
   WILDCARD_PERMISSION,
 } from '@/modules/permissions';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Shield, Lock, Unlock, Users, Settings, Trash2, Edit, Eye } from 'lucide-react';
 
 /**
