@@ -1,7 +1,9 @@
-import { LinkedAccounts } from '@/modules/auth/components/LinkedAccounts';
-import { ProfileSyncStatus } from '@/modules/auth/components/ProfileSyncStatus';
-import { ChangePasswordCard } from '@/modules/auth/components/ChangePasswordCard';
-import { UpdateProfileCard } from '@/modules/auth/components/UpdateProfileCard';
+import {
+  LinkedAccounts,
+  ProfileSyncStatus,
+  ChangePasswordCard,
+  UpdateProfileCard,
+} from '@/modules/account';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {

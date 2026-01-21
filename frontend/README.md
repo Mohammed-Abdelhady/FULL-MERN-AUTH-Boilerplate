@@ -35,9 +35,13 @@ src/
 │   ├── forms/              # Form components
 │   └── navigation/         # Nav components
 ├── modules/                # Feature modules
-│   ├── auth/               # Auth (forms, store, hooks)
-│   ├── sessions/           # Session management
-│   └── permissions/        # RBAC components
+│   ├── auth/               # Core auth (login, register, password reset)
+│   ├── oauth/              # OAuth (buttons, API, utils)
+│   ├── account/            # Account settings (profile, linked accounts)
+│   ├── roles/              # Role management (CRUD, API)
+│   ├── users/              # User management (admin)
+│   ├── permissions/        # Permission guards & utilities
+│   └── sessions/           # Session management
 ├── store/                  # Redux store
 │   └── api/                # RTK Query APIs
 ├── hooks/                  # Custom hooks
@@ -59,13 +63,36 @@ NEXT_PUBLIC_GITHUB_CLIENT_ID=your-github-client-id
 
 ## Key Features
 
-### Authentication Module (`src/modules/auth/`)
+### Auth Module (`src/modules/auth/`)
 
 - Login/Register forms with validation
-- OAuth buttons (Google, Facebook, GitHub)
 - Password reset flow
-- Profile management
+- Core authentication logic
+
+### OAuth Module (`src/modules/oauth/`)
+
+- OAuth buttons (Google, Facebook, GitHub)
+- OAuth API and utilities
+- Provider icons and styles
+
+### Account Module (`src/modules/account/`)
+
+- Profile management (update name)
+- Change password
 - Linked accounts management
+- Profile sync status
+
+### Roles Module (`src/modules/roles/`)
+
+- Role CRUD operations
+- Role detail panel
+- Role sidebar navigation
+
+### Users Module (`src/modules/users/`)
+
+- User management (admin)
+- User cards and lists
+- User role selector
 
 ### Sessions Module (`src/modules/sessions/`)
 
@@ -76,9 +103,9 @@ NEXT_PUBLIC_GITHUB_CLIENT_ID=your-github-client-id
 
 ### Permissions Module (`src/modules/permissions/`)
 
-- Role management (CRUD)
-- Permission assignment
-- User role selector
+- Permission guards
+- Permission utilities
+- Permission selector components
 
 ## Development
 
