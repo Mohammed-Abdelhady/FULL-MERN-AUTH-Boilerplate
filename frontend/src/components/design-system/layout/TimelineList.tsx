@@ -1,0 +1,92 @@
+import { forwardRef, HTMLAttributes, ReactNode } from 'react';
+import { cn } from '@/lib/utils';
+
+export interface TimelineListProps<T> extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+  /**
+   * Array of items to render
+   */
+  items: T[];
+
+  /**
+   * Render function for each item
+   */
+  renderItem: (item: T, index: number) => ReactNode;
+
+  /**
+   * Highlight a specific item (e.g., current session)
+   */
+  highlightIndex?: number;
+
+  /**
+   * Enable stagger animation for items
+   */
+  stagger?: boolean;
+}
+
+/**
+ * TimelineList - Vertical timeline layout
+ *
+ * Features:
+ * - Vertical list with timeline aesthetic
+ * - Optional highlighted item
+ * - Stagger animations on mount
+ * - Chronological order visualization
+ * - Responsive spacing
+ *
+ * @example
+ * ```tsx
+ * <TimelineList
+ *   items={sessions}
+ *   renderItem={(session, index) => (
+ *     <SessionCardTimeline session={session} isCurrent={session.isCurrent} />
+ *   )}
+ *   highlightIndex={sessions.findIndex(s => s.isCurrent)}
+ *   stagger
+ * />
+ * ```
+ */
+export const TimelineList = forwardRef(
+  <T,>(
+    {
+      items,
+      renderItem,
+      highlightIndex,
+      stagger = false,
+      className,
+      ...props
+    }: TimelineListProps<T>,
+    ref: React.ForwardedRef<HTMLDivElement>,
+  ) => {
+    return (
+      <div
+        ref={ref}
+        data-testid="timeline-list"
+        className={cn('flex flex-col space-y-4', className)}
+        {...props}
+      >
+        {items.map((item, index) => {
+          const isHighlighted = highlightIndex !== undefined && index === highlightIndex;
+
+          return (
+            <div
+              key={index}
+              data-testid={`timeline-item-${index}`}
+              className={cn(
+                'transition-all duration-300 ease-out',
+                stagger && 'animate-slide-up stagger-animation',
+                isHighlighted && 'scale-[1.02]',
+              )}
+              style={stagger ? ({ '--index': index } as React.CSSProperties) : undefined}
+            >
+              {renderItem(item, index)}
+            </div>
+          );
+        })}
+      </div>
+    );
+  },
+) as (<T>(
+  props: TimelineListProps<T> & { ref?: React.ForwardedRef<HTMLDivElement> },
+) => React.ReactElement) & { displayName?: string };
+
+TimelineList.displayName = 'TimelineList';

@@ -79,6 +79,22 @@
   --sidebar-accent-foreground: 224 71% 4%;
   --sidebar-border: 220 13% 91%;
   --sidebar-ring: 239 84% 67%;
+
+  /* Refined Minimal Design System - Light Mode */
+  --surface-primary: 0 0% 99%;
+  --surface-secondary: 0 0% 97%;
+  --surface-tertiary: 0 0% 95%;
+  --border-subtle: 0 0% 92%;
+  --border-hover: 0 0% 88%;
+  --text-primary: 0 0% 9%;
+  --text-secondary: 0 0% 38%;
+  --text-tertiary: 0 0% 58%;
+  --accent-primary: 239 45% 55%;
+  --accent-hover: 239 50% 50%;
+  --accent-surface: 239 45% 98%;
+  --status-success: 142 35% 45%;
+  --status-warning: 38 45% 55%;
+  --status-danger: 0 40% 50%;
 }
 
 .dark {
@@ -140,6 +156,22 @@
   --sidebar-accent-foreground: 210 20% 98%;
   --sidebar-border: 215 28% 17%;
   --sidebar-ring: 239 84% 67%;
+
+  /* Refined Minimal Design System - Dark Mode */
+  --surface-primary: 0 0% 6%;
+  --surface-secondary: 0 0% 9%;
+  --surface-tertiary: 0 0% 12%;
+  --border-subtle: 0 0% 15%;
+  --border-hover: 0 0% 20%;
+  --text-primary: 0 0% 98%;
+  --text-secondary: 0 0% 70%;
+  --text-tertiary: 0 0% 50%;
+  --accent-primary: 239 45% 60%;
+  --accent-hover: 239 50% 65%;
+  --accent-surface: 239 45% 8%;
+  --status-success: 142 40% 50%;
+  --status-warning: 38 50% 60%;
+  --status-danger: 0 45% 55%;
 }
 
 /*
@@ -187,6 +219,22 @@
   --color-sidebar-border: hsl(var(--sidebar-border));
   --color-sidebar-ring: hsl(var(--sidebar-ring));
 
+  /* Refined Minimal Colors */
+  --color-surface-primary: hsl(var(--surface-primary));
+  --color-surface-secondary: hsl(var(--surface-secondary));
+  --color-surface-tertiary: hsl(var(--surface-tertiary));
+  --color-border-subtle: hsl(var(--border-subtle));
+  --color-border-hover: hsl(var(--border-hover));
+  --color-text-primary: hsl(var(--text-primary));
+  --color-text-secondary: hsl(var(--text-secondary));
+  --color-text-tertiary: hsl(var(--text-tertiary));
+  --color-accent-primary: hsl(var(--accent-primary));
+  --color-accent-hover: hsl(var(--accent-hover));
+  --color-accent-surface: hsl(var(--accent-surface));
+  --color-status-success: hsl(var(--status-success));
+  --color-status-warning: hsl(var(--status-warning));
+  --color-status-danger: hsl(var(--status-danger));
+
   /* Border radius */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -196,6 +244,94 @@
   /* Fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+/*
+ * Custom Animations for Minimal Design System
+ */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Animation utility classes */
+.animate-slide-up {
+  animation: slideUp 300ms ease-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 300ms ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 200ms ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 200ms ease-out;
+}
+
+/* Stagger animation support */
+.stagger-animation {
+  animation-delay: calc(var(--index, 0) * 50ms);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /*
