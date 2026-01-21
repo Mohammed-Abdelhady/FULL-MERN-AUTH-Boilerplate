@@ -454,7 +454,8 @@ export function ReferenceMutation({ itemId, itemName, onSuccess }: ReferenceMuta
       description: `Are you sure you want to delete "${itemName}"? This action cannot be undone.`,
       confirmText: 'Delete',
       onConfirm: async () => {
-        // Simulate API call
+        // Simulate API call - in real usage: await deleteItem(itemId).unwrap();
+        console.log(`Deleting item with ID: ${itemId}`);
         await new Promise((resolve) => setTimeout(resolve, 1000));
         toast.success(`${itemName} deleted`);
         onSuccess?.();

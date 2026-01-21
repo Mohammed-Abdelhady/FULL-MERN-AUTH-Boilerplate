@@ -17,7 +17,7 @@
  * <ReferenceButton />
  */
 
-import { useState, lazy, Suspense, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -126,7 +126,7 @@ export function ReferenceButton({
         setOpen(false);
         setName('');
         onSuccess?.();
-      } catch (error) {
+      } catch {
         toast.error('Failed to create item');
       } finally {
         setIsSubmitting(false);

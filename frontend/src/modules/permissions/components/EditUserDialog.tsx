@@ -25,7 +25,6 @@ interface EditUserDialogProps {
 }
 
 interface EditUserFormProps {
-  userId: string;
   initialName: string;
   initialEmail: string;
   isLoading: boolean;
@@ -37,7 +36,6 @@ interface EditUserFormProps {
  * Inner form component - remounts when userId changes via key prop
  */
 function EditUserForm({
-  userId,
   initialName,
   initialEmail,
   isLoading,
@@ -242,7 +240,6 @@ export function EditUserDialog({
         {/* Key forces remount when userId changes, reinitializing state */}
         <EditUserForm
           key={userId}
-          userId={userId}
           initialName={currentName}
           initialEmail={currentEmail}
           isLoading={isLoading}
