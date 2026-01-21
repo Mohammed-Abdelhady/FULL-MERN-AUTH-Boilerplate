@@ -21,6 +21,17 @@ import { useUserFilters } from '@/modules/permissions/hooks/useUserFilters';
 import { useAppDispatch } from '@/store/hooks';
 import { baseApi } from '@/store/api/baseApi';
 
+/** Section identifiers for user groups */
+enum UserSection {
+  VERIFIED = 'verified',
+  PENDING = 'pending',
+}
+
+/** Role filter options */
+enum RoleFilter {
+  ALL = 'all',
+}
+
 // Lazy load permissions dialog
 const UserPermissionsDialog = lazy(() =>
   import('@/modules/permissions/components/UserPermissionsDialog').then((mod) => ({
@@ -35,9 +46,9 @@ const UserPermissionsDialog = lazy(() =>
 export default function AdminUsersPage() {
   const dispatch = useAppDispatch();
   const [searchQuery, setSearchQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState<string>('all');
+  const [roleFilter, setRoleFilter] = useState<string>(RoleFilter.ALL);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+  const [collapsedSections, setCollapsedSections] = useState<Set<UserSection>>(new Set());
 
   const { data: usersData, isLoading, isError, error, refetch } = useGetUsersQuery({});
   const users = useMemo(() => usersData?.users || [], [usersData?.users]);
@@ -67,7 +78,7 @@ export default function AdminUsersPage() {
     if (!open) setSelectedUserId(null);
   }, []);
 
-  const toggleSection = useCallback((sectionId: string) => {
+  const toggleSection = useCallback((sectionId: UserSection) => {
     setCollapsedSections((prev) => {
       const next = new Set(prev);
       if (next.has(sectionId)) {
@@ -126,11 +137,11 @@ export default function AdminUsersPage() {
           />
         </div>
         <Select value={roleFilter} onValueChange={setRoleFilter}>
-          <SelectTrigger className="w-full sm:w-[200px]" data-testid="role-filter">
+          <SelectTrigger className="w-full sm:w-50" data-testid="role-filter">
             <SelectValue placeholder="All Roles" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Roles</SelectItem>
+            <SelectItem value={RoleFilter.ALL}>All Roles</SelectItem>
             {uniqueRoles.map((role) => (
               <SelectItem key={role} value={role}>
                 {role.charAt(0).toUpperCase() + role.slice(1)}
@@ -179,10 +190,10 @@ export default function AdminUsersPage() {
         >
           <div className="space-y-3">
             <p className="text-lg font-semibold">
-              {searchQuery || roleFilter !== 'all' ? 'No users found' : 'No users yet'}
+              {searchQuery || roleFilter !== RoleFilter.ALL ? 'No users found' : 'No users yet'}
             </p>
             <p className="text-sm text-muted-foreground/60 max-w-sm">
-              {searchQuery || roleFilter !== 'all'
+              {searchQuery || roleFilter !== RoleFilter.ALL
                 ? 'Try adjusting your search or filter criteria.'
                 : 'Users will appear here once they register.'}
             </p>
@@ -194,11 +205,11 @@ export default function AdminUsersPage() {
       <Activity mode={!isLoading && !isError && filteredUsers.length > 0 ? 'visible' : 'hidden'}>
         <div className="space-y-8">
           <UserListSection
-            id="verified"
+            id={UserSection.VERIFIED}
             title="Verified Users"
             count={verifiedUsers.length}
-            collapsed={collapsedSections.has('verified')}
-            onCollapse={() => toggleSection('verified')}
+            collapsed={collapsedSections.has(UserSection.VERIFIED)}
+            onCollapse={() => toggleSection(UserSection.VERIFIED)}
           >
             {verifiedUsers.map((user, index) => (
               <div
@@ -213,11 +224,11 @@ export default function AdminUsersPage() {
 
           {pendingUsers.length > 0 && (
             <UserListSection
-              id="pending"
+              id={UserSection.PENDING}
               title="Pending Verification"
               count={pendingUsers.length}
-              collapsed={collapsedSections.has('pending')}
-              onCollapse={() => toggleSection('pending')}
+              collapsed={collapsedSections.has(UserSection.PENDING)}
+              onCollapse={() => toggleSection(UserSection.PENDING)}
             >
               {pendingUsers.map((user, index) => (
                 <div
