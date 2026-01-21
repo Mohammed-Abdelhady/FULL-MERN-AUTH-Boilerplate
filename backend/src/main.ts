@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import { ErrorResponse, ErrorDetails } from './common/dto/api-response.dto';
 
 /**
  * Bootstrap the NestJS application
@@ -96,7 +97,9 @@ async function bootstrap() {
       )
       .build();
 
-    const document = SwaggerModule.createDocument(app, config);
+    const document = SwaggerModule.createDocument(app, config, {
+      extraModels: [ErrorResponse, ErrorDetails],
+    });
     SwaggerModule.setup('api/docs', app, document);
 
     console.log('='.repeat(50));

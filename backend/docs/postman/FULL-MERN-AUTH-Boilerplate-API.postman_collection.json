@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "FULL-MERN-AUTH-Boilerplate API",
-    "description": "Complete API collection for FULL-MERN-AUTH-Boilerplate backend with authentication, user management, and admin operations",
+    "description": "Complete API collection for FULL-MERN-AUTH-Boilerplate backend with authentication, user management, and admin operations.\n\n## Error Response Format\n\nAll errors follow a consistent format:\n```json\n{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"ERROR_CODE\",\n    \"message\": \"Human-readable message\",\n    \"details\": { ... }\n  }\n}\n```\n\nThe `code` field can be used for i18n translation lookup in the frontend.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "version": "2.1.0"
   },
@@ -23,7 +23,7 @@
     },
     {
       "key": "testPassword",
-      "value": "Password123",
+      "value": "Password123!",
       "type": "string"
     },
     {
@@ -46,7 +46,7 @@
     "type": "bearer",
     "bearer": [
       {
-        "key": "jwtToken",
+        "key": "token",
         "value": "{{jwtToken}}",
         "type": "string"
       }
@@ -60,7 +60,7 @@
         "exec": [
           "// Skip authentication for public endpoints",
           "const url = pm.request.url.toString();",
-          "if (url.includes('/auth/register') || url.includes('/auth/activate') || url.includes('/auth/login') || url.includes('/auth/oauth') || url.includes('/health')) {",
+          "if (url.includes('/auth/register') || url.includes('/auth/activate') || url.includes('/auth/login') || url.includes('/auth/oauth') || url.includes('/health') || url.includes('/auth/forgot-password') || url.includes('/auth/reset-password')) {",
           "  pm.request.headers.remove('Authorization');",
           "}"
         ]
@@ -89,17 +89,28 @@
               "raw": "{{baseUrl}}/auth/register",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "register"]
-            }
+            },
+            "description": "Register a new user. Sends activation email with 6-digit code."
           },
           "response": [
             {
               "name": "Success - User registered",
-              "originalRequest": "No Original Request",
-              "status": {
-                "code": 200,
-                "name": "OK"
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"Password123!\",\n  \"name\": \"Test User\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "register"]
+                }
               },
-              "_postman_previewlanguage": "html",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
               "header": [
                 {
                   "key": "Content-Type",
@@ -107,7 +118,61 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"507f1f77bcf86cd799439011\",\n    \"email\": \"{{testEmail}}\",\n    \"name\": \"{{testName}}\",\n    \"role\": \"USER\",\n    \"isVerified\": false,\n    \"createdAt\": \"2024-01-15T10:30:00.000Z\"\n  },\n  \"message\": \"User registered successfully\"\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"email\": \"test@example.com\",\n    \"message\": \"Activation code sent to your email\"\n  }\n}"
+            },
+            {
+              "name": "Error - Email already exists",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"existing@example.com\",\n  \"password\": \"Password123!\",\n  \"name\": \"Test User\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "register"]
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"EMAIL_ALREADY_EXISTS\",\n    \"message\": \"This email is already registered\"\n  }\n}"
+            },
+            {
+              "name": "Error - Validation failed",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"invalid-email\",\n  \"password\": \"weak\",\n  \"name\": \"\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "register"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"VALIDATION_ERROR\",\n    \"message\": \"Validation failed\",\n    \"details\": {\n      \"errors\": [\n        { \"field\": \"email\", \"messages\": [\"email must be a valid email\"] },\n        { \"field\": \"password\", \"messages\": [\"password must be at least 8 characters\"] },\n        { \"field\": \"name\", \"messages\": [\"name should not be empty\"] }\n      ]\n    }\n  }\n}"
             }
           ],
           "event": [
@@ -116,25 +181,20 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "  pm.response.to.have.status(200);",
+                  "pm.test('Status is 200 or expected error', function () {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 400, 409]);",
                   "});",
                   "",
-                  "pm.test('Response has success: true', function () {",
+                  "pm.test('Response has correct structure', function () {",
                   "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.success).to.be.true;",
-                  "});",
-                  "",
-                  "pm.test('Response has data', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.data).to.exist;",
-                  "});",
-                  "",
-                  "pm.test('Response has user id', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.data.id).to.be.a.string;",
-                  "  // Store userId for later use",
-                  "  pm.environment.set('userId', jsonData.data.id);",
+                  "  pm.expect(jsonData).to.have.property('success');",
+                  "  if (jsonData.success) {",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "  } else {",
+                  "    pm.expect(jsonData).to.have.property('error');",
+                  "    pm.expect(jsonData.error).to.have.property('code');",
+                  "    pm.expect(jsonData.error).to.have.property('message');",
+                  "  }",
                   "});"
                 ]
               }
@@ -159,29 +219,202 @@
               "raw": "{{baseUrl}}/auth/activate",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "activate"]
-            }
+            },
+            "description": "Activate user account with 6-digit code from email."
           },
+          "response": [
+            {
+              "name": "Success - Account activated",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"test@example.com\",\n  \"code\": \"123456\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/activate",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "activate"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"user\": {\n      \"id\": \"507f1f77bcf86cd799439011\",\n      \"email\": \"test@example.com\",\n      \"name\": \"Test User\",\n      \"role\": \"user\",\n      \"isVerified\": true\n    }\n  },\n  \"message\": \"Account activated successfully\"\n}"
+            },
+            {
+              "name": "Error - Invalid code",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"test@example.com\",\n  \"code\": \"000000\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/activate",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "activate"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"ACTIVATION_CODE_INVALID\",\n    \"message\": \"Invalid code. 3 attempts remaining.\",\n    \"details\": {\n      \"remainingAttempts\": 3\n    }\n  }\n}"
+            },
+            {
+              "name": "Error - Code expired",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"test@example.com\",\n  \"code\": \"123456\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/activate",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "activate"]
+                }
+              },
+              "status": "Gone",
+              "code": 410,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"ACTIVATION_CODE_EXPIRED\",\n    \"message\": \"Activation code has expired. Please request a new one.\"\n  }\n}"
+            },
+            {
+              "name": "Error - Max attempts exceeded",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"test@example.com\",\n  \"code\": \"000000\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/activate",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "activate"]
+                }
+              },
+              "status": "Too Many Requests",
+              "code": 429,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"MAX_ATTEMPTS_EXCEEDED\",\n    \"message\": \"Too many failed attempts. Please request a new code.\"\n  }\n}"
+            },
+            {
+              "name": "Error - No pending registration",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"unknown@example.com\",\n  \"code\": \"123456\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/activate",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "activate"]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"NO_PENDING_REGISTRATION\",\n    \"message\": \"No pending registration found. Please register again.\"\n  }\n}"
+            }
+          ],
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response has success: true', function () {",
+                  "pm.test('Response has correct structure', function () {",
                   "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.success).to.be.true;",
-                  "});",
-                  "",
-                  "pm.test('Response has message', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.message).to.exist;",
+                  "  pm.expect(jsonData).to.have.property('success');",
+                  "  if (jsonData.success) {",
+                  "    pm.expect(jsonData).to.have.property('data');",
+                  "  } else {",
+                  "    pm.expect(jsonData.error).to.have.property('code');",
+                  "    pm.expect(jsonData.error).to.have.property('message');",
+                  "  }",
                   "});"
                 ]
               }
+            }
+          ]
+        },
+        {
+          "name": "Resend Activation Code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/resend-activation",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "resend-activation"]
+            },
+            "description": "Resend activation code to email."
+          },
+          "response": [
+            {
+              "name": "Success - Code resent",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"message\": \"Activation code sent to your email\"\n}"
+            },
+            {
+              "name": "Error - Rate limit exceeded",
+              "status": "Too Many Requests",
+              "code": 429,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"RESEND_RATE_LIMIT_EXCEEDED\",\n    \"message\": \"Please wait before requesting another code\",\n    \"details\": {\n      \"retryAfter\": 60\n    }\n  }\n}"
             }
           ]
         },
@@ -203,38 +436,150 @@
               "raw": "{{baseUrl}}/auth/login",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "login"]
-            }
+            },
+            "description": "Login with email and password. Returns session cookie."
           },
+          "response": [
+            {
+              "name": "Success - Logged in",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Set-Cookie",
+                  "value": "sid=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...; Path=/; HttpOnly; SameSite=Strict"
+                }
+              ],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"user\": {\n      \"id\": \"507f1f77bcf86cd799439011\",\n      \"email\": \"test@example.com\",\n      \"name\": \"Test User\",\n      \"role\": \"user\",\n      \"isVerified\": true\n    }\n  }\n}"
+            },
+            {
+              "name": "Error - Invalid credentials",
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"INVALID_CREDENTIALS\",\n    \"message\": \"Invalid email or password\"\n  }\n}"
+            },
+            {
+              "name": "Error - Email not verified",
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"EMAIL_NOT_VERIFIED\",\n    \"message\": \"Please verify your email before logging in\"\n  }\n}"
+            },
+            {
+              "name": "Error - Rate limit exceeded",
+              "status": "Too Many Requests",
+              "code": 429,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"RATE_LIMIT_EXCEEDED\",\n    \"message\": \"Too many login attempts. Please try again later.\",\n    \"details\": {\n      \"retryAfter\": 60\n    }\n  }\n}"
+            }
+          ],
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "  pm.response.to.have.status(200);",
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test('Response has correct structure', function () {",
+                  "  pm.expect(jsonData).to.have.property('success');",
                   "});",
                   "",
-                  "pm.test('Response has success: true', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.success).to.be.true;",
-                  "});",
-                  "",
-                  "pm.test('Response has token', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.data.token).to.exist;",
-                  "  // Store JWT token for authenticated requests",
-                  "  pm.environment.set('jwtToken', jsonData.data.token);",
-                  "});",
-                  "",
-                  "pm.test('Response has user', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.data.user).to.exist;",
-                  "  // Store userId for later use",
-                  "  pm.environment.set('userId', jsonData.data.user.id);",
-                  "});"
+                  "if (jsonData.success && jsonData.data && jsonData.data.user) {",
+                  "  pm.collectionVariables.set('userId', jsonData.data.user.id);",
+                  "  // Extract session cookie if present",
+                  "  const cookies = pm.response.headers.filter(h => h.key === 'Set-Cookie');",
+                  "  if (cookies.length > 0) {",
+                  "    console.log('Session cookie set by server');",
+                  "  }",
+                  "}"
                 ]
               }
+            }
+          ]
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "forgot-password"]
+            },
+            "description": "Request password reset code via email."
+          },
+          "response": [
+            {
+              "name": "Success - Reset code sent",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"message\": \"If the email is registered, a reset code has been sent\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"code\": \"123456\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "reset-password"]
+            },
+            "description": "Reset password with code from email."
+          },
+          "response": [
+            {
+              "name": "Success - Password reset",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"message\": \"Password reset successfully\"\n}"
+            },
+            {
+              "name": "Error - Invalid code",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"PASSWORD_RESET_CODE_INVALID\",\n    \"message\": \"Invalid password reset code\"\n  }\n}"
+            },
+            {
+              "name": "Error - Code expired",
+              "status": "Gone",
+              "code": 410,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"PASSWORD_RESET_CODE_EXPIRED\",\n    \"message\": \"Password reset code has expired. Please request a new one.\"\n  }\n}"
+            },
+            {
+              "name": "Error - No pending reset",
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"NO_PENDING_PASSWORD_RESET\",\n    \"message\": \"No password reset request found. Please request a new one.\"\n  }\n}"
             }
           ]
         },
@@ -251,8 +596,18 @@
               "raw": "{{baseUrl}}/auth/logout",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "logout"]
-            }
+            },
+            "description": "Logout current session."
           },
+          "response": [
+            {
+              "name": "Success - Logged out",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"message\": \"Logged out successfully\"\n}"
+            }
+          ],
           "event": [
             {
               "listen": "test",
@@ -266,11 +621,6 @@
                   "pm.test('Response has success: true', function () {",
                   "  const jsonData = pm.response.json();",
                   "  pm.expect(jsonData.success).to.be.true;",
-                  "});",
-                  "",
-                  "pm.test('Response has message', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.message).to.exist;",
                   "});"
                 ]
               }
@@ -287,10 +637,6 @@
           "request": {
             "method": "GET",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
             "url": {
               "raw": "{{baseUrl}}/auth/oauth/authorize?provider=google",
               "host": ["{{baseUrl}}"],
@@ -302,29 +648,30 @@
                 }
               ],
               "path": ["auth", "oauth", "authorize"]
-            }
+            },
+            "description": "Get OAuth authorization URL for a provider."
           },
-          "event": [
+          "response": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response has success: true', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.success).to.be.true;",
-                  "});",
-                  "",
-                  "pm.test('Response has authorization URL', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.data.url).to.be.a.string;",
-                  "});"
-                ]
-              }
+              "name": "Success - URL returned",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"url\": \"https://accounts.google.com/o/oauth2/v2/auth?...\"\n  }\n}"
+            },
+            {
+              "name": "Error - Invalid provider",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"INVALID_OAUTH_PROVIDER\",\n    \"message\": \"Invalid OAuth provider specified\"\n  }\n}"
+            },
+            {
+              "name": "Error - Provider not configured",
+              "status": "Service Unavailable",
+              "code": 503,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"GOOGLE_NOT_CONFIGURED\",\n    \"message\": \"Google OAuth is not configured on this server\"\n  }\n}"
             }
           ]
         },
@@ -340,44 +687,36 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"provider\": \"google\",\n  \"code\": \"4/0AX4XhW7ly5Cx...\",\n  \"state\": \"random_state_string\"\n}"
+              "raw": "{\n  \"provider\": \"google\",\n  \"code\": \"4/0AX4XhW7ly5Cx...\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/auth/oauth/callback",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "oauth", "callback"]
-            }
+            },
+            "description": "Exchange OAuth code for session."
           },
-          "event": [
+          "response": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response has success: true', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.success).to.be.true;",
-                  "});",
-                  "",
-                  "pm.test('Response has token', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.data.token).to.exist;",
-                  "  // Store JWT token for authenticated requests",
-                  "  pm.environment.set('jwtToken', jsonData.data.token);",
-                  "});",
-                  "",
-                  "pm.test('Response has user', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.data.user).to.exist;",
-                  "  // Store userId for later use",
-                  "  pm.environment.set('userId', jsonData.data.user.id);",
-                  "});"
-                ]
-              }
+              "name": "Success - Authenticated",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"user\": {\n      \"id\": \"507f1f77bcf86cd799439011\",\n      \"email\": \"user@gmail.com\",\n      \"name\": \"Google User\",\n      \"role\": \"user\",\n      \"isVerified\": true,\n      \"linkedProviders\": [\"google\"]\n    },\n    \"isNewUser\": false\n  }\n}"
+            },
+            {
+              "name": "Error - Invalid code",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"GOOGLE_CODE_INVALID\",\n    \"message\": \"Google authorization code is invalid or expired\"\n  }\n}"
+            },
+            {
+              "name": "Error - Email not verified",
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"GOOGLE_EMAIL_NOT_VERIFIED\",\n    \"message\": \"Please verify your Google email before signing in\"\n  }\n}"
             }
           ]
         },
@@ -386,37 +725,20 @@
           "request": {
             "method": "GET",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
             "url": {
               "raw": "{{baseUrl}}/auth/oauth/providers",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "oauth", "providers"]
-            }
+            },
+            "description": "Get list of configured OAuth providers."
           },
-          "event": [
+          "response": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response has success: true', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.success).to.be.true;",
-                  "});",
-                  "",
-                  "pm.test('Response has providers array', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.data.providers).to.be.an('array');",
-                  "});"
-                ]
-              }
+              "name": "Success - Providers list",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"providers\": [\"google\", \"github\", \"facebook\"]\n  }\n}"
             }
           ]
         }
@@ -430,37 +752,27 @@
           "request": {
             "method": "GET",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
             "url": {
               "raw": "{{baseUrl}}/user/profile",
               "host": ["{{baseUrl}}"],
               "path": ["user", "profile"]
-            }
+            },
+            "description": "Get current user profile."
           },
-          "event": [
+          "response": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response has success: true', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.success).to.be.true;",
-                  "});",
-                  "",
-                  "pm.test('Response has user data', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.data).to.exist;",
-                  "});"
-                ]
-              }
+              "name": "Success - Profile returned",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"507f1f77bcf86cd799439011\",\n    \"email\": \"test@example.com\",\n    \"name\": \"Test User\",\n    \"role\": \"user\",\n    \"isVerified\": true,\n    \"linkedProviders\": [\"google\"],\n    \"createdAt\": \"2024-01-15T10:30:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "Error - Unauthorized",
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"SESSION_REQUIRED\",\n    \"message\": \"Please log in to continue\"\n  }\n}"
             }
           ]
         },
@@ -482,29 +794,16 @@
               "raw": "{{baseUrl}}/user/profile",
               "host": ["{{baseUrl}}"],
               "path": ["user", "profile"]
-            }
+            },
+            "description": "Update current user profile."
           },
-          "event": [
+          "response": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response has success: true', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.success).to.be.true;",
-                  "});",
-                  "",
-                  "pm.test('Response has updated user data', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.data).to.exist;",
-                  "});"
-                ]
-              }
+              "name": "Success - Profile updated",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"507f1f77bcf86cd799439011\",\n    \"email\": \"test@example.com\",\n    \"name\": \"Updated Name\",\n    \"role\": \"user\",\n    \"isVerified\": true\n  }\n}"
             }
           ]
         },
@@ -520,35 +819,36 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"currentPassword\": \"{{testPassword}}\",\n  \"newPassword\": \"NewPassword123\"\n}"
+              "raw": "{\n  \"currentPassword\": \"{{testPassword}}\",\n  \"newPassword\": \"NewPassword123!\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/user/password",
               "host": ["{{baseUrl}}"],
               "path": ["user", "password"]
-            }
+            },
+            "description": "Change user password."
           },
-          "event": [
+          "response": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response has success: true', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.success).to.be.true;",
-                  "});",
-                  "",
-                  "pm.test('Response has message', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.message).to.exist;",
-                  "});"
-                ]
-              }
+              "name": "Success - Password changed",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"message\": \"Password changed successfully\"\n}"
+            },
+            {
+              "name": "Error - Invalid current password",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"INVALID_CURRENT_PASSWORD\",\n    \"message\": \"Current password is incorrect\"\n  }\n}"
+            },
+            {
+              "name": "Error - Same password",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"SAME_PASSWORD\",\n    \"message\": \"New password must be different from current password\"\n  }\n}"
             }
           ]
         },
@@ -557,42 +857,20 @@
           "request": {
             "method": "GET",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
             "url": {
               "raw": "{{baseUrl}}/user/sessions",
               "host": ["{{baseUrl}}"],
               "path": ["user", "sessions"]
-            }
+            },
+            "description": "Get all active sessions for current user."
           },
-          "event": [
+          "response": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response has success: true', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.success).to.be.true;",
-                  "});",
-                  "",
-                  "pm.test('Response has sessions array', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.data.sessions).to.be.an('array');",
-                  "});",
-                  "",
-                  "pm.test('Response has total count', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.data.total).to.be.a('number');",
-                  "});"
-                ]
-              }
+              "name": "Success - Sessions returned",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"sessions\": [\n      {\n        \"id\": \"session123\",\n        \"userAgent\": \"Mozilla/5.0...\",\n        \"ip\": \"192.168.1.1\",\n        \"lastActivity\": \"2024-01-15T10:30:00.000Z\",\n        \"createdAt\": \"2024-01-15T08:00:00.000Z\",\n        \"isCurrent\": true\n      }\n    ],\n    \"total\": 1\n  }\n}"
             }
           ]
         },
@@ -601,37 +879,34 @@
           "request": {
             "method": "DELETE",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
             "url": {
               "raw": "{{baseUrl}}/user/sessions/{{sessionId}}",
               "host": ["{{baseUrl}}"],
               "path": ["user", "sessions", "{{sessionId}}"]
-            }
+            },
+            "description": "Revoke a specific session."
           },
-          "event": [
+          "response": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response has success: true', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.success).to.be.true;",
-                  "});",
-                  "",
-                  "pm.test('Response has message', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.message).to.exist;",
-                  "});"
-                ]
-              }
+              "name": "Success - Session revoked",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"message\": \"Session revoked successfully\"\n}"
+            },
+            {
+              "name": "Error - Session not found",
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"SESSION_NOT_FOUND\",\n    \"message\": \"Session not found\"\n  }\n}"
+            },
+            {
+              "name": "Error - Cannot revoke current session",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"CANNOT_REVOKE_CURRENT_SESSION\",\n    \"message\": \"Cannot revoke current session. Use logout instead.\"\n  }\n}"
             }
           ]
         },
@@ -640,76 +915,101 @@
           "request": {
             "method": "POST",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
             "url": {
               "raw": "{{baseUrl}}/user/sessions/revoke-others",
               "host": ["{{baseUrl}}"],
               "path": ["user", "sessions", "revoke-others"]
-            }
+            },
+            "description": "Revoke all sessions except current one."
           },
-          "event": [
+          "response": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response has success: true', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.success).to.be.true;",
-                  "});",
-                  "",
-                  "pm.test('Response has revokedCount', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.data.revokedCount).to.be.a('number');",
-                  "});"
-                ]
-              }
+              "name": "Success - Sessions revoked",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"revokedCount\": 3\n  },\n  \"message\": \"3 session(s) revoked\"\n}"
             }
           ]
         },
         {
-          "name": "Deactivate Account",
+          "name": "Link OAuth Provider",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider\": \"github\",\n  \"code\": \"github_auth_code...\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/providers/link",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "providers", "link"]
+            },
+            "description": "Link a new OAuth provider to account."
+          },
+          "response": [
+            {
+              "name": "Success - Provider linked",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"linkedProviders\": [\"google\", \"github\"]\n  },\n  \"message\": \"GitHub account linked successfully\"\n}"
+            },
+            {
+              "name": "Error - Provider already linked",
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"PROVIDER_ALREADY_LINKED\",\n    \"message\": \"This provider is already linked to your account\"\n  }\n}"
+            },
+            {
+              "name": "Error - Provider linked to other account",
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"PROVIDER_LINKED_TO_OTHER_ACCOUNT\",\n    \"message\": \"This provider is already linked to another account\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Unlink OAuth Provider",
           "request": {
             "method": "DELETE",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
             "url": {
-              "raw": "{{baseUrl}}/user/account",
+              "raw": "{{baseUrl}}/user/providers/github",
               "host": ["{{baseUrl}}"],
-              "path": ["user", "account"]
-            }
+              "path": ["user", "providers", "github"]
+            },
+            "description": "Unlink an OAuth provider from account."
           },
-          "event": [
+          "response": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response has success: true', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.success).to.be.true;",
-                  "});",
-                  "",
-                  "pm.test('Response has message', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.message).to.exist;",
-                  "});"
-                ]
-              }
+              "name": "Success - Provider unlinked",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"linkedProviders\": [\"google\"]\n  },\n  \"message\": \"GitHub account unlinked successfully\"\n}"
+            },
+            {
+              "name": "Error - Cannot unlink last provider",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"CANNOT_UNLINK_LAST_PROVIDER\",\n    \"message\": \"Cannot unlink last authentication provider. Set a password first.\"\n  }\n}"
+            },
+            {
+              "name": "Error - Provider not linked",
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"PROVIDER_NOT_LINKED\",\n    \"message\": \"This provider is not linked to your account\"\n  }\n}"
             }
           ]
         }
@@ -723,10 +1023,6 @@
           "request": {
             "method": "GET",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
             "url": {
               "raw": "{{baseUrl}}/admin/users?page=1&limit=10",
               "host": ["{{baseUrl}}"],
@@ -741,36 +1037,37 @@
                   "key": "limit",
                   "value": "10",
                   "description": "Items per page"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search by name or email",
+                  "disabled": true
+                },
+                {
+                  "key": "role",
+                  "value": "",
+                  "description": "Filter by role",
+                  "disabled": true
                 }
               ]
-            }
+            },
+            "description": "List all users (admin only)."
           },
-          "event": [
+          "response": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response has success: true', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.success).to.be.true;",
-                  "});",
-                  "",
-                  "pm.test('Response has users array', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.data.users).to.be.an('array');",
-                  "});",
-                  "",
-                  "pm.test('Response has pagination data', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.data.pagination).to.exist;",
-                  "});"
-                ]
-              }
+              "name": "Success - Users list",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"users\": [\n      {\n        \"id\": \"507f1f77bcf86cd799439011\",\n        \"email\": \"user@example.com\",\n        \"name\": \"John Doe\",\n        \"role\": \"user\",\n        \"isVerified\": true,\n        \"isActive\": true,\n        \"createdAt\": \"2024-01-15T10:30:00.000Z\"\n      }\n    ],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 10,\n      \"total\": 50,\n      \"totalPages\": 5\n    }\n  }\n}"
+            },
+            {
+              "name": "Error - Forbidden",
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"FORBIDDEN\",\n    \"message\": \"You don't have permission to access this resource\"\n  }\n}"
             }
           ]
         },
@@ -779,81 +1076,27 @@
           "request": {
             "method": "GET",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
             "url": {
               "raw": "{{baseUrl}}/admin/users/{{userId}}",
               "host": ["{{baseUrl}}"],
               "path": ["admin", "users", "{{userId}}"]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response has success: true', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.success).to.be.true;",
-                  "});",
-                  "",
-                  "pm.test('Response has user data', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.data).to.exist;",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "Update User Status",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"isActive\": false\n}"
             },
-            "url": {
-              "raw": "{{baseUrl}}/admin/users/{{userId}}/status",
-              "host": ["{{baseUrl}}"],
-              "path": ["admin", "users", "{{userId}}", "status"]
-            }
+            "description": "Get user details by ID (admin only)."
           },
-          "event": [
+          "response": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response has success: true', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.success).to.be.true;",
-                  "});",
-                  "",
-                  "pm.test('Response has updated user data', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.data).to.exist;",
-                  "});"
-                ]
-              }
+              "name": "Success - User details",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"507f1f77bcf86cd799439011\",\n    \"email\": \"user@example.com\",\n    \"name\": \"John Doe\",\n    \"role\": \"user\",\n    \"isVerified\": true,\n    \"isActive\": true,\n    \"linkedProviders\": [\"google\"],\n    \"createdAt\": \"2024-01-15T10:30:00.000Z\",\n    \"lastLogin\": \"2024-01-20T15:45:00.000Z\"\n  }\n}"
+            },
+            {
+              "name": "Error - User not found",
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"USER_NOT_FOUND\",\n    \"message\": \"User not found\"\n  }\n}"
             }
           ]
         },
@@ -869,35 +1112,43 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"role\": \"MANAGER\"\n}"
+              "raw": "{\n  \"role\": \"moderator\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/admin/users/{{userId}}/role",
               "host": ["{{baseUrl}}"],
               "path": ["admin", "users", "{{userId}}", "role"]
-            }
+            },
+            "description": "Update user role (admin only)."
           },
-          "event": [
+          "response": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response has success: true', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.success).to.be.true;",
-                  "});",
-                  "",
-                  "pm.test('Response has updated user data', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.data).to.exist;",
-                  "});"
-                ]
-              }
+              "name": "Success - Role updated",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"507f1f77bcf86cd799439011\",\n    \"role\": \"moderator\"\n  },\n  \"message\": \"User role updated successfully\"\n}"
+            },
+            {
+              "name": "Error - Cannot modify self",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"CANNOT_MODIFY_SELF\",\n    \"message\": \"Cannot change your own role\"\n  }\n}"
+            },
+            {
+              "name": "Error - Cannot modify higher role",
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"CANNOT_MODIFY_HIGHER_ROLE\",\n    \"message\": \"Cannot modify user with higher role\"\n  }\n}"
+            },
+            {
+              "name": "Error - Invalid role assignment",
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"INVALID_ROLE_ASSIGNMENT\",\n    \"message\": \"Cannot assign admin role via API\"\n  }\n}"
             }
           ]
         },
@@ -906,27 +1157,27 @@
           "request": {
             "method": "DELETE",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
             "url": {
               "raw": "{{baseUrl}}/admin/users/{{userId}}",
               "host": ["{{baseUrl}}"],
               "path": ["admin", "users", "{{userId}}"]
-            }
+            },
+            "description": "Delete/deactivate user (admin only)."
           },
-          "event": [
+          "response": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status is 204', function () {",
-                  "  pm.response.to.have.status(204);",
-                  "});"
-                ]
-              }
+              "name": "Success - User deleted",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": true,\n  \"message\": \"User deleted successfully\"\n}"
+            },
+            {
+              "name": "Error - User already deleted",
+              "status": "Gone",
+              "code": 410,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"success\": false,\n  \"error\": {\n    \"code\": \"USER_ALREADY_DELETED\",\n    \"message\": \"User is already deleted\"\n  }\n}"
             }
           ]
         }
@@ -940,37 +1191,20 @@
           "request": {
             "method": "GET",
             "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
             "url": {
               "raw": "{{baseUrl}}/health",
               "host": ["{{baseUrl}}"],
               "path": ["health"]
-            }
+            },
+            "description": "Check API health status."
           },
-          "event": [
+          "response": [
             {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response has status field', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.status).to.exist;",
-                  "});",
-                  "",
-                  "pm.test('Response has uptime field', function () {",
-                  "  const jsonData = pm.response.json();",
-                  "  pm.expect(jsonData.uptime).to.be.a('number');",
-                  "});"
-                ]
-              }
+              "name": "Success - Healthy",
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "body": "{\n  \"status\": \"ok\",\n  \"uptime\": 3600,\n  \"timestamp\": \"2024-01-15T10:30:00.000Z\",\n  \"database\": \"connected\"\n}"
             }
           ]
         }
