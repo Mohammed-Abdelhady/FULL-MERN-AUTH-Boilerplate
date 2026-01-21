@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useCallback, lazy, Suspense, Activity } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { SearchBar, SplitView } from '@/components/design-system';
 import { useListRolesQuery, type Role } from '@/modules/permissions/api/rolesApi';
@@ -33,6 +34,7 @@ const DeleteRoleDialog = lazy(() =>
  * Allows viewing, creating, editing, and deleting roles.
  */
 export default function RolesPage() {
+  const t = useTranslations('roles');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -92,20 +94,20 @@ export default function RolesPage() {
         <div className="my-8">
           <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
             <div>
-              <h1 className="text-4xl font-light tracking-tight">Roles</h1>
+              <h1 className="text-4xl font-light tracking-tight">{t('title')}</h1>
               <p className="text-sm text-muted-foreground/60 mt-1 leading-relaxed">
-                {roles.length} {roles.length === 1 ? 'role' : 'roles'} defined
+                {t('count', { count: roles.length })}
               </p>
             </div>
             <Button onClick={() => setCreateDialogOpen(true)} data-testid="create-role-button">
               <Plus className="mr-2 h-4 w-4" />
-              Create Role
+              {t('createRole')}
             </Button>
           </div>
 
           {/* Search */}
           <SearchBar
-            placeholder="Search roles by name, slug, or description..."
+            placeholder={t('searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onClear={() => setSearchTerm('')}
@@ -119,7 +121,7 @@ export default function RolesPage() {
           <div className="flex items-center justify-center py-16">
             <div className="text-center space-y-4">
               <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">Loading roles...</p>
+              <p className="text-sm text-muted-foreground">{t('loading')}</p>
             </div>
           </div>
         </Activity>
@@ -147,17 +149,15 @@ export default function RolesPage() {
           <div className="flex items-center justify-center py-16 text-center">
             <div className="space-y-3 max-w-md">
               <h3 className="text-lg font-semibold">
-                {searchTerm ? 'No roles found' : 'No roles created yet'}
+                {searchTerm ? t('noRoles') : t('noRolesYet')}
               </h3>
               <p className="text-sm text-muted-foreground/60">
-                {searchTerm
-                  ? 'Try adjusting your search criteria.'
-                  : 'Get started by creating your first custom role.'}
+                {searchTerm ? t('noRolesHint') : t('noRolesYetHint')}
               </p>
               {!searchTerm && (
                 <Button className="mt-4" onClick={() => setCreateDialogOpen(true)}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Create Role
+                  {t('createRole')}
                 </Button>
               )}
             </div>

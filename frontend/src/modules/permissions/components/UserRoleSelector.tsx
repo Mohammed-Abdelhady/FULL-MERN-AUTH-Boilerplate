@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Select,
   SelectContent,
@@ -40,6 +41,8 @@ export function UserRoleSelector({
   onRoleChange,
   disabled = false,
 }: UserRoleSelectorProps) {
+  const t = useTranslations('permissions.userRole');
+  const tCommon = useTranslations('common');
   const [pendingRole, setPendingRole] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const { data: rolesData, isLoading: isLoadingRoles } = useListRolesQuery(undefined);
@@ -55,7 +58,7 @@ export function UserRoleSelector({
     // Check if the role is protected (admin roles)
     const selectedRole = roles.find((r) => r.slug === newRole);
     if (selectedRole?.isProtected && newRole !== currentRole) {
-      toast.error('Cannot assign protected admin roles');
+      toast.error(t('cannotAssignProtected'));
       return;
     }
 
@@ -71,13 +74,13 @@ export function UserRoleSelector({
     try {
       await onRoleChange(pendingRole);
       const roleName = roles.find((r) => r.slug === pendingRole)?.name || pendingRole;
-      toast.success(`User role changed to ${roleName}`);
+      toast.success(t('changeSuccess', { role: roleName }));
       setPendingRole(null);
     } catch (error) {
       const errorMessage =
         error && typeof error === 'object' && 'data' in error && error.data
           ? String((error.data as { message?: string }).message)
-          : 'Failed to change user role';
+          : t('changeError');
       toast.error(errorMessage);
     } finally {
       setIsUpdating(false);
@@ -133,7 +136,7 @@ export function UserRoleSelector({
                 <span>{role.name}</span>
                 {role.isProtected && role.slug !== currentRole && (
                   <Badge variant="secondary" className="ml-2 text-xs">
-                    Protected
+                    {t('protected')}
                   </Badge>
                 )}
               </div>
@@ -146,20 +149,22 @@ export function UserRoleSelector({
       <AlertDialog open={!!pendingRole} onOpenChange={(open) => !open && handleCancelRoleChange()}>
         <AlertDialogContent data-testid="role-change-confirm-dialog">
           <AlertDialogHeader>
-            <AlertDialogTitle>Change User Role?</AlertDialogTitle>
+            <AlertDialogTitle>{t('changeTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to change this user&apos;s role from{' '}
-              <strong>{currentRoleData?.name || currentRole}</strong> to{' '}
-              <strong>{pendingRoleData?.name || pendingRole}</strong>?
+              {t.rich('changeDescription', {
+                name: 'this user',
+                from: currentRoleData?.name || currentRole,
+                to: pendingRoleData?.name || pendingRole || '',
+                strong: (chunks) => <strong>{chunks}</strong>,
+              })}
               <br />
               <br />
-              This will update the user&apos;s permissions immediately and may affect their access
-              to certain features.
+              {t('changeWarning')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isUpdating} data-testid="cancel-role-change-button">
-              Cancel
+              {tCommon('cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmRoleChange}
@@ -169,10 +174,10 @@ export function UserRoleSelector({
               {isUpdating ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Changing...
+                  {t('changing')}
                 </>
               ) : (
-                'Change Role'
+                t('changeRole')
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

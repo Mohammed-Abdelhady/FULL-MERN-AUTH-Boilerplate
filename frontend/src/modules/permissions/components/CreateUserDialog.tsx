@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Dialog,
   DialogContent,
@@ -48,6 +49,9 @@ export interface CreateUserDialogProps {
  * ```
  */
 export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDialogProps) {
+  const t = useTranslations('users.createUser');
+  const tValidation = useTranslations('validation');
+  const tCommon = useTranslations('common');
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
@@ -66,28 +70,27 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
     const newErrors: Record<string, string> = {};
 
     if (!email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = tValidation('emailRequired');
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = 'Invalid email format';
+      newErrors.email = tValidation('emailInvalid');
     }
 
     if (!name.trim()) {
-      newErrors.name = 'Name is required';
+      newErrors.name = tValidation('nameRequired');
     } else if (name.trim().length < 2) {
-      newErrors.name = 'Name must be at least 2 characters';
+      newErrors.name = tValidation('nameMinLength');
     }
 
     if (!password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = tValidation('passwordRequired');
     } else if (password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
+      newErrors.password = tValidation('passwordMinLength');
     } else if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(password)) {
-      newErrors.password =
-        'Password must contain uppercase, lowercase, number, and special character';
+      newErrors.password = tValidation('passwordStrength');
     }
 
     if (!role) {
-      newErrors.role = 'Role is required';
+      newErrors.role = tValidation('roleRequired');
     }
 
     setErrors(newErrors);
@@ -109,14 +112,14 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
         role,
       }).unwrap();
 
-      toast.success('User created successfully');
+      toast.success(t('success'));
       handleClose();
       onSuccess?.();
     } catch (error) {
       const errorMessage =
         error && typeof error === 'object' && 'data' in error && error.data
           ? String((error.data as { message?: string }).message)
-          : 'Failed to create user';
+          : t('error');
       toast.error(errorMessage);
     }
   };
@@ -135,9 +138,9 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]" data-testid="create-user-dialog">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-light tracking-tight">Create New User</DialogTitle>
+          <DialogTitle className="text-2xl font-light tracking-tight">{t('title')}</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground/60">
-            Add a new user to the system with a specific role and permissions.
+            {t('description')}
           </DialogDescription>
         </DialogHeader>
 
@@ -148,12 +151,12 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
               htmlFor="email"
               className="text-xs uppercase tracking-widest text-muted-foreground/60"
             >
-              Email Address
+              {t('email')}
             </Label>
             <Input
               id="email"
               type="email"
-              placeholder="user@example.com"
+              placeholder={t('emailPlaceholder')}
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
@@ -176,12 +179,12 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
               htmlFor="name"
               className="text-xs uppercase tracking-widest text-muted-foreground/60"
             >
-              Full Name
+              {t('name')}
             </Label>
             <Input
               id="name"
               type="text"
-              placeholder="John Doe"
+              placeholder={t('namePlaceholder')}
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
@@ -204,7 +207,7 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
               htmlFor="password"
               className="text-xs uppercase tracking-widest text-muted-foreground/60"
             >
-              Password
+              {t('password')}
             </Label>
             <div className="relative">
               <Input
@@ -242,7 +245,7 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
               htmlFor="role"
               className="text-xs uppercase tracking-widest text-muted-foreground/60"
             >
-              User Role
+              {t('role')}
             </Label>
             <Select
               value={role}
@@ -260,7 +263,7 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
                 {isLoadingRoles ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <SelectValue placeholder="Select a role" />
+                  <SelectValue placeholder={t('selectRole')} />
                 )}
               </SelectTrigger>
               <SelectContent>
@@ -269,7 +272,7 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
                     <div className="flex items-center gap-2">
                       <span>{r.name}</span>
                       {r.isSystemRole && (
-                        <span className="text-xs text-muted-foreground/50">(System)</span>
+                        <span className="text-xs text-muted-foreground/50">{t('systemRole')}</span>
                       )}
                     </div>
                   </SelectItem>
@@ -291,16 +294,16 @@ export function CreateUserDialog({ open, onOpenChange, onSuccess }: CreateUserDi
               disabled={isLoading}
               data-testid="cancel-create-user-button"
             >
-              Cancel
+              {tCommon('cancel')}
             </Button>
             <Button type="submit" disabled={isLoading} data-testid="submit-create-user-button">
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
+                  {t('creating')}
                 </>
               ) : (
-                'Create User'
+                t('submit')
               )}
             </Button>
           </DialogFooter>

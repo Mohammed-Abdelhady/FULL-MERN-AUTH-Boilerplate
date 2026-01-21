@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useCallback, useEffect, lazy, Suspense, Activity } from 'react';
+import { useTranslations } from 'next-intl';
 import { Loader2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -44,6 +45,8 @@ const UserPermissionsDialog = lazy(() =>
  * Accessible at /admin/users
  */
 export default function AdminUsersPage() {
+  const t = useTranslations('users');
+  const tCommon = useTranslations('common');
   const dispatch = useAppDispatch();
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>(RoleFilter.ALL);
@@ -101,9 +104,9 @@ export default function AdminUsersPage() {
       <div className="my-8">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-4xl font-light tracking-tight">Users</h1>
+            <h1 className="text-4xl font-light tracking-tight">{t('title')}</h1>
             <p className="text-sm text-muted-foreground/60 mt-1 leading-relaxed">
-              {users.length} {users.length === 1 ? 'user' : 'users'} registered
+              {t('count', { count: users.length })}
             </p>
           </div>
           <div className="flex gap-2">
@@ -115,7 +118,7 @@ export default function AdminUsersPage() {
               data-testid="refresh-users-button"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh
+              {t('refresh')}
             </Button>
             <PermissionGuard permission={USER_PERMISSIONS.CREATE_ALL}>
               <CreateUserButton />
@@ -128,7 +131,7 @@ export default function AdminUsersPage() {
       <div className="mb-8 flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
           <SearchBar
-            placeholder="Search by name or email..."
+            placeholder={t('searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onClear={() => setSearchQuery('')}
@@ -138,10 +141,10 @@ export default function AdminUsersPage() {
         </div>
         <Select value={roleFilter} onValueChange={setRoleFilter}>
           <SelectTrigger className="w-full sm:w-50" data-testid="role-filter">
-            <SelectValue placeholder="All Roles" />
+            <SelectValue placeholder={t('allRoles')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value={RoleFilter.ALL}>All Roles</SelectItem>
+            <SelectItem value={RoleFilter.ALL}>{t('allRoles')}</SelectItem>
             {uniqueRoles.map((role) => (
               <SelectItem key={role} value={role}>
                 {role.charAt(0).toUpperCase() + role.slice(1)}
@@ -156,7 +159,7 @@ export default function AdminUsersPage() {
         <div className="flex items-center justify-center py-12" data-testid="loading-skeleton">
           <div className="text-center space-y-4">
             <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">Loading users...</p>
+            <p className="text-sm text-muted-foreground">{t('loading')}</p>
           </div>
         </div>
       </Activity>
@@ -166,17 +169,17 @@ export default function AdminUsersPage() {
         <Alert variant="destructive" data-testid="error-state">
           <AlertDescription className="flex items-center justify-between">
             <span>
-              Failed to load users.{' '}
+              {t('loadError')}{' '}
               {error &&
               'data' in error &&
               typeof error.data === 'object' &&
               error.data &&
               'message' in error.data
                 ? String(error.data.message)
-                : 'Please try again.'}
+                : t('tryAgain')}
             </span>
             <Button variant="outline" size="sm" onClick={() => refetch()}>
-              Retry
+              {tCommon('retry')}
             </Button>
           </AlertDescription>
         </Alert>
@@ -190,12 +193,12 @@ export default function AdminUsersPage() {
         >
           <div className="space-y-3">
             <p className="text-lg font-semibold">
-              {searchQuery || roleFilter !== RoleFilter.ALL ? 'No users found' : 'No users yet'}
+              {searchQuery || roleFilter !== RoleFilter.ALL ? t('noUsers') : t('noUsersYet')}
             </p>
             <p className="text-sm text-muted-foreground/60 max-w-sm">
               {searchQuery || roleFilter !== RoleFilter.ALL
-                ? 'Try adjusting your search or filter criteria.'
-                : 'Users will appear here once they register.'}
+                ? t('noUsersHint')
+                : t('noUsersYetHint')}
             </p>
           </div>
         </div>
@@ -206,7 +209,7 @@ export default function AdminUsersPage() {
         <div className="space-y-8">
           <UserListSection
             id={UserSection.VERIFIED}
-            title="Verified Users"
+            title={t('verifiedUsers')}
             count={verifiedUsers.length}
             collapsed={collapsedSections.has(UserSection.VERIFIED)}
             onCollapse={() => toggleSection(UserSection.VERIFIED)}
@@ -225,7 +228,7 @@ export default function AdminUsersPage() {
           {pendingUsers.length > 0 && (
             <UserListSection
               id={UserSection.PENDING}
-              title="Pending Verification"
+              title={t('pendingVerification')}
               count={pendingUsers.length}
               collapsed={collapsedSections.has(UserSection.PENDING)}
               onCollapse={() => toggleSection(UserSection.PENDING)}
@@ -245,7 +248,7 @@ export default function AdminUsersPage() {
 
         {/* Results Summary */}
         <div className="mt-6 text-xs text-muted-foreground/50">
-          Showing {filteredUsers.length} of {users.length} users
+          {t('showingCount', { filtered: filteredUsers.length, total: users.length })}
         </div>
       </Activity>
 

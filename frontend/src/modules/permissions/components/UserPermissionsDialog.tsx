@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Dialog,
   DialogContent,
@@ -86,6 +87,7 @@ export function UserPermissionsDialog({
   userId,
   userName,
 }: UserPermissionsDialogProps) {
+  const t = useTranslations('permissions.dialog');
   // Component will remount when userId changes due to key prop on Dialog
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
@@ -111,9 +113,7 @@ export function UserPermissionsDialog({
         await addPermission({ userId, permission }).unwrap();
       }
 
-      toast.success(
-        `${availablePermissions.length} permission${availablePermissions.length !== 1 ? 's' : ''} added successfully`,
-      );
+      toast.success(t('addSuccess', { count: availablePermissions.length }));
 
       // Reset state
       setSelectedPermissions([]);
@@ -124,8 +124,8 @@ export function UserPermissionsDialog({
     } catch (error: unknown) {
       const errorMessage =
         error && typeof error === 'object' && 'data' in error
-          ? (error.data as { message?: string })?.message || 'Failed to add permissions'
-          : 'Failed to add permissions';
+          ? (error.data as { message?: string })?.message || t('addError')
+          : t('addError');
 
       toast.error(errorMessage);
     }
@@ -137,15 +137,15 @@ export function UserPermissionsDialog({
     try {
       await removePermission({ userId, permission }).unwrap();
 
-      toast.success('Permission removed successfully');
+      toast.success(t('removeSuccess'));
 
       // Refresh data
       refetch();
     } catch (error: unknown) {
       const errorMessage =
         error && typeof error === 'object' && 'data' in error
-          ? (error.data as { message?: string })?.message || 'Failed to remove permission'
-          : 'Failed to remove permission';
+          ? (error.data as { message?: string })?.message || t('removeError')
+          : t('removeError');
 
       toast.error(errorMessage);
     }
@@ -170,11 +170,9 @@ export function UserPermissionsDialog({
       <Dialog key={userId || 'no-user'} open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Manage User Permissions</DialogTitle>
+            <DialogTitle>{t('title')}</DialogTitle>
             <DialogDescription>
-              {userName
-                ? `Manage permissions for ${userName}`
-                : 'Add or remove permissions for this user'}
+              {userName ? t('descriptionWithUser', { name: userName }) : t('descriptionGeneric')}
             </DialogDescription>
           </DialogHeader>
 
@@ -190,13 +188,16 @@ export function UserPermissionsDialog({
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        <span className="font-medium">Current Role:</span>{' '}
+                        <span className="font-medium">{t('currentRole')}</span>{' '}
                         <Badge variant="secondary">{data?.role || 'None'}</Badge>
                       </p>
                       <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">
-                        {effectivePermissions.length} total permission
-                        {effectivePermissions.length !== 1 ? 's' : ''} (
-                        {inheritedPermissions.length} inherited + {directPermissions.length} direct)
+                        {t('totalPermissions', { count: effectivePermissions.length })} (
+                        {t('inheritedAndDirect', {
+                          inherited: inheritedPermissions.length,
+                          direct: directPermissions.length,
+                        })}
+                        )
                       </p>
                     </div>
                   </div>
@@ -205,7 +206,7 @@ export function UserPermissionsDialog({
                 {hasWildcard && (
                   <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950">
                     <p className="text-sm text-amber-900 dark:text-amber-100">
-                      <strong>Wildcard Permission (*):</strong> This user has all permissions.
+                      <strong>{t('wildcardTitle')}</strong> {t('wildcardDescription')}
                     </p>
                   </div>
                 )}
@@ -215,7 +216,7 @@ export function UserPermissionsDialog({
                   <div className="flex items-center gap-2">
                     <Shield className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                     <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-                      Inherited from Role ({inheritedPermissions.length})
+                      {t('inheritedFromRole', { role: data?.role || '' })}
                     </h3>
                     {data?.role && (
                       <Badge variant="secondary" className="text-xs">
@@ -227,7 +228,7 @@ export function UserPermissionsDialog({
                   {inheritedPermissions.length === 0 ? (
                     <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-center dark:border-gray-700 dark:bg-gray-800">
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        No permissions inherited from role
+                        {t('noInheritedPermissions')}
                       </p>
                     </div>
                   ) : (
@@ -245,7 +246,7 @@ export function UserPermissionsDialog({
                     <div className="flex items-center gap-2">
                       <User className="h-4 w-4 text-green-600 dark:text-green-400" />
                       <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-                        Direct Permissions ({directPermissions.length})
+                        {t('directPermissions', { count: directPermissions.length })}
                       </h3>
                     </div>
                     <Button
@@ -254,14 +255,14 @@ export function UserPermissionsDialog({
                       data-testid="add-permission-button"
                     >
                       <Plus className="mr-2 h-4 w-4" />
-                      Add Permissions
+                      {t('addPermissions')}
                     </Button>
                   </div>
 
                   {directPermissions.length === 0 ? (
                     <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-center dark:border-gray-700 dark:bg-gray-800">
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        No direct permissions assigned
+                        {t('noDirectPermissions')}
                       </p>
                     </div>
                   ) : (
@@ -275,7 +276,7 @@ export function UserPermissionsDialog({
                       {/* Remove Actions Section */}
                       <div className="space-y-2 pt-2 border-t border-border-subtle">
                         <p className="text-xs uppercase tracking-widest text-muted-foreground/40">
-                          Remove Permissions
+                          {t('removePermissions')}
                         </p>
                         <div className="grid gap-2">
                           {directPermissions.map((permission) => (
@@ -296,7 +297,7 @@ export function UserPermissionsDialog({
                                 data-testid={`remove-permission-${permission}`}
                               >
                                 <Trash2 className="h-3 w-3 mr-1" />
-                                Remove
+                                {t('remove')}
                               </Button>
                             </div>
                           ))}

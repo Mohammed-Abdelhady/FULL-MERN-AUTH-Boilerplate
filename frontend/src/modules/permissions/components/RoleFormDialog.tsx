@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Loader2 } from 'lucide-react';
 import {
   Dialog,
@@ -49,6 +50,8 @@ function RoleForm({
   onSubmit,
   onCancel,
 }: RoleFormProps) {
+  const t = useTranslations('roles.form');
+  const tCommon = useTranslations('common');
   // Initialize directly from props - component remounts when key changes
   const [name, setName] = useState(initialName);
   const [description, setDescription] = useState(initialDescription);
@@ -59,11 +62,11 @@ function RoleForm({
     const newErrors: { name?: string; permissions?: string } = {};
 
     if (!name.trim()) {
-      newErrors.name = 'Role name is required';
+      newErrors.name = t('nameError');
     }
 
     if (selectedPermissions.length === 0) {
-      newErrors.permissions = 'At least one permission is required';
+      newErrors.permissions = t('permissionsError');
     }
 
     setErrors(newErrors);
@@ -89,13 +92,13 @@ function RoleForm({
       {/* Role Name */}
       <div className="space-y-2">
         <Label htmlFor="role-name">
-          Role Name <span className="text-destructive">*</span>
+          {t('nameLabel')} <span className="text-destructive">{t('nameRequired')}</span>
         </Label>
         <Input
           id="role-name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g., Content Editor"
+          placeholder={t('namePlaceholder')}
           disabled={isLoading || isProtected}
           data-testid="role-name-input"
           className={errors.name ? 'border-destructive' : ''}
@@ -109,12 +112,12 @@ function RoleForm({
 
       {/* Role Description */}
       <div className="space-y-2">
-        <Label htmlFor="role-description">Description</Label>
+        <Label htmlFor="role-description">{t('descriptionLabel')}</Label>
         <Textarea
           id="role-description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Brief description of what this role can do"
+          placeholder={t('descriptionPlaceholder')}
           rows={3}
           disabled={isLoading || isProtected}
           data-testid="role-description-input"
@@ -124,7 +127,8 @@ function RoleForm({
       {/* Permissions */}
       <div className="space-y-2">
         <Label>
-          Permissions <span className="text-destructive">*</span>
+          {t('permissionsLabel')}{' '}
+          <span className="text-destructive">{t('permissionsRequired')}</span>
         </Label>
         {errors.permissions && (
           <p className="text-sm text-destructive" data-testid="permissions-error">
@@ -148,16 +152,16 @@ function RoleForm({
           disabled={isLoading}
           data-testid="cancel-button"
         >
-          Cancel
+          {tCommon('cancel')}
         </Button>
         <Button type="submit" disabled={isLoading || isProtected} data-testid="save-button">
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {mode === 'create' ? 'Creating...' : 'Updating...'}
+              {mode === 'create' ? t('creating') : t('updating')}
             </>
           ) : (
-            <>{mode === 'create' ? 'Create Role' : 'Update Role'}</>
+            <>{mode === 'create' ? t('create') : t('update')}</>
           )}
         </Button>
       </DialogFooter>
@@ -198,6 +202,7 @@ function RoleForm({
  * ```
  */
 export function RoleFormDialog({ open, onOpenChange, mode, role }: RoleFormDialogProps) {
+  const t = useTranslations('roles.form');
   const [createRole, { isLoading: isCreating }] = useCreateRoleMutation();
   const [updateRole, { isLoading: isUpdating }] = useUpdateRoleMutation();
   const { toast } = useToast();
@@ -217,7 +222,7 @@ export function RoleFormDialog({ open, onOpenChange, mode, role }: RoleFormDialo
           description: data.description || undefined,
           permissions: data.permissions,
         }).unwrap();
-        toast.success(`Role "${data.name}" created successfully`);
+        toast.success(t('createSuccess', { name: data.name }));
       } else if (mode === 'edit' && role) {
         await updateRole({
           idOrSlug: role.slug,
@@ -227,7 +232,7 @@ export function RoleFormDialog({ open, onOpenChange, mode, role }: RoleFormDialo
             permissions: data.permissions,
           },
         }).unwrap();
-        toast.success(`Role "${data.name}" updated successfully`);
+        toast.success(t('updateSuccess', { name: data.name }));
       }
 
       onOpenChange(false);
@@ -235,7 +240,7 @@ export function RoleFormDialog({ open, onOpenChange, mode, role }: RoleFormDialo
       const errorMessage =
         error && typeof error === 'object' && 'data' in error && error.data
           ? String((error.data as { message?: string }).message)
-          : 'An error occurred';
+          : t('error');
       toast.error(errorMessage);
     }
   };
@@ -255,14 +260,10 @@ export function RoleFormDialog({ open, onOpenChange, mode, role }: RoleFormDialo
       >
         <DialogHeader>
           <DialogTitle data-testid="role-form-title">
-            {mode === 'create' ? 'Create New Role' : `Edit Role: ${role?.name}`}
+            {mode === 'create' ? t('createTitle') : t('editTitle', { name: role?.name || '' })}
           </DialogTitle>
           <DialogDescription>
-            {mode === 'create'
-              ? 'Create a custom role with specific permissions for your users.'
-              : isProtected
-                ? 'This is a protected system role. Some fields cannot be modified.'
-                : 'Modify the role name, description, and permissions.'}
+            {mode === 'create' ? t('createDescription') : t('editDescription')}
           </DialogDescription>
         </DialogHeader>
 
