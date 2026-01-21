@@ -7,7 +7,7 @@ import {
   selectUser,
   selectAuthLoading,
 } from '@/modules/auth/store/authSlice';
-import { WelcomeModal } from '@/components/welcome/WelcomeModal';
+import { WelcomeModal } from '@/modules/auth/components/WelcomeModal';
 
 interface ActivationGuardProps {
   readonly children: React.ReactNode;

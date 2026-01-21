@@ -42,10 +42,15 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
     // Try to refresh the session (cookie-based)
     const refreshResult = await baseQuery('/api/auth/refresh', api, extraOptions);
 
+    // Check if refresh endpoint exists and was successful
     if (refreshResult.data) {
       // Refresh successful, retry the original request
       // New session cookie automatically set by backend
       result = await baseQuery(args, api, extraOptions);
+    } else if (refreshResult.error?.status === 404) {
+      // Refresh endpoint not implemented yet, return original 401 error
+      // This prevents infinite loading when refresh endpoint doesn't exist
+      return result;
     } else {
       // Refresh failed, user needs to login again
       // Trigger logout to clear client state
@@ -63,6 +68,6 @@ const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQue
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['User', 'Auth', 'LinkedProviders', 'ProfileSync', 'Roles', 'Permissions'],
+  tagTypes: ['User', 'Auth', 'LinkedProviders', 'ProfileSync', 'Roles', 'Permissions', 'Sessions'],
   endpoints: () => ({}),
 });
